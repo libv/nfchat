@@ -990,7 +990,6 @@ xchat_cleanup (void)
 #ifdef USE_PERL
    perl_end ();
 #endif
-   fe_cleanup ();
    if (prefs.autosave)
    {
       save_config ();

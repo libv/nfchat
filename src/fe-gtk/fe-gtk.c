@@ -53,7 +53,6 @@ extern void update_all_of (char *name);
 extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, struct session *sess);
 extern void palette_load (void);
 extern void key_init (void);
-extern void palette_save (void);
 extern void create_window (struct session *);
 extern GtkStyle *my_widget_get_style (char *bg_pic);
 extern void PrintText (struct session *, char *);
@@ -194,12 +193,6 @@ void
 fe_main (void)
 {
    gtk_main ();
-}
-
-void
-fe_cleanup (void)
-{
-   palette_save ();
 }
 
 void

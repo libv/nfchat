@@ -39,13 +39,11 @@ extern GSList *sess_list;
 extern GdkFont *font_normal;
 extern GtkWidget *main_window, *main_book;
 
-extern void palette_save (void);
 extern void my_system (char *cmd);
 extern void show_and_unfocus (GtkWidget * wid);
 extern char *default_file (void);
 extern void connect_server (struct session *sess, char *server, int port, int quiet);
 extern void userlist_hide (GtkWidget * igad, struct session *sess);
-extern void palette_edit (void);
 extern GdkFont *my_font_load (char *fontname);
 extern int tcp_send_len (struct server *serv, char *buf, int len);
 extern int tcp_send (struct server *serv, char *buf);
@@ -728,8 +726,7 @@ menu_help (GtkWidget * wid, gpointer sess)
 
 static void
 menu_savedefault (GtkWidget * wid, gpointer sess)
-{
-   palette_save ();
+{   
    if (save_config ())
       gtkutil_simpledialog ("Settings saved.");
 }
@@ -971,7 +968,6 @@ static struct mymenu mymenu[] =
 
    {M_NEWMENU, N_ ("Settings"), 0, 0, 1},  /* 38 */
    {M_MENU, N_ ("Setup.."), (menucallback) menu_settings, 0, 1},
-   {M_MENU, N_ ("Palette.."), (menucallback) palette_edit, 0, 1},
    {M_MENU, N_ ("User Commands.."), (menucallback) menu_usercommands, 0, 1},
    {M_MENU, N_ ("CTCP Replies.."), (menucallback) menu_ctcpguiopen, 0, 1},
    {M_MENU, N_ ("Userlist Buttons.."), (menucallback) menu_ulbuttons, 0, 1},
