@@ -1,9 +1,8 @@
 NF-chat;
 
-0.2.2; removing tab button and prolly alot of the tab stuff
+0.2.2; removing tab buttons and prolly alot of the tab stuff
 """"""
-  -   
-
+ 
 0.2.1; removing dialog windows
 """"""
   a)
@@ -26,7 +25,11 @@ NF-chat;
       relink_window(2x)
    - fkeys.c; tab_nick_comp
    - text_gui.c PrintTextLine
-
+ c)
+   - removed the 4 buttons from tbox in create_window
+   - removed maingui_moveright/left, X_session, relink_window
+             maingui_refresh
+   - removed the show userlist button
      
 0.2.0;
 """"""

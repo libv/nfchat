@@ -949,7 +949,7 @@ tree_select_row (GtkWidget *tree, GList *row)
       return;
    }
 }
- 
+
 static GtkWidget *
 new_tree_view ()
 {
@@ -1119,124 +1119,6 @@ gui_make_tab_window (struct session *sess)
    }
 }
 
-static int
-maingui_refresh (session *sess)
-{
-   gtk_xtext_refresh (GTK_XTEXT (sess->gui->textgad));
-   return 0;
-}
-
-/* This function takes a session and toggles it between a tab and a free window */
-int
-relink_window (GtkWidget * w, struct session *sess)
-{
-   GtkWidget *old;
-   int page, num, need = 0;
-
-   if (sess->is_tab)
-   {
-      /* It is currently a tab so we need to make a window */
-
-      /* Warning! Hack alert!, since we need to destroy the main_book on the last page,
-         I get the current page. If it is 0 (the first page) then I
-         try to get page 1. If that doesn't exist I assume it is the only page.
-         It works with GTK 1.2.0 but GTK could change in the future. WATCH OUT! 
-         -- AGL (9/4/99) */
-
-      num = gtk_notebook_get_current_page (GTK_NOTEBOOK (main_book));
-      if (num == 0)
-      {
-         if (gtk_notebook_get_nth_page (GTK_NOTEBOOK (main_book), 1) == NULL)
-            need = TRUE;
-      }
-      sess->is_tab = 0;
-      old = sess->gui->window;
-      gtk_signal_disconnect_by_data (GTK_OBJECT (old), sess);
-
-      sess->gui->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-
-      gtk_widget_realize (sess->gui->window);
-      maingui_set_icon (sess->gui->window);
-      
-      fe_set_title (sess);
-      gtk_signal_connect ((GtkObject *) sess->gui->window, "destroy",
-                          GTK_SIGNAL_FUNC (gtk_kill_session_callback), sess);
-      gtk_signal_connect ((GtkObject *) sess->gui->window, "focus_in_event",
-                          GTK_SIGNAL_FUNC (focus_in), sess);
-      gtk_window_set_policy ((GtkWindow *) sess->gui->window, TRUE, TRUE, FALSE);
-
-      gtk_widget_reparent (sess->gui->vbox, sess->gui->window);
-
-      if (sess->channel[0] == 0)
-         sess->gui->changad = gtk_label_new ("<none>");
-      else
-         sess->gui->changad = gtk_label_new (sess->channel);
-      gtk_box_pack_start (GTK_BOX (sess->gui->tbox), sess->gui->changad, FALSE, FALSE, 5);
-      gtk_box_reorder_child (GTK_BOX (sess->gui->tbox), sess->gui->changad, 4);
-      gtk_widget_show (sess->gui->changad);
-   
-      if (need)
-         gtk_widget_destroy (main_book);
-      return 0;
-   } else
-   {
-      /* We have a free window so we need to make it a tab */
-      if (main_book == NULL)
-      {
-         /* Oh dear, we don't *have* a main_book, so we need to make one */
-         gui_make_tab_window (sess);
-         need = TRUE;
-      }
-      
-      sess->is_tab = 1;
-      old = sess->gui->window;
-      gtk_signal_disconnect_by_data (GTK_OBJECT (old), sess);
-      sess->gui->window = gtk_hbox_new (0, 0);
-      gtk_signal_connect ((GtkObject *) sess->gui->window, "destroy",
-                          GTK_SIGNAL_FUNC (gtk_kill_session_callback), sess);
-      gtk_widget_reparent (sess->gui->vbox, sess->gui->window);
-      gtk_widget_destroy (old);
-
-      /* FIXME: Erm, I think gtk_notebook_remove_page will destroy the changad,
-         if not then we have a memory leak. Could someoue check this?
-         -- AGL (9/4/99) */
-
-      if (sess->gui->changad != NULL)
-         gtk_widget_destroy (sess->gui->changad);
-      if (sess->channel[0] == 0)
-         sess->gui->changad = gtk_label_new ("<none>");
-      else
-         sess->gui->changad = gtk_label_new (sess->channel);
-
-      gtk_widget_show (sess->gui->changad);
-      gtk_notebook_append_page (GTK_NOTEBOOK (main_book), sess->gui->window, sess->gui->changad);
-      gtk_widget_show_all (sess->gui->window);
-      if (need)
-         gtk_widget_show_all (main_window);
-      page = gtk_notebook_page_num (GTK_NOTEBOOK (main_book), sess->gui->window);
-      maingui_pagetofront (page);
-      gtk_idle_add ((GtkFunction) maingui_refresh, (gpointer) sess);
-
-      /* dialog windows don't have this box */
-      if (sess->gui->userlistbox) 
-      {
-         gtk_widget_realize (sess->gui->userlistbox);
-         gdk_window_set_background (sess->gui->userlistbox->window,
-                       &sess->gui->userlistbox->style->bg[GTK_STATE_NORMAL]);
-      }
-
-      return 0;
-   }
-}
-
-/* 'X' button pressed - only used by dialog.c */
-
-void
-X_session (GtkWidget * button, struct session *sess)
-{
-   gtk_widget_destroy (sess->gui->window);
-}
-
 static void
 maingui_init_styles (GtkStyle * style)
 {
@@ -1250,31 +1132,6 @@ maingui_init_styles (GtkStyle * style)
    bluetab_style = gtk_style_new ();
    bluetab_style->font = style->font;
    memcpy (bluetab_style->fg, &colors[12], sizeof (GdkColor));
-}
-
-void
-maingui_moveleft (GtkWidget *wid)
-{
-   int pos;
-   if (main_window)
-   {
-	   pos = gtk_notebook_get_current_page ((GtkNotebook*)main_book);
-	   if (pos)
-	      gtk_notebook_reorder_child ((GtkNotebook*)main_book,
-                gtk_notebook_get_nth_page((GtkNotebook*)main_book, pos), pos-1);
-   }
-}
-
-void
-maingui_moveright (GtkWidget *wid)
-{
-   int pos;
-   if (main_window)
-   {
-	   pos = gtk_notebook_get_current_page ((GtkNotebook*)main_book);
-	   gtk_notebook_reorder_child ((GtkNotebook*)main_book,
-             gtk_notebook_get_nth_page((GtkNotebook*)main_book, pos), pos+1);
-   }
 }
 
 void
@@ -1305,7 +1162,6 @@ create_window (struct session *sess)
       }
    } else
    {
-
       sess->gui->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
       fe_set_title (sess);
@@ -1337,35 +1193,6 @@ create_window (struct session *sess)
    gtk_box_pack_start (GTK_BOX (vbox), tbox, FALSE, TRUE, 2);
    gtk_widget_show (tbox);
    
-   wid = gtk_button_new_with_label ("X");
-   GTK_WIDGET_UNSET_FLAGS (wid, GTK_CAN_FOCUS);
-   gtk_box_pack_start (GTK_BOX (tbox), wid, 0, 0, 0);
-   gtk_signal_connect (GTK_OBJECT (wid), "clicked",
-   GTK_SIGNAL_FUNC (X_session), sess);
-   gtk_widget_show (wid);
-   add_tip (wid, "Close Channel");
-
-   sess->gui->delink_button = wid = gtk_button_new_with_label ("^");
-   gtk_box_pack_start (GTK_BOX (tbox), wid, 0, 0, 0);
-   gtk_signal_connect (GTK_OBJECT (wid), "clicked",
-                       GTK_SIGNAL_FUNC (relink_window), sess);
-   gtk_widget_show (wid);
-   add_tip (wid, "Link/DeLink this tab");
-
-   wid = gtk_button_new_with_label ("<");
-   gtk_box_pack_start (GTK_BOX (tbox), wid, 0, 0, 0);
-   gtk_signal_connect (GTK_OBJECT (wid), "clicked",
-			     GTK_SIGNAL_FUNC (maingui_moveleft), 0);
-   gtk_widget_show (wid);
-   add_tip (wid, "Move tab left");
-
-   wid = gtk_button_new_with_label (">");
-   gtk_box_pack_start (GTK_BOX (tbox), wid, 0, 0, 0);
-   gtk_signal_connect (GTK_OBJECT (wid), "clicked",
-			     GTK_SIGNAL_FUNC (maingui_moveright), 0);
-   gtk_widget_show (wid);
-   add_tip (wid, "Move tab right"); 
-
    if (!prefs.tabchannels)
    {
       sess->gui->changad = gtk_label_new ("<none>");
@@ -1380,13 +1207,6 @@ create_window (struct session *sess)
    gtk_widget_show (sess->gui->topicgad);
 
    add_tip (sess->gui->topicgad, "The channel topic");
-
-   wid = gtk_button_new_with_label (">");
-   gtk_box_pack_end (GTK_BOX (tbox), wid, 0, 0, 0);
-   gtk_signal_connect (GTK_OBJECT (wid), "clicked",
-                       GTK_SIGNAL_FUNC (userlist_hide), (gpointer) sess);
-   show_and_unfocus (wid);
-   add_tip (wid, "Hide/Show Userlist");
 
    leftpane = gtk_hbox_new (FALSE, 0);
    gtk_widget_show (leftpane);
