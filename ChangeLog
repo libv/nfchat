@@ -24,7 +24,10 @@ NF-chat;
               fe_session_callback, 
    - removed from fe-gtk.c
         - calls from fe_set_hilight, fe_print_text
-
+   c) some cleanups
+     - maingui.c
+       - removed buttons from maingui_new_tab
+       - removed maingui_delink_nontab
  
 0.2.1; removing dialog windows
 """"""

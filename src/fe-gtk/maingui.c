@@ -1002,62 +1002,6 @@ my_window_set_title (GtkWidget *window, char *title)
       gtk_label_set_text (gtk_object_get_user_data (GTK_OBJECT(window)), title);
 }
 
-static void
-maingui_delink_nontab (GtkWidget *wid, GtkWidget *box)
-{
-   GtkWidget *win;
-   GtkWidget *label;
-   gboolean need = FALSE;
-   struct relink_data *rld;
-   int page;
-
-   g_assert (box);
-   rld = gtk_object_get_user_data (GTK_OBJECT (box));
-   g_assert (rld);
-   
-   if (rld->win == NULL) {
-
-      win = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-
-      gtk_signal_connect ((GtkObject *) win, "destroy",
-			  gtk_widget_destroy, box);
-
-      page = gtk_notebook_page_num (GTK_NOTEBOOK (main_book), box);
-      gtk_widget_reparent (box, win);
-
-      rld->win = win;
-      gtk_window_set_title (GTK_WINDOW (win), rld->ltitle);
-      gtk_notebook_remove_page (GTK_NOTEBOOK (main_book), page);
-
-      gtk_widget_show_all (win);
-      rld->hbox = NULL;
-   } else {
-      if (main_book == NULL) {
-	 gui_make_tab_window (NULL);
-	 need = TRUE;
-      }
-      win = gtk_hbox_new (0, 0);
-      gtk_widget_show (win);
-      
-      gtk_widget_reparent (box, win);
-      gtk_signal_disconnect_by_data (GTK_OBJECT (rld->win), box);
-      gtk_widget_destroy (GTK_WIDGET (rld->win));
-      label = gtk_label_new (rld->stitle);
-      gtk_widget_show (label);
-      gtk_notebook_append_page (GTK_NOTEBOOK (main_book), win, label);
-      if (prefs.newtabstofront)
-      {
-	 gtk_idle_add ((GtkFunction) maingui_pagetofront, (gpointer)
-		       gtk_notebook_page_num (GTK_NOTEBOOK (main_book), box));
-      }
-      gtk_widget_show_all (win);
-      if (need)
-	 gtk_widget_show_all (main_window);
-      rld->win = NULL;
-      rld->hbox = win;
-   }
-}
-
 static int
 maingui_box_close (GtkWidget *wid, struct relink_data *rld)
 {
@@ -1088,20 +1032,6 @@ maingui_new_tab (char *title, char *name, void *close_callback, void *userdata)
    box = gtk_vbox_new (0, 0);
    gtk_box_pack_start (GTK_BOX(box), topbox, 0, 0, 0);
    gtk_widget_show (box);
-
-   wid = gtk_button_new_with_label ("X");
-   gtk_box_pack_start (GTK_BOX (topbox), wid, 0, 0, 0);
-   gtk_signal_connect (GTK_OBJECT (wid), "clicked",
-                       GTK_SIGNAL_FUNC (gtkutil_destroy), box);
-   gtk_widget_show (wid);
-   add_tip (wid, "Close Tab"); 
-
-   wid = gtk_button_new_with_label("^");
-   gtk_signal_connect (GTK_OBJECT (wid), "clicked",
-                       GTK_SIGNAL_FUNC (maingui_delink_nontab), box);
-   gtk_box_pack_start (GTK_BOX (topbox), wid, 0, 0, 0);
-   gtk_widget_show (wid);
-   add_tip (wid, "Relink");
 
    wid = gtk_label_new (title);
    gtk_container_add (GTK_CONTAINER(topbox), wid);
