@@ -1,13 +1,26 @@
 NF-chat;
+0.1.10;
+"""""""
+  - removed plugingui
+  - removed all plugin entries from menu.c
+  - removed fe_pluginlist_update from common/fe.h, plugin.c
+  - edited Makefile.h
 
-
-start gtk strip
+0.1.9;
+""""""
+  - partially removed palette.c
+  - removed palette_edit from menu.c
+  - removed palette_save from menu.c, fe-gtk.c
+  - removed fe_cleanup from fe-gtk.c, common/fe.h, 
+    (contained only palette_save at this point)
+ ### two functions left, not sure if they r to be removed,
+ ### maybe they should be kept for later, in which case they
+ ### should be merged with the files who require them
 
 0.1.8;
 """"""
   - removed rawlog.c
   - removed open_rawlog from menu.c
-## prefs.autosave_url
   - removed fe_add_rawlog from src/common/xchat.c fe.h inbound.c
   - removed rawlog entries from fe-gtk.c & fe-gtk.h
   - removed struct server_gui from fe-gtk.c and fe_new_server
@@ -118,9 +131,9 @@ Migrating to 0.1.*
     src/fe-gtk/userlistgui.c
     src/fe-gtk/usermenu.c
     configure.in
-## Lost dcc receive window??? - it has to be removed anyway ;)
-## this already existed on 0.0.2
-## Check out dnd*
+### Lost dcc receive window??? - it has to be removed anyway ;)
+### this already existed on 0.0.2
+### Check out dnd*
 
 0.0.3;
 """"""

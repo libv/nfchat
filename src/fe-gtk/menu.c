@@ -780,50 +780,6 @@ menu_perllist (void)
 
 #endif
 
-
-#ifdef USE_PLUGIN
-
-static void
-menu_loadplugin_callback (struct session *sess, void *data2, char *file)
-{
-   if (file)
-   {
-      char *buf = malloc (strlen (file) + 10);
-
-      sprintf (buf, "/LOADDLL %s", file);
-      free (file);
-      handle_command (buf, sess, FALSE, FALSE);
-      free (buf);
-   }
-}
-
-static void
-menu_loadplugin (void)
-{
-   gtkutil_file_req ("Select a Plugin to load", menu_loadplugin_callback,
-                 menu_sess, 0, FALSE);
-}
-
-static void
-menu_pluginlist (void)
-{
-   module_glist (menu_sess);
-}
-
-static void
-menu_unloadallplugins (void)
-{
-   module_unload (0, menu_sess);
-}
-
-#else
-
-#define menu_unloadallplugins 0
-#define menu_pluginlist 0
-#define menu_loadplugin 0
-
-#endif
-
 #define usercommands_help  "User Commands - Special codes:\n\n"\
                            "%c  =  current channel\n"\
                            "%v  =  x-chat version ("VERSION")\n"\
@@ -987,20 +943,6 @@ static struct mymenu mymenu[] =
    {M_MENU, N_ ("Load Perl Script.."), (menucallback) menu_loadperl, 0, 1},
    {M_MENU, N_ ("Unload All Scripts"), (menucallback) menu_unloadall, 0, 1},
    {M_MENU, N_ ("Perl List"), (menucallback) menu_perllist, 0, 1},
-#else
-   {M_MENU, N_ ("Load Perl Script.."), 0, 0, 0},
-   {M_MENU, N_ ("Unload All Scripts"), 0, 0, 0},
-   {M_MENU, N_ ("Perl List"), 0, 0, 0},
-#endif
-   {M_SEP, 0, 0, 0, 0},
-#ifdef USE_PLUGIN
-   {M_MENU, N_ ("Load Plugin (*.so).."), (menucallback) menu_loadplugin, 0, 1},
-   {M_MENU, N_ ("Unload All Plugins"), (menucallback) menu_unloadallplugins, 0, 1},
-   {M_MENU, N_ ("Plugin List"), (menucallback) menu_pluginlist, 0, 1},
-#else
-   {M_MENU, N_ ("Load Plugin (*.so).."), 0, 0, 0},
-   {M_MENU, N_ ("Unload All Plugins"), 0, 0, 0},
-   {M_MENU, N_ ("Plugin List"), 0, 0, 0},
 #endif
    {M_NEWMENURIGHT, N_ ("Help"), 0, 0, 1},
    {M_MENU, N_ ("Help.."), (menucallback) menu_help, 0, 1},

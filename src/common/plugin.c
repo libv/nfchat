@@ -258,7 +258,6 @@ module_load (char *name, struct session *sess)
    m->next = modules;
    m->last = NULL;
    modules = m;
-   fe_pluginlist_update ();
 
    return 0;
 }
@@ -375,14 +374,10 @@ module_unload (char *name, struct session *sess)
          module_unlink_mod (m);
          free (m);
          if (name)
-         {
-            fe_pluginlist_update ();
             return 0;
-         }
       }
       m = m->next;
    }
-   fe_pluginlist_update ();
    return 0;
 }
 
