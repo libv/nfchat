@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-08-28 03:04+0200\n"
+"POT-Creation-Date: 2000-08-28 03:31+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,956 +14,174 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: ENCODING\n"
 
-#: src/fe-gtk/menu.c:892
+#: src/fe-gtk/menu.c:885
 msgid "X-Chat"
 msgstr ""
 
-#: src/fe-gtk/menu.c:893
+#: src/fe-gtk/menu.c:886
 msgid "New Server Tab.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:894
+#: src/fe-gtk/menu.c:887
 msgid "New Server Window.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:895
+#: src/fe-gtk/menu.c:888
 msgid "New Channel Tab.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:896
+#: src/fe-gtk/menu.c:889
 msgid "New Channel Window.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:898
+#: src/fe-gtk/menu.c:891
 msgid "Close"
 msgstr ""
 
-#: src/fe-gtk/menu.c:900
+#: src/fe-gtk/menu.c:893
 msgid "Quit"
 msgstr ""
 
 #. 10
-#: src/fe-gtk/menu.c:902
+#: src/fe-gtk/menu.c:895
 msgid "Windows"
 msgstr ""
 
-#: src/fe-gtk/menu.c:903
+#: src/fe-gtk/menu.c:896
 msgid "Flush Buffer"
 msgstr ""
 
-#: src/fe-gtk/menu.c:904
+#: src/fe-gtk/menu.c:897
 msgid "Save Buffer.."
 msgstr ""
 
 #. 23
-#: src/fe-gtk/menu.c:906
+#: src/fe-gtk/menu.c:899
 msgid "User Modes"
 msgstr ""
 
-#: src/fe-gtk/menu.c:907
+#: src/fe-gtk/menu.c:900
 msgid "Invisible"
 msgstr ""
 
-#: src/fe-gtk/menu.c:908
+#: src/fe-gtk/menu.c:901
 msgid "Receive Wallops"
 msgstr ""
 
-#: src/fe-gtk/menu.c:909
+#: src/fe-gtk/menu.c:902
 msgid "Receive Server Notices"
 msgstr ""
 
-#: src/fe-gtk/menu.c:911
+#: src/fe-gtk/menu.c:904
 msgid "Marked Away"
 msgstr ""
 
-#: src/fe-gtk/menu.c:913
+#: src/fe-gtk/menu.c:906
 msgid "Auto ReJoin on Kick"
 msgstr ""
 
-#: src/fe-gtk/menu.c:914
+#: src/fe-gtk/menu.c:907
 msgid "Auto ReConnect to Server"
 msgstr ""
 
-#: src/fe-gtk/menu.c:915
+#: src/fe-gtk/menu.c:908
 msgid "Never-give-up ReConnect"
 msgstr ""
 
-#: src/fe-gtk/menu.c:917
+#: src/fe-gtk/menu.c:910
 msgid "Auto Open Dialog Windows"
 msgstr ""
 
 #. 35
-#: src/fe-gtk/menu.c:918
+#: src/fe-gtk/menu.c:911
 msgid "Auto Accept DCC Chat"
 msgstr ""
 
-#: src/fe-gtk/menu.c:919
+#: src/fe-gtk/menu.c:912
 msgid "Auto Accept DCC Send"
 msgstr ""
 
-#: src/fe-gtk/menu.c:921
+#: src/fe-gtk/menu.c:914
 msgid "Settings"
 msgstr ""
 
 #. 38
-#: src/fe-gtk/menu.c:922
-msgid "Setup.."
-msgstr ""
-
-#: src/fe-gtk/menu.c:923
+#: src/fe-gtk/menu.c:915
 msgid "User Commands.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:924
+#: src/fe-gtk/menu.c:916
 msgid "CTCP Replies.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:925
+#: src/fe-gtk/menu.c:917
 msgid "Userlist Buttons.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:926
+#: src/fe-gtk/menu.c:918
 msgid "Userlist Popup.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:927
+#: src/fe-gtk/menu.c:919
 msgid "Replace.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:928
+#: src/fe-gtk/menu.c:920
 msgid "URL Handlers.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:929
+#: src/fe-gtk/menu.c:921
 msgid "Edit Event Texts.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:930
+#: src/fe-gtk/menu.c:922
 msgid "Edit Key Bindings.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:931
+#: src/fe-gtk/menu.c:923
 msgid "Select theme.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:933
+#: src/fe-gtk/menu.c:925
 msgid "Reload Settings"
 msgstr ""
 
-#: src/fe-gtk/menu.c:935
+#: src/fe-gtk/menu.c:927
 msgid "Save Settings now"
 msgstr ""
 
-#: src/fe-gtk/menu.c:936
+#: src/fe-gtk/menu.c:928
 msgid "Save Settings on exit"
 msgstr ""
 
-#: src/fe-gtk/menu.c:937
+#: src/fe-gtk/menu.c:929
 msgid "Scripts & Plugins"
 msgstr ""
 
-#: src/fe-gtk/menu.c:939
+#: src/fe-gtk/menu.c:931
 msgid "Load Perl Script.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:940
+#: src/fe-gtk/menu.c:932
 msgid "Unload All Scripts"
 msgstr ""
 
-#: src/fe-gtk/menu.c:941
+#: src/fe-gtk/menu.c:933
 msgid "Perl List"
 msgstr ""
 
-#: src/fe-gtk/menu.c:943
+#: src/fe-gtk/menu.c:935
 msgid "Help"
 msgstr ""
 
-#: src/fe-gtk/menu.c:944
+#: src/fe-gtk/menu.c:936
 msgid "Help.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:946
+#: src/fe-gtk/menu.c:938
 msgid "X-Chat Homepage.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:947
+#: src/fe-gtk/menu.c:939
 msgid "Online Docs.."
-msgstr ""
-
-#: src/fe-gtk/settings.c:133
-msgid "Browse..."
-msgstr ""
-
-#: src/fe-gtk/settings.c:294
-msgid "Choose File"
-msgstr ""
-
-#: src/fe-gtk/settings.c:323
-msgid "Select Font"
-msgstr ""
-
-#: src/fe-gtk/settings.c:736
-msgid "Appearance"
-msgstr ""
-
-#: src/fe-gtk/settings.c:738
-msgid "Use gdk_fontset_load instead of gdk_font_load"
-msgstr ""
-
-#: src/fe-gtk/settings.c:741
-msgid "Font:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:745
-msgid "Background Picture:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:749
-msgid "Background XPM:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:756
-msgid "Indent Nicks"
-msgstr ""
-
-#: src/fe-gtk/settings.c:758
-msgid "Make nicknames right justified."
-msgstr ""
-
-#: src/fe-gtk/settings.c:760
-msgid "Auto Indent"
-msgstr ""
-
-#: src/fe-gtk/settings.c:762
-msgid "Auto adjust the separator bar position as needed."
-msgstr ""
-
-#: src/fe-gtk/settings.c:764
-msgid "Draw Separator Bar"
-msgstr ""
-
-#: src/fe-gtk/settings.c:766
-msgid "Make the separator an actual visible line."
-msgstr ""
-
-#: src/fe-gtk/settings.c:768
-msgid "Word Wrap"
-msgstr ""
-
-#: src/fe-gtk/settings.c:770
-msgid "Don't split words from one line to the next"
-msgstr ""
-
-#: src/fe-gtk/settings.c:772
-msgid "Transparent Background"
-msgstr ""
-
-#: src/fe-gtk/settings.c:774
-msgid "Make the text box seem see-through"
-msgstr ""
-
-#: src/fe-gtk/settings.c:776
-msgid "Tint Transparency"
-msgstr ""
-
-#: src/fe-gtk/settings.c:778
-msgid "Tint the see-through text box to make it darker"
-msgstr ""
-
-#: src/fe-gtk/settings.c:785
-msgid "Tint Setting"
-msgstr ""
-
-#: src/fe-gtk/settings.c:787
-msgid "Change in realtime"
-msgstr ""
-
-#: src/fe-gtk/settings.c:790
-msgid "Red:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:791
-msgid "Green:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:792
-msgid "Blue:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:816
-msgid "Startup and Shutdown"
-msgstr ""
-
-#: src/fe-gtk/settings.c:817
-msgid "No Server List On Startup"
-msgstr ""
-
-#: src/fe-gtk/settings.c:820
-msgid "Don't display the server list on X-Chat startup"
-msgstr ""
-
-#: src/fe-gtk/settings.c:821
-msgid "Auto Save URL list"
-msgstr ""
-
-#: src/fe-gtk/settings.c:824
-msgid "Auto save your URL list when exiting from X-Chat"
-msgstr ""
-
-#: src/fe-gtk/settings.c:826
-msgid "User List"
-msgstr ""
-
-#: src/fe-gtk/settings.c:829
-msgid "Double Click Command:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:835
-msgid "Userlist sorted by: "
-msgstr ""
-
-#: src/fe-gtk/settings.c:842
-msgid "A-Z, Ops first"
-msgstr ""
-
-#: src/fe-gtk/settings.c:843
-msgid "A-Z"
-msgstr ""
-
-#: src/fe-gtk/settings.c:844
-msgid "Z-A, Ops last"
-msgstr ""
-
-#: src/fe-gtk/settings.c:845
-msgid "Z-A"
-msgstr ""
-
-#: src/fe-gtk/settings.c:846
-msgid "Unsorted"
-msgstr ""
-
-#: src/fe-gtk/settings.c:865
-msgid "Input Box"
-msgstr ""
-
-#: src/fe-gtk/settings.c:866
-msgid "Nick Name Completion"
-msgstr ""
-
-#: src/fe-gtk/settings.c:869
-msgid "Complete nicknames when a partial one is entered"
-msgstr ""
-
-#: src/fe-gtk/settings.c:870
-msgid "Give the Input Box style"
-msgstr ""
-
-#: src/fe-gtk/settings.c:873
-msgid "Input box gets same style as main text area"
-msgstr ""
-
-#: src/fe-gtk/settings.c:875
-msgid "Output Box"
-msgstr ""
-
-#: src/fe-gtk/settings.c:876
-msgid "Time Stamp All Text"
-msgstr ""
-
-#: src/fe-gtk/settings.c:879
-msgid "Prefix all text with the current time stamp"
-msgstr ""
-
-#: src/fe-gtk/settings.c:880
-msgid "Colored Nicks"
-msgstr ""
-
-#: src/fe-gtk/settings.c:883
-msgid "Output nicknames in different colors"
-msgstr ""
-
-#: src/fe-gtk/settings.c:885
-msgid "Output Filtering"
-msgstr ""
-
-#: src/fe-gtk/settings.c:886
-msgid "Strip MIRC Color"
-msgstr ""
-
-#: src/fe-gtk/settings.c:889
-msgid "Strip MIRC color codes from text before displaying"
-msgstr ""
-
-#: src/fe-gtk/settings.c:890
-msgid "Filter out BEEPs"
-msgstr ""
-
-#: src/fe-gtk/settings.c:893
-msgid "Remove ^G BEEP codes from text before displaying"
-msgstr ""
-
-#: src/fe-gtk/settings.c:895
-msgid "Buffer Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:899
-msgid "Text Buffer Size:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:900
-msgid "lines (0=Unlimited)."
-msgstr ""
-
-#: src/fe-gtk/settings.c:917
-msgid "Buttons"
-msgstr ""
-
-#: src/fe-gtk/settings.c:918
-msgid "Channel Mode Buttons"
-msgstr ""
-
-#: src/fe-gtk/settings.c:922
-msgid "Show the TNSIPMLK buttons"
-msgstr ""
-
-#: src/fe-gtk/settings.c:923
-msgid "User List Buttons"
-msgstr ""
-
-#: src/fe-gtk/settings.c:927
-msgid "Show the buttons below the user list"
-msgstr ""
-
-#: src/fe-gtk/settings.c:929
-msgid "Tabs"
-msgstr ""
-
-#: src/fe-gtk/settings.c:933
-msgid "Bottom"
-msgstr ""
-
-#: src/fe-gtk/settings.c:934
-msgid "Top"
-msgstr ""
-
-#: src/fe-gtk/settings.c:935
-msgid "Left"
-msgstr ""
-
-#: src/fe-gtk/settings.c:936
-msgid "Right"
-msgstr ""
-
-#: src/fe-gtk/settings.c:937
-msgid "Hidden"
-msgstr ""
-
-#: src/fe-gtk/settings.c:946
-msgid "New Tabs to front"
-msgstr ""
-
-#: src/fe-gtk/settings.c:949
-msgid "Bring new query/channel tabs to front"
-msgstr ""
-
-#: src/fe-gtk/settings.c:950
-msgid "Channel Tabs"
-msgstr ""
-
-#: src/fe-gtk/settings.c:953
-msgid "Use tabs for channels instead of separate windows"
-msgstr ""
-
-#: src/fe-gtk/settings.c:954
-msgid "Private Message Tabs"
-msgstr ""
-
-#: src/fe-gtk/settings.c:957
-msgid "Use tabs for /query instead of separate windows"
-msgstr ""
-
-#: src/fe-gtk/settings.c:958
-msgid "Use a separate tab/window for server messages"
-msgstr ""
-
-#: src/fe-gtk/settings.c:961
-msgid "Use tabs for DCC, Ignore, Notify etc windows."
-msgstr ""
-
-#: src/fe-gtk/settings.c:965
-msgid "Other Layout Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:966
-msgid "Disable Paned Userlist"
-msgstr ""
-
-#: src/fe-gtk/settings.c:969
-msgid "Use a fixed width user list instead of the paned one"
-msgstr ""
-
-#: src/fe-gtk/settings.c:980
-msgid "Window Position"
-msgstr ""
-
-#: src/fe-gtk/settings.c:981
-msgid ""
-"If Left and Top are set to zero, X-Chat will use your window manager "
-"defaults."
-msgstr ""
-
-#: src/fe-gtk/settings.c:986
-msgid "Left:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:990
-msgid "Top:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:994
-msgid "Window Size"
-msgstr ""
-
-#: src/fe-gtk/settings.c:998
-msgid "Width:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1002
-msgid "Height:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1005
-msgid "Show Session Tree View"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1069 src/fe-gtk/settings.c:1147
-#: src/fe-gtk/settings.c:1175 src/fe-gtk/settings.c:1196
-#: src/fe-gtk/settings.c:1246 src/fe-gtk/settings.c:1266
-msgid "General"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1070
-msgid "Raw Mode Display"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1073
-msgid "Display raw mode changes instead of interpretations"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1074
-msgid "Beep on Private Messages"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1077
-msgid "Beep when a private message for you is received"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1078
-msgid "Don't send /who #chan on join."
-msgstr ""
-
-#: src/fe-gtk/settings.c:1081
-msgid "Don't find user information when joining a channel."
-msgstr ""
-
-#: src/fe-gtk/settings.c:1082
-msgid "Perform a periodic mail check."
-msgstr ""
-
-#: src/fe-gtk/settings.c:1085
-msgid "Your irc settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1088
-msgid "Quit Message:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1094
-msgid "External Programs"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1097
-msgid "DNS Lookup Program:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1103
-msgid "Timing"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1107
-msgid "Auto ReConnect Delay:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1110 src/fe-gtk/settings.c:1304
-#: src/fe-gtk/settings.c:1310
-msgid "seconds."
-msgstr ""
-
-#: src/fe-gtk/settings.c:1122
-msgid "Address"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1125
-msgid "Hostname / IP Number:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1129
-msgid ""
-"Most people should leave this blank, it's only\n"
-"usefull for machines with multiple addresses."
-msgstr ""
-
-#: src/fe-gtk/settings.c:1133
-msgid "Get my IP from Server (for use in DCC Send only)"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1136
-msgid "For people using a 10.* or 192.168.* IP number."
-msgstr ""
-
-#: src/fe-gtk/settings.c:1148
-msgid "Show away once"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1151
-msgid "Only show away messages the first time they're seen"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1152
-msgid "Announce away messsages"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1156
-msgid "Announce your away message to the channel(s) you are in"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1158
-msgid "Your away settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1161
-msgid "Away Reason:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1178
-msgid "Extra Words to Highlight on:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1182
-msgid "(separate with commas)"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1184
-msgid "Hilighted Nick Color:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1198 src/fe-gtk/settings.c:1527
-msgid "Logging"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1201
-msgid "Enable logging conversations to disk"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1203
-msgid "Log name mask:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1218
-msgid "User List Notify Highlighting"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1219
-msgid "Highlight Notifies"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1222
-msgid "Highlight notified users in the user list"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1225
-msgid "Notified User Color:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1230
-msgid "Notification Timeouts"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1234
-msgid "Notify Check Interval:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1237
-msgid "seconds. (15=Normal, 0=Disable)"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1247
-msgid "Enable Character Translation"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1252
-msgid "Translation File:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1257
-msgid "Use a ircII style translation file."
-msgstr ""
-
-#: src/fe-gtk/settings.c:1267
-msgid "Auto Open DCC Send Window"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1271
-msgid "Automatically open DCC Send Window"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1272
-msgid "Auto Open DCC Recv Window"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1276
-msgid "Automatically open DCC Recv Window"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1277
-msgid "Auto Open DCC Chat Window"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1281
-msgid "Automatically open DCC Chat Window"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1282
-msgid "Resume on Auto Accept"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1286
-msgid "When Auto-Accepting DCC, try to resume."
-msgstr ""
-
-#: src/fe-gtk/settings.c:1298
-msgid "Timeouts"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1302
-msgid "DCC Offers Timeout:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1307
-msgid "DCC Stall Timeout:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1312
-msgid "Received files"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1316
-msgid "File Permissions:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1318
-msgid "(octal)"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1320
-msgid "Directory to save to:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1324
-msgid "Save file with Nickname"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1327
-msgid "Put the sender's nickname in incoming filenames"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1329
-msgid "DCC Send Options"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1331
-msgid "Fast DCC Send"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1334
-msgid "Don't wait for ACKs to send more data"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1337
-msgid "Send Block Size:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1339
-msgid "(1024=Normal)"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1351
-msgid "Built-in Replies"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1352
-msgid "Hide Version"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1355
-msgid "Do not reply to CTCP version"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1357
-msgid "Sound"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1360
-msgid "Sound Dir:"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1365
-msgid "Play Command:"
-msgstr ""
-
-#. prepare the dialog
-#: src/fe-gtk/settings.c:1402
-msgid "X-Chat: Preferences"
-msgstr ""
-
-#. i love buttons
-#: src/fe-gtk/settings.c:1420
-msgid "Ok"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1427
-msgid "Apply"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1434
-msgid "Cancel"
-msgstr ""
-
-#. the tree
-#: src/fe-gtk/settings.c:1451
-msgid "Categories"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1475
-msgid "Interface Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1476
-msgid "Interface"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1481
-msgid "IRC Input/Output Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1482
-msgid "IRC Input/Output"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1486
-msgid "Window Layout Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1487
-msgid "Window Layout"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1491
-msgid "Main Window Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1492
-msgid "Main Window"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1496
-msgid "Channel Window Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1497
-msgid "Channel Windows"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1501
-msgid "Dialog Window Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1502
-msgid "Dialog Windows"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1506
-msgid "IRC Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1507
-msgid "IRC"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1511
-msgid "IP Address Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1512
-msgid "IP Address"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1516
-msgid "Away Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1517
-msgid "Away"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1521
-msgid "Highlighting Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1522
-msgid "Highlighting"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1526
-msgid "Logging Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1531
-msgid "Notification Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1532
-msgid "Notification"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1536
-msgid "Character Set (Translation Tables)"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1537
-msgid "Character Set"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1541
-msgid "CTCP Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1542
-msgid "CTCP"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1546
-msgid "DCC Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1547
-msgid "DCC"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1551
-msgid "File Transfer Settings"
-msgstr ""
-
-#: src/fe-gtk/settings.c:1552
-msgid "File Transfer"
 msgstr ""

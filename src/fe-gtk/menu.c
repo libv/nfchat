@@ -57,7 +57,6 @@ extern void xchat_cleanup (GtkWidget * wid, gpointer sess);
 extern struct server *new_server (void);
 extern struct session *new_session (struct server *, char *from);
 extern void PrintText (struct session *, char *);
-extern void settings_opengui (struct session *sess);
 extern char *find_selected_nick (struct session *sess);
 extern int handle_command (char *cmd, struct session *sess, int, int);
 extern int cmd_unloadall (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -491,12 +490,6 @@ menu_chanmenu (struct session *sess, GdkEventButton * event, char *chan)
 }
 
 static void
-menu_settings (GtkWidget * wid, gpointer sess)
-{
-   settings_opengui (menu_sess);
-}
-
-static void
 menu_newserver_window (GtkWidget * wid, gpointer sess)
 {
    int old = prefs.tabchannels;
@@ -919,7 +912,6 @@ static struct mymenu mymenu[] =
    {M_MENUTOG, N_ ("Auto Accept DCC Send"), (menucallback) menu_autodccsend, 0, 1},
 
    {M_NEWMENU, N_ ("Settings"), 0, 0, 1},  /* 38 */
-   {M_MENU, N_ ("Setup.."), (menucallback) menu_settings, 0, 1},
    {M_MENU, N_ ("User Commands.."), (menucallback) menu_usercommands, 0, 1},
    {M_MENU, N_ ("CTCP Replies.."), (menucallback) menu_ctcpguiopen, 0, 1},
    {M_MENU, N_ ("Userlist Buttons.."), (menucallback) menu_ulbuttons, 0, 1},

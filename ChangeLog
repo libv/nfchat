@@ -1,4 +1,29 @@
 NF-chat;
+
+0.1.12;
+"""""""
+
+  - removed settings_opengui from settings.c and menu.c
+    and all adjacent functions from settings.c
+  - deleted settings.c and .h
+  - edited Makefile.am and POTFILES.in
+
+0.1.11;
+"""""""
+  - removed the following entries from menu.c
+        fe_dcc_open_send_win
+        fe_dcc_open_recv_win
+        fe_dcc_open_chat_win
+  - removed them from common/dcc.c, common/fe.h
+    and offcourse from dccgui.c
+  - removed fe_dcc_send_filereq from dialog.c
+    and adjacent function dialog_send and widget
+  - removed all entries of fe_dcc_update*
+    in common/dcc.c, common/fe.h, common/outbound.c
+  - removed update_dcc_window from common/dcc.c
+    and the type definition from dcc_close
+  - deleted fe-gtk/dccgui.c & edited Makefile.am
+
 0.1.10;
 """""""
   - removed plugingui

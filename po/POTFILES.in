@@ -6,5 +6,4 @@ src/fe-gtk/editlist.c
 src/fe-gtk/fkeys.c
 src/fe-gtk/gtkutil.c
 src/fe-gtk/menu.c
-src/fe-gtk/settings.c
 src/common/xchat.c
