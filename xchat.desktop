@@ -1,7 +1,0 @@
-[Desktop Entry]
-Name=X-Chat IRC client
-Comment=IRC Client
-Exec=xchat
-Icon=xchat.png
-Terminal=0
-Type=Internet

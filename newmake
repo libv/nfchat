@@ -1,0 +1,9 @@
+#!/bin/bash
+
+aclocal
+autoheader
+automake --foreign
+autoconf
+./configure
+make
+

@@ -2,10 +2,10 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT(src)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(xchat, 1.4.2)
+AM_INIT_AUTOMAKE(NF-chat, 0.0.1)
 AC_PROG_CC
 
-ALL_LINGUAS="cs da de el es fr hu it ja ko nl pt_BR sl sr_YU"
+ALL_LINGUAS="fr nl"
 AM_GNU_GETTEXT
 
 AC_PATH_PROG(sedpath, sed)
@@ -45,13 +45,8 @@ AC_ARG_ENABLE(gtkfe,
 [  --disable-gtkfe         disable building gtk frontend],
         gtkfe=$enableval, gtkfe=yes)
 
-AC_ARG_ENABLE(textfe,
-[  --disable-textfe        disable building text frontend],
-        textfe=$enableval, textfe=yes)
-
-AC_ARG_ENABLE(gnome,
-[  --disable-gnome         disable use of gnome],
-        gnome=$enableval, gnome=yes)
+textfe=no
+gnome=no
 
 AC_ARG_ENABLE(imlib,
 [  --disable-imlib         disable use of imlib],
@@ -61,13 +56,8 @@ AC_ARG_ENABLE(perl,
 [  --disable-perl          disable use of perl scripting],
         perl=$enableval, perl=yes)
 
-AC_ARG_ENABLE(python,
-[  --disable-python        disable use of python scripting],
-        python=$enableval, python=yes)
-
-AC_ARG_ENABLE(panel,
-[  --disable-panel         disable gnome panel support],
-        panel=$enableval, panel=yes)
+python=no
+panel=no
 
 AC_ARG_ENABLE(plugin,
 [  --disable-plugin        disable plugin support],
@@ -414,9 +404,7 @@ AC_OUTPUT([
 Makefile 
 src/Makefile
 src/common/Makefile
-src/fe-text/Makefile
 src/fe-gtk/Makefile
-intl/Makefile
 po/Makefile.in
 ])
 

@@ -1,121 +1,122 @@
-# Xchat in danish.
-# Copyright (C) 1999 Free Software Foundation, Inc.
-# Henrik Hansen <hh@mailserver.dk>, 1999
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: xchat-1.2.0\n"
-"POT-Creation-Date: 2000-02-11 15:13+1100\n"
-"PO-Revision-Date: 2000-02-12 00:27+01:00\n"
-"Last-Translator: Birger Langkjer <birger.langkjer@image.dk>\n"
-"Language-Team: Danish <dltp@lists.wiktor.dk>\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2000-08-25 02:23+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=iso-8859-1\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
 
 #: src/fe-gtk/gtkutil.c:180 src/fe-gtk/settings.c:1447
 msgid "Ok"
-msgstr "Ok"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1140 src/fe-gtk/menu.c:1615
 msgid "Server List.."
-msgstr "Serverliste.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1148 src/fe-gtk/menu.c:1617
 msgid "New Server Tab.."
-msgstr "Nyt serverfaneblad.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1155 src/fe-gtk/menu.c:1618
 msgid "New Server Window.."
-msgstr "Nyt servervindue.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1162 src/fe-gtk/menu.c:1619
 msgid "New Channel Tab.."
-msgstr "Nyt kanalfaneblad.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1169 src/fe-gtk/menu.c:1620
 msgid "New Channel Window.."
-msgstr "Nyt kanalvindue.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1177
 msgid "New Shell Tab.."
-msgstr "Nyt shellfaneblad.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1185 src/fe-gtk/menu.c:1622
 msgid "Close"
-msgstr "Luk"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1193 src/fe-gtk/menu.c:1624
 msgid "Quit"
-msgstr "Afslut"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1205 src/fe-gtk/menu.c:1627
 msgid "Channel List Window.."
-msgstr "Kanalliste vindue.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1210 src/fe-gtk/menu.c:1628
 msgid "DCC Send Window.."
-msgstr "DCC Send Vindue.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1215 src/fe-gtk/menu.c:1629
 msgid "DCC Receive Window.."
-msgstr "DCC Modtag Vindue.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1220 src/fe-gtk/menu.c:1630
 msgid "DCC Chat Window.."
-msgstr "DCC Snak Vindue.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1225 src/fe-gtk/menu.c:1631
 msgid "Raw Log Window.."
-msgstr "Log-vindue.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1230 src/fe-gtk/menu.c:1632
 msgid "URL Grabber Window.."
-msgstr "URL-opsnapper-vindue.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1235 src/fe-gtk/menu.c:1633
 msgid "Notify List Window.."
-msgstr "Anmeld Liste Vindue.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1240 src/fe-gtk/menu.c:1634
 msgid "Ignore Window.."
-msgstr "Ignorervindue.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1246 src/fe-gtk/menu.c:1636
 msgid "Flush Buffer"
-msgstr "Slet buffer"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1253 src/fe-gtk/menu.c:1637
 msgid "Search Buffer.."
-msgstr "Søg i buffer.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1260 src/fe-gtk/menu.c:1638
 msgid "Save Buffer.."
-msgstr "Gem buffer.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1270 src/fe-gtk/menu.c:1641
 msgid "Invisible"
-msgstr "Usynlig"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1275 src/fe-gtk/menu.c:1642
 msgid "Receive Wallops"
-msgstr "Modtag wallops"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1280 src/fe-gtk/menu.c:1643
 msgid "Receive Server Notices"
-msgstr "Modtag serverbekendtgørelser"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1286 src/fe-gtk/menu.c:1645
 msgid "Marked Away"
-msgstr "Markeret borte"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1292
 msgid "Auto Rejoin on Kick"
-msgstr "Auto-rejoin ved kick"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1297 src/fe-gtk/menu.c:1648
 msgid "Auto ReConnect to Server"
-msgstr "Automatisk gentilslutning til server"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1302 src/fe-gtk/menu.c:1649
 msgid "Never-give-up ReConnect"
@@ -123,45 +124,45 @@ msgstr ""
 
 #: src/fe-gtk/menu.c:1308 src/fe-gtk/menu.c:1651
 msgid "Auto Open Dialog Windows"
-msgstr "Autoåbning af dialogvinduer"
+msgstr ""
 
 #. 35
 #: src/fe-gtk/menu.c:1313 src/fe-gtk/menu.c:1652
 msgid "Auto Accept DCC Chat"
-msgstr "Modtag DCC chat automatisk"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1318 src/fe-gtk/menu.c:1653
 msgid "Auto Accept DCC Send"
-msgstr "Modtag DCC send automatisk"
+msgstr ""
 
 #. 38
 #: src/fe-gtk/menu.c:1328 src/fe-gtk/menu.c:1656
 msgid "Setup.."
-msgstr "Opsætning.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1335 src/fe-gtk/menu.c:1657
 msgid "Palette.."
-msgstr "Palette.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1342 src/fe-gtk/menu.c:1658
 msgid "User Commands.."
-msgstr "Brugerkommandoer.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1349 src/fe-gtk/menu.c:1659
 msgid "CTCP Replies.."
-msgstr "CTCP svar.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1356 src/fe-gtk/menu.c:1660
 msgid "Userlist Buttons.."
-msgstr "Brugerlisteknapper.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1363 src/fe-gtk/menu.c:1661
 msgid "Userlist Popup.."
-msgstr "Brugerlistepopup.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1370
 msgid "Replace Popup.."
-msgstr "Udskiftpopup.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1377 src/fe-gtk/menu.c:1663
 msgid "URL Handlers.."
@@ -169,91 +170,91 @@ msgstr ""
 
 #: src/fe-gtk/menu.c:1384 src/fe-gtk/menu.c:1664
 msgid "Edit Event Texts.."
-msgstr "Redigér hændelsestekster.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1391 src/fe-gtk/menu.c:1665
 msgid "Edit Key Bindings.."
-msgstr "Redigér tastegenveje.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1398 src/fe-gtk/menu.c:1666
 msgid "Select theme.."
-msgstr "Vælg tema.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1406 src/fe-gtk/menu.c:1668
 msgid "Reload Settings"
-msgstr "Genoplæs opsætning"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1414 src/fe-gtk/menu.c:1670
 msgid "Save Settings now"
-msgstr "Gem opsætning nu"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1421 src/fe-gtk/menu.c:1671
 msgid "Save Settings on exit"
-msgstr "Gem opsætning ved afslut"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1433 src/fe-gtk/menu.c:1706
 msgid "Help.."
-msgstr "Hjælp.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1441 src/fe-gtk/menu.c:1708
 msgid "X-Chat Homepage.."
-msgstr "X-Chats hjemmeside.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1448 src/fe-gtk/menu.c:1709
 msgid "Online Docs.."
-msgstr "Online-dokumenter"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1456 src/fe-gtk/menu.c:1711
 msgid "About X-Chat.."
-msgstr "Om X-Chat..."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1468
 msgid "Perl Script.."
-msgstr "Perl skript.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1473
 msgid "Python Script.."
-msgstr "Python skript.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1478
 msgid "Plugin.."
-msgstr "Indplug.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1488 src/fe-gtk/menu.c:1676 src/fe-gtk/menu.c:1680
 msgid "Perl List"
-msgstr "Perlliste"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1493 src/fe-gtk/menu.c:1695 src/fe-gtk/menu.c:1698
 msgid "Python List"
-msgstr "Pythonliste"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1498 src/fe-gtk/menu.c:1686 src/fe-gtk/menu.c:1690
 msgid "Plugin List"
-msgstr "Indplugsliste"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1508
 msgid "All Perl Scripts"
-msgstr "Alle Perl skripts"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1513
 msgid "All Python Scripts"
-msgstr "Alle Python skripts"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1518
 msgid "All Plugins"
-msgstr "Alle indplug"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1526
 msgid "Load"
-msgstr "Indlæs"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1527
 msgid "Info"
-msgstr "Info"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1528
 msgid "Kill"
-msgstr "Dræb"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1536
 msgid "Edit User Menu.."
@@ -261,109 +262,109 @@ msgstr ""
 
 #: src/fe-gtk/menu.c:1547
 msgid "_X-Chat"
-msgstr "_X-Chat"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1548
 msgid "_Windows"
-msgstr "_Vinduer"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1549
 msgid "User _Modes"
-msgstr "Bruger_tilstande"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1550
 msgid "_Settings"
-msgstr "_Opsætning"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1551
 msgid "S_cripts & Plugins"
-msgstr "S_kripts og indplug"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1552
 msgid "Use_r Menu"
-msgstr "_Brugermenu"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1553
 msgid "_Help"
-msgstr "_Hjælp"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1614
 msgid "X-Chat"
-msgstr "X-Chat"
+msgstr ""
 
 #. 10
 #: src/fe-gtk/menu.c:1626
 msgid "Windows"
-msgstr "Vinduer"
+msgstr ""
 
 #. 23
 #: src/fe-gtk/menu.c:1640
 msgid "User Modes"
-msgstr "Brugertilstande"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1647
 msgid "Auto ReJoin on Kick"
-msgstr "Auto ReJoin ved Kick"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1655
 msgid "Settings"
-msgstr "Opsætning"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1662
 msgid "Replace.."
-msgstr "Udskift.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1672
 msgid "Scripts & Plugins"
-msgstr "Skripts og indplug"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1674 src/fe-gtk/menu.c:1678
 msgid "Load Perl Script.."
-msgstr "Indlæs perl skript.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1675 src/fe-gtk/menu.c:1679
 msgid "Unload All Scripts"
-msgstr "Aflæs alle skripts"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1684 src/fe-gtk/menu.c:1688
 msgid "Load Plugin (*.so).."
-msgstr "Indlæs indplug (*.so).."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1685 src/fe-gtk/menu.c:1689
 msgid "Unload All Plugins"
-msgstr "Aflæs alle indplug"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1694 src/fe-gtk/menu.c:1697
 msgid "Load Python Script.."
-msgstr "Indlsæ Python skript.."
+msgstr ""
 
 #: src/fe-gtk/menu.c:1701
 msgid "User Menu"
-msgstr "Brugermenu"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1702
 msgid "Edit User Menu"
-msgstr "Redigér brugermenu"
+msgstr ""
 
 #: src/fe-gtk/menu.c:1705
 msgid "Help"
-msgstr "Hjælp"
+msgstr ""
 
 #: src/fe-gtk/settings.c:133
 msgid "Browse..."
-msgstr "Gennemse..."
+msgstr ""
 
 #: src/fe-gtk/settings.c:294
 msgid "Choose File"
-msgstr "Vælg fil"
+msgstr ""
 
 #: src/fe-gtk/settings.c:323
 msgid "Select Font"
-msgstr "Vælg skrifttype"
+msgstr ""
 
 #: src/fe-gtk/settings.c:740
 msgid "Appearance"
-msgstr "Udseende"
+msgstr ""
 
 #: src/fe-gtk/settings.c:742
 msgid "Use gdk_fontset_load instead of gdk_font_load"
@@ -371,15 +372,15 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:745
 msgid "Font:"
-msgstr "Skrift:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:749
 msgid "Background Picture:"
-msgstr "Baggrundsbillede:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:753
 msgid "Background XPM:"
-msgstr "BaggrundsXPM:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:760
 msgid "Indent Nicks"
@@ -391,7 +392,7 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:764
 msgid "Auto Indent"
-msgstr "Autoindryk"
+msgstr ""
 
 #: src/fe-gtk/settings.c:766
 msgid "Auto adjust the separator bar position as needed."
@@ -407,7 +408,7 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:772
 msgid "Word Wrap"
-msgstr "Ombrydning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:774
 msgid "Don't split words from one line to the next"
@@ -415,11 +416,11 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:776
 msgid "Transparent Background"
-msgstr "Gennemsigtig baggrund"
+msgstr ""
 
 #: src/fe-gtk/settings.c:778
 msgid "Make the text box seem see-through"
-msgstr "Gør tekstboksen gennemsigtig"
+msgstr ""
 
 #: src/fe-gtk/settings.c:780
 msgid "Tint Transparency"
@@ -431,7 +432,7 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:789
 msgid "Tint Setting"
-msgstr "Tint-opsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:791
 msgid "Change in realtime"
@@ -439,43 +440,43 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:794
 msgid "Red:"
-msgstr "Rød:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:795
 msgid "Green:"
-msgstr "Grøn:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:796
 msgid "Blue:"
-msgstr "Blå:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:820
 msgid "Startup and Shutdown"
-msgstr "Start og luk ned"
+msgstr ""
 
 #: src/fe-gtk/settings.c:821
 msgid "No Server List On Startup"
-msgstr "Ingen serverliste ved opstart"
+msgstr ""
 
 #: src/fe-gtk/settings.c:824
 msgid "Don't display the server list on X-Chat startup"
-msgstr "Vis ikke serverlisten ved X-Chat opstart"
+msgstr ""
 
 #: src/fe-gtk/settings.c:825
 msgid "Auto Save URL list"
-msgstr "Automatisk lagring af URL-liste"
+msgstr ""
 
 #: src/fe-gtk/settings.c:828
 msgid "Auto save your URL list when exiting from X-Chat"
-msgstr "Gem din URL-liste automatisk ved afslutning af X-Chat"
+msgstr ""
 
 #: src/fe-gtk/settings.c:830
 msgid "User List"
-msgstr "Brugerliste"
+msgstr ""
 
 #: src/fe-gtk/settings.c:833
 msgid "Double Click Command:"
-msgstr "Dobbelklik-kommando:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:839
 msgid "Userlist sorted by: "
@@ -503,15 +504,15 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:869
 msgid "Input Box"
-msgstr "Inputboks"
+msgstr ""
 
 #: src/fe-gtk/settings.c:870
 msgid "Nick Name Completion"
-msgstr "Brugernavnudfyldelse"
+msgstr ""
 
 #: src/fe-gtk/settings.c:873
 msgid "Complete nicknames when a partial one is entered"
-msgstr "Udfylder brugernavn når en del af det er indtastet"
+msgstr ""
 
 #: src/fe-gtk/settings.c:874
 msgid "Give the Input Box style"
@@ -523,176 +524,173 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:879
 msgid "Output Box"
-msgstr "Uddataboks"
+msgstr ""
 
 #: src/fe-gtk/settings.c:880
 msgid "Time Stamp All Text"
-msgstr "Tidsstempel på al tekst"
+msgstr ""
 
 #: src/fe-gtk/settings.c:883
 msgid "Prefix all text with the current time stamp"
-msgstr "Indsæt et tidsstempel før al tekst"
+msgstr ""
 
 #: src/fe-gtk/settings.c:884
 msgid "Colored Nicks"
-msgstr "Farvede brugernavne"
+msgstr ""
 
 #: src/fe-gtk/settings.c:887
 msgid "Output nicknames in different colors"
-msgstr "Vis brugernavne i forskellige farver"
+msgstr ""
 
 #: src/fe-gtk/settings.c:889
 msgid "Output Filtering"
-msgstr "Uddatafiltrering"
+msgstr ""
 
 #: src/fe-gtk/settings.c:890
 msgid "Strip MIRC Color"
-msgstr "Fjern MIRC-farver"
+msgstr ""
 
 #: src/fe-gtk/settings.c:893
 msgid "Strip MIRC color codes from text before displaying"
-msgstr "Fjern MIRC-farver fra teksten før den vises"
+msgstr ""
 
 #: src/fe-gtk/settings.c:894
 msgid "Filter out BEEPs"
-msgstr "Fjern bip"
+msgstr ""
 
 #: src/fe-gtk/settings.c:897
 msgid "Remove ^G BEEP codes from text before displaying"
-msgstr "Fjern ^G bip-koder fra teksten før den fjernes"
+msgstr ""
 
 #: src/fe-gtk/settings.c:899
 msgid "Buffer Settings"
-msgstr "Bufferopsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:903
 msgid "Text Buffer Size:"
-msgstr "Tekstbufferstørrelse:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:904
 msgid "lines (0=Unlimited)."
-msgstr "linier (0=Ubegrænset)."
+msgstr ""
 
 #: src/fe-gtk/settings.c:921
 msgid "Buttons"
-msgstr "Knapper"
+msgstr ""
 
 #: src/fe-gtk/settings.c:922
 msgid "Channel Mode Buttons"
-msgstr "Kanaltilstandsknapper"
+msgstr ""
 
 #: src/fe-gtk/settings.c:926
 msgid "Show the TNSIPMLK buttons"
-msgstr "Vis TNSIPMLK-knapperne"
+msgstr ""
 
 #: src/fe-gtk/settings.c:927
 msgid "User List Buttons"
-msgstr "Brugerlisteknapper"
+msgstr ""
 
 #: src/fe-gtk/settings.c:931
 msgid "Show the buttons below the user list"
-msgstr "Vis knapperne under brugerlisten"
+msgstr ""
 
 #: src/fe-gtk/settings.c:933
 msgid "Tabs"
-msgstr "Faneblade"
+msgstr ""
 
 #: src/fe-gtk/settings.c:937
 msgid "Bottom"
-msgstr "Bund"
+msgstr ""
 
 #: src/fe-gtk/settings.c:938
 msgid "Top"
-msgstr "Top"
+msgstr ""
 
 #: src/fe-gtk/settings.c:939
 msgid "Left"
-msgstr "Venstre"
+msgstr ""
 
 #: src/fe-gtk/settings.c:940
 msgid "Right"
-msgstr "Højre"
+msgstr ""
 
 #: src/fe-gtk/settings.c:941
 msgid "Hidden"
-msgstr "Skjult"
+msgstr ""
 
 #: src/fe-gtk/settings.c:950
 msgid "New Tabs to front"
-msgstr "Nye faneblade forrest"
+msgstr ""
 
 #: src/fe-gtk/settings.c:953
 msgid "Bring new query/channel tabs to front"
-msgstr "Indsæt nye faneblade forrest"
+msgstr ""
 
 #: src/fe-gtk/settings.c:954
 msgid "Channel Tabs"
-msgstr "Kanalfaneblade"
+msgstr ""
 
 #: src/fe-gtk/settings.c:957
 msgid "Use tabs for channels instead of separate windows"
-msgstr "Brug faneblade i stedet for separate vinduer"
+msgstr ""
 
 #: src/fe-gtk/settings.c:958
 msgid "Private Message Tabs"
-msgstr "Privat-besked faneblad"
+msgstr ""
 
 #: src/fe-gtk/settings.c:961
 msgid "Use tabs for /query instead of separate windows"
-msgstr "Brug faneblad til /query istedet for separate vinduer"
+msgstr ""
 
 #: src/fe-gtk/settings.c:962
 msgid "Use a separate tab/window for server messages"
-msgstr "Brug separat faneblad/vindue til server-beskeder"
+msgstr ""
 
 #: src/fe-gtk/settings.c:965
-#, fuzzy
 msgid "Use tabs for DCC, Ignore, Notify etc windows."
-msgstr "Brug faneblad til /query istedet for separate vinduer"
+msgstr ""
 
 #: src/fe-gtk/settings.c:969
 msgid "Other Layout Settings"
-msgstr "Andre layoutindstillinger"
+msgstr ""
 
 #: src/fe-gtk/settings.c:970
 msgid "Disable Paned Userlist"
-msgstr "Brug ikke fanebladsbrugerliste"
+msgstr ""
 
 #: src/fe-gtk/settings.c:973
 msgid "Use a fixed width user list instead of the paned one"
-msgstr "Brug fast brugerlistbredde i stedet for den indrammede"
+msgstr ""
 
 #: src/fe-gtk/settings.c:984
 msgid "Window Position"
-msgstr "Vinduesplacering"
+msgstr ""
 
 #: src/fe-gtk/settings.c:985
 msgid ""
 "If Left and Top are set to zero, X-Chat will use your window manager "
 "defaults."
 msgstr ""
-"Hvis Venstre og Top er sat til nul, vil X-Chat bruge din window managers "
-"standardinstilling."
 
 #: src/fe-gtk/settings.c:990
 msgid "Left:"
-msgstr "Venstre:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:994
 msgid "Top:"
-msgstr "Top:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:998
 msgid "Window Size"
-msgstr "Vinduesstørrelse"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1002
 msgid "Width:"
-msgstr "Bredde:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1006
 msgid "Height:"
-msgstr "Højde:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1009
 msgid "Show Session Tree View"
@@ -703,7 +701,7 @@ msgstr ""
 #: src/fe-gtk/settings.c:1221 src/fe-gtk/settings.c:1271
 #: src/fe-gtk/settings.c:1291
 msgid "General"
-msgstr "Generelt"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1072
 msgid "Hide Session on Panelize"
@@ -715,7 +713,7 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:1077
 msgid "Panel Applet"
-msgstr "Panel-applet"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1078
 msgid "Layout For a Vertical Panel"
@@ -755,15 +753,15 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:1110
 msgid "Your irc settings"
-msgstr "Din irc-opsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1113
 msgid "Quit Message:"
-msgstr "Afskedsbesked:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1119
 msgid "External Programs"
-msgstr "Eksterne programmer"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1122
 msgid "DNS Lookup Program:"
@@ -775,20 +773,20 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:1132
 msgid "Auto ReConnect Delay:"
-msgstr "Autogentilslutningsforsinkelse:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1135 src/fe-gtk/settings.c:1329
 #: src/fe-gtk/settings.c:1335
 msgid "seconds."
-msgstr "sekunder."
+msgstr ""
 
 #: src/fe-gtk/settings.c:1147
 msgid "Address"
-msgstr "Adresse"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1150
 msgid "Hostname / IP Number:"
-msgstr "Værtsnavn / IP-nummer:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1154
 msgid ""
@@ -894,27 +892,27 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:1292
 msgid "Auto Open DCC Send Window"
-msgstr "Autoåbn DCC Send Vindue"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1296
 msgid "Automatically open DCC Send Window"
-msgstr "Åben Automatisk DCC Send Vindue"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1297
 msgid "Auto Open DCC Recv Window"
-msgstr "Autoåbn DCC Recv Vindue"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1301
 msgid "Automatically open DCC Recv Window"
-msgstr "Åben Automatisk DCC Recv Vindue"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1302
 msgid "Auto Open DCC Chat Window"
-msgstr "Autoåbn DCC Chat Vindue"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1306
 msgid "Automatically open DCC Chat Window"
-msgstr "Åben Automatisk DCC Chat Vindue"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1307
 msgid "Resume on Auto Accept"
@@ -938,19 +936,19 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:1337
 msgid "Received files"
-msgstr "Modtagne filer"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1341
 msgid "File Permissions:"
-msgstr "Filrettigheder:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1343
 msgid "(octal)"
-msgstr "(oktal)"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1345
 msgid "Directory to save to:"
-msgstr "Mappe at gemme i:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1349
 msgid "Save file with Nickname"
@@ -962,11 +960,11 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:1354
 msgid "DCC Send Options"
-msgstr "DCC Send optioner"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1356
 msgid "Fast DCC Send"
-msgstr "Hurtig DCC Send"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1359
 msgid "Don't wait for ACKs to send more data"
@@ -978,27 +976,27 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:1364
 msgid "(1024=Normal)"
-msgstr "(1024=Normal)"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1376
 msgid "Built-in Replies"
-msgstr "Indbyggede svar"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1377
 msgid "Hide Version"
-msgstr "Skjul version"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1380
 msgid "Do not reply to CTCP version"
-msgstr "Besvar ikke CTCP version"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1382
 msgid "Sound"
-msgstr "Lyde"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1385
 msgid "Sound Dir:"
-msgstr "Lydmappe:"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1390
 msgid "Play Command:"
@@ -1007,28 +1005,28 @@ msgstr ""
 #. prepare the dialog
 #: src/fe-gtk/settings.c:1427
 msgid "X-Chat: Preferences"
-msgstr "X-Chat: Opsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1457
 msgid "Apply"
-msgstr "Anvend"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1467
 msgid "Cancel"
-msgstr "Annullér"
+msgstr ""
 
 #. the tree
 #: src/fe-gtk/settings.c:1484
 msgid "Categories"
-msgstr "Kategorier"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1508
 msgid "Interface Settings"
-msgstr "Brugerfladeopsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1509
 msgid "Interface"
-msgstr "Brugerflade"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1514
 msgid "IRC Input/Output Settings"
@@ -1044,55 +1042,55 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:1520
 msgid "Window Layout"
-msgstr "Vinduesudseende"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1524
 msgid "Main Window Settings"
-msgstr "Hovedvinduesopsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1525
 msgid "Main Window"
-msgstr "Hovedvinduer"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1529
 msgid "Channel Window Settings"
-msgstr "Kanalvinduesopsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1530
 msgid "Channel Windows"
-msgstr "Kanalvinduer"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1534
 msgid "Dialog Window Settings"
-msgstr "Dialogvinduesopsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1535
 msgid "Dialog Windows"
-msgstr "Dialogvinduer"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1540
 msgid "Panel Settings"
-msgstr "Panelopsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1541
 msgid "Panel"
-msgstr "Panel"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1546
 msgid "IRC Settings"
-msgstr "IRC opsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1547
 msgid "IRC"
-msgstr "IRC"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1551
 msgid "IP Address Settings"
-msgstr "IP Addresse opsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1552
 msgid "IP Address"
-msgstr "IP adresse"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1556
 msgid "Away Settings"
@@ -1100,19 +1098,19 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:1557
 msgid "Away"
-msgstr "Væk"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1561
 msgid "Highlighting Settings"
-msgstr "Fremhævningsopsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1562
 msgid "Highlighting"
-msgstr "Fremhævning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1566
 msgid "Logging Settings"
-msgstr "Log-opsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1571
 msgid "Notification Settings"
@@ -1124,77 +1122,32 @@ msgstr ""
 
 #: src/fe-gtk/settings.c:1576
 msgid "Character Set (Translation Tables)"
-msgstr "Tegnsæt (oversættelsestabeller)"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1577
 msgid "Character Set"
-msgstr "Tegnsæt"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1581
 msgid "CTCP Settings"
-msgstr "CTCP opsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1582
 msgid "CTCP"
-msgstr "CTCP"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1586
 msgid "DCC Settings"
-msgstr "DCC opsætning"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1587
 msgid "DCC"
-msgstr "DCC"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1591
 msgid "File Transfer Settings"
-msgstr "Filoverførselsindstillinger"
+msgstr ""
 
 #: src/fe-gtk/settings.c:1592
 msgid "File Transfer"
-msgstr "Filoverførsel"
-
-#~ msgid "Lastlog Window.."
-#~ msgstr "Seneste-log vindue.."
-
-#~ msgid "Choose XPM"
-#~ msgstr "Vælg XPM"
-
-#~ msgid "Normal Font:"
-#~ msgstr "Normal skrift:"
-
-#~ msgid "Advanced for GNOME"
-#~ msgstr "Advanceret for GNOME"
-
-#~ msgid "Use ZVT"
-#~ msgstr "Brug ZVT"
-
-#~ msgid "Use GNOME's ZVT ANSI Emulation instead of GtkText"
-#~ msgstr "Brug GNOME's ZVT ANSI emulation istedetfor GtkText"
-
-#~ msgid "Tab Nicks"
-#~ msgstr "Brugernavne i kolonne"
-
-#~ msgid "All nicknames take up same space on left hand side"
-#~ msgstr "Alle brugernavne bruger den samme plads til venstre"
-
-#~ msgid "ZVT Buffer Size:"
-#~ msgstr "ZVT bufferstørrelse:"
-
-#~ msgid "lines."
-#~ msgstr "linier."
-
-#~ msgid "Tabs at bottom"
-#~ msgstr "Faneblade forneden"
-
-#~ msgid "Put the tabs at the bottom of the window"
-#~ msgstr "Vis fanebladene nederst i vinduet"
-
-#~ msgid "IP address:"
-#~ msgstr "IP adresse:"
-
-#~ msgid "No ServerName in logs"
-#~ msgstr "Intet Servernavn i log"
-
-#~ msgid "About..."
-#~ msgstr "Om.."
+msgstr ""
