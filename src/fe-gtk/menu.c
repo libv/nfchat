@@ -204,7 +204,7 @@ userlist_button_cb (GtkWidget *button, char *cmd)
       sel_list = sel_list->next;
       nicks++;
 
-      /* if not using "%a", execute the command once for each nickname */
+     /* if not using "%a", execute the command once for each nickname */
       if (!using_allnicks)
          nick_command_parse (sess, cmd, user->nick, "");
 
@@ -228,12 +228,12 @@ popup_menu_cb (GtkWidget *item, char *cmd)
    char *nick;
 
    /* the userdata is set in menu_quick_item() */
-   nick = gtk_object_get_user_data (GTK_OBJECT (item));
+  nick = gtk_object_get_user_data (GTK_OBJECT (item));
 
    nick_command_parse (menu_sess, cmd, nick, nick);
-}
+} 
 
-GtkWidget *
+ GtkWidget *
 menu_quick_item (char *cmd, char *label, GtkWidget *menu, int flags, gpointer userdata)
 {
    GtkWidget *item;

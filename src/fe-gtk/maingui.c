@@ -58,7 +58,6 @@ extern GdkFont *font_normal;
 extern gint xchat_is_quitting;
 
 extern void nick_command_parse (session *sess, char *cmd, char *nick, char *allnick);
-extern void userlist_button_cb (GtkWidget *button, char *cmd);
 extern void goto_url (void *unused, char *url);
 extern int key_action_insert (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2, struct session *sess);
 extern int handle_multiline (struct session *sess, char *cmd, int history, int nocommand);
@@ -77,9 +76,6 @@ extern void menu_popup (struct session *sess, GdkEventButton * event, char *nick
 extern void clear_user_list (struct session *sess);
 extern void handle_inputgad (GtkWidget * igad, struct session *sess);
 int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);
-
-static void userlist_button (GtkWidget * box, char *label, char *cmd,
-                      struct session *sess, int a, int b, int c, int d);
 
 static void tree_update ();
 void tree_default_style (struct session *sess);
@@ -132,46 +128,6 @@ maingui_set_icon (GtkWidget *win)
 #endif
    }
    gtkutil_set_icon (win->window, xchat_icon, xchat_bmp);
-}
-
-static void
-maingui_createbuttons (struct session *sess)
-{
-   struct popup *pop;
-   GSList *list = button_list;
-   int a = 0, b = 0;
-
-   sess->gui->button_box = gtk_table_new (5, 2, FALSE);
-   gtk_box_pack_end (GTK_BOX (sess->gui->nl_box), sess->gui->button_box, FALSE, FALSE, 1);
-   gtk_widget_show (sess->gui->button_box);
-
-   while (list)
-   {
-      pop = (struct popup *) list->data;
-      if (pop->cmd[0])
-      {
-         userlist_button (sess->gui->button_box, pop->name, pop->cmd, sess, a, a + 1, b, b + 1);
-         a++;
-         if (a == 2)
-         {
-            a = 0;
-            b++;
-         }
-      }
-      list = list->next;
-   }
-}
-
-void
-fe_buttons_update (struct session *sess)
-{
-   if (sess->gui->button_box)
-   {
-      gtk_widget_destroy (sess->gui->button_box);
-      sess->gui->button_box = 0;
-   }
-   if (!prefs.nouserlistbuttons)
-      maingui_createbuttons (sess);
 }
 
 void
@@ -350,18 +306,6 @@ show_and_unfocus (GtkWidget * wid)
 {
    GTK_WIDGET_UNSET_FLAGS (wid, GTK_CAN_FOCUS);
    gtk_widget_show (wid);
-}
-
-static void
-userlist_button (GtkWidget * box, char *label, char *cmd,
-                 struct session *sess, int a, int b, int c, int d)
-{
-   GtkWidget *wid = gtk_button_new_with_label (label);
-   gtk_object_set_user_data (GTK_OBJECT (wid), sess);
-   gtk_signal_connect (GTK_OBJECT (wid), "clicked",
-                       GTK_SIGNAL_FUNC (userlist_button_cb), cmd);
-   gtk_table_attach_defaults (GTK_TABLE (box), wid, a, b, c, d);
-   show_and_unfocus (wid);
 }
 
 GtkStyle *
@@ -1259,11 +1203,6 @@ create_window (struct session *sess)
    gtk_widget_set_usize (sess->gui->namelistgad->parent, 115, 0);
    gtk_signal_connect (GTK_OBJECT (sess->gui->namelistgad), "button_press_event",
                        GTK_SIGNAL_FUNC (ul_button_rel), sess);
-
-   if (!prefs.nouserlistbuttons)
-      maingui_createbuttons (sess);
-   else
-      sess->gui->button_box = 0;
 
    bbox = gtk_hbox_new (FALSE, 0);
    gtk_container_set_border_width (GTK_CONTAINER (bbox), 0);

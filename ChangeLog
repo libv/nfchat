@@ -1,8 +1,19 @@
 NF-chat;
 
-0.2.2; removing tab buttons and prolly alot of the tab stuff
+0.2.2; removing buttonbox & tree 
 """"""
- 
+ a)
+  - removed button_box from struct session_gui fe-gtk.h
+  - removed adjacent calls from maingui.c
+        - maingui_createbuttons removed
+### prefs.nouserlistbuttons
+        - removed fe_buttons_update
+        - removed maingui_createbuttons call from create_window
+        - removed userlist_button
+  - removed fe_buttons_update calls from fe.h, outbound.c
+### userlist_button_cb
+
+
 0.2.1; removing dialog windows
 """"""
   a)

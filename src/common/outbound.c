@@ -226,7 +226,7 @@ process_data_init (unsigned char *buf, char *cmd, char *word[], char *word_eol[]
    }
 }
 
-static int cmd_addbutton (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
+static int cmd_addbutton (struct session *sess, char *tbuf, char *word[], char *word_eol[]); 
 static int cmd_away (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_ban (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_clear (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -236,7 +236,7 @@ static int cmd_country (struct session *sess, char *tbuf, char *word[], char *wo
 static int cmd_cycle (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_delbutton (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
+static int cmd_delbutton (struct session *sess, char *tbuf, char *word[], char *word_eol[]); 
 static int cmd_deop (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_devoice (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_discon (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -457,11 +457,11 @@ cmd_addbutton (struct session *sess, char *tbuf, char *word[], char *word_eol[])
    if (*word[2] && *word_eol[3])
    {
       list_addentry (&button_list, word_eol[3], word[2]);
-      fe_buttons_update (sess);
+      /* fe_buttons_update (sess); removed from maingui.c - this whole structure should go */
       return TRUE;
    }
    return FALSE;
-}
+} 
 
 int
 cmd_away (struct session *sess, char *tbuf, char *word[], char *word_eol[])
@@ -868,7 +868,7 @@ cmd_delbutton (struct session *sess, char *tbuf, char *word[], char *word_eol[])
    if (*word[2])
    {
       if (list_delentry (&button_list, word[2]))
-         fe_buttons_update (sess);
+         /* fe_buttons_update (sess); remove this whole structure please*/
       return TRUE;
    }
    return FALSE;

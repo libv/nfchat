@@ -82,7 +82,7 @@ struct session_gui
    GtkWidget *op_xpm;
    GtkWidget *userlistbox;
    GtkWidget *nl_box;
-   GtkWidget *button_box;
+   /* GtkWidget *button_box; */
    GtkWidget *bar;
    GtkWidget *leftpane;
    GtkWidget *delink_button;
