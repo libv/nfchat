@@ -1,5 +1,6 @@
-/* X-Chat
- * Copyright (C) 1998 Peter Zelezny.
+/*
+ * NF-Chat: A cut down version of X-chat, cut down by _Death_
+ * Largely based upon X-Chat 1.4.2 by Peter Zelezny. (www.xchat.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -114,9 +115,9 @@ fe_exit (void)
 }
 
 int
-fe_timeout_add (int interval, void *callback)
+fe_timeout_add (int interval, void *callback, void *userdata)
 {
-   return gtk_timeout_add (interval, (GtkFunction) callback, 0);
+   return gtk_timeout_add (interval, (GtkFunction) callback, userdata);
 }
 
 void
@@ -172,7 +173,7 @@ my_font_load (char *fontname)
       font = gdk_font_load (fontname);
    if (!font)
    {
-      fprintf (stderr, "Error: Cannot open font:\n\n%s", fontname);
+      fprintf (stderr, "NF-CHAT Error: Cannot open font:\n\n%s", fontname);
       font = gdk_font_load ("fixed");
       if (!font)
       {
@@ -213,7 +214,7 @@ my_widget_get_style (char *bg_pic)
             style->bg_pixmap[GTK_STATE_NORMAL] = pixmap;
          }
       } else
-         fprintf (stderr, "Error: Cannot access %s", bg_pic);
+         fprintf (stderr, "NF-CHAT Error: Cannot access %s", bg_pic);
    }
    return style;
 }

@@ -147,18 +147,36 @@ NF-chat;
 	- implemented userlistscroll
 	- implemented reconnect on !connected & \n
     f)
-BUG; $nickPRIVMSG :Unknown command
+	- adding decent gnu header to all files
+	- removed willjoin channel
+	- fixed rejoin on kick
+	- removed prefs.autorejoin
+	- added join_timeout
+	# thnx to TheGewp & Snewpie for kickin the client
+	- removed changad, fe_set_channel
+	- edited to loose channel name
+		XP_TE_JOIN, XP_TE_TOPIC, XP_TE_KICK, XP_TE_PART
+		XP_TE_PARTREASON, XP_TE_UKICK
+	- removed
+		XP_TE_CHANDATE, XP_TE_TOPICDATE, XP_TE_USERSONCHAN
+		XP_TE_CHANMODES, XP_TE_RAWMODES
+	- removed channel_date, topic_nametime
+	current size = 76548 bytes
+	- exits cleanly with a quit on sigterm & sigquit
+	- reconnects on sighup
+	- edited some stuff in text.c
+	- made fprintf uniform on whole prog
+	stripped size = 76420 bytes
+    g)
 
-### make it rejoin the channel on reconnect
-### make it rejoin the set channel on a prefs specified time interval
-*** make it send a quit to the server upon kill.
+*** make scrolling topic
+*** Add prefs for colour defines of the widgets.
+	add some extra prefs & code for my_widget_get_style(maingui.c)
+    	for/background - base colours!!!! -> seems to only affect inputbox
 
-### make scrolling topic
-### cmd_help
-*** add some extra prefs & code for my_widget_get_style(maingui.c)
-    for/background - base colours!!!! -> seems to only affect inputbox
-*** remember to check for fprintf uniformication
-### Add decent file headers
+*** barely possible when theres NO! ircd runnin!
+    still needs testing on server errors & kicks & lines - reserve for
+    when an ircd is runnin
 
 0.3.3;
 """"""

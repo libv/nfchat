@@ -1,3 +1,21 @@
+/*
+ * NF-Chat: A cut down version of X-chat, cut down by _Death_
+ * Largely based upon X-Chat 1.4.2 by Peter Zelezny. (www.xchat.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ */
 
 #ifndef SIGNAL_H
 #define SIGNAL_H
@@ -35,59 +53,54 @@
 #define XP_TE_TOPIC     27
 #define XP_TE_KICK      28
 #define XP_TE_PART      29
-#define XP_TE_CHANDATE  30
-#define XP_TE_TOPICDATE 31
-#define XP_TE_QUIT      32
-#define XP_TE_PARTREASON 33
-#define XP_TE_NOTICE    34
-#define XP_TE_MSGSEND      35
-#define XP_TE_UCHANMSG  36
-#define XP_TE_AWAY    37
-#define XP_TE_UCHANGENICK 38
-#define XP_TE_UKICK     39
-#define XP_TE_CHANSETKEY 40
-#define XP_TE_CHANSETLIMIT 41
-#define XP_TE_CHANOP    42
-#define XP_TE_CHANVOICE 43
-#define XP_TE_CHANBAN   44
-#define XP_TE_CHANRMKEY 45
-#define XP_TE_CHANRMLIMIT 46
-#define XP_TE_CHANDEOP  47
-#define XP_TE_CHANDEVOICE 48
-#define XP_TE_CHANUNBAN 49
-#define XP_TE_CHANEXEMPT 50
-#define XP_TE_CHANRMEXEMPT 51
-#define XP_TE_CHANINVITE 52
-#define XP_TE_CHANRMINVITE 53
-#define XP_TE_CHANMODEGEN 54
-#define XP_TE_USERLIMIT 55
-#define XP_TE_BANNED    56
-#define XP_TE_INVITE    57
-#define XP_TE_KEYWORD   58
-#define XP_TE_MOTDSKIP  59
-#define XP_TE_SERVTEXT  60
-#define XP_TE_USERSONCHAN  61
-#define XP_TE_NICKCLASH 62
-#define XP_TE_NICKFAIL  63
-#define XP_TE_UKNHOST   64
-#define XP_TE_CONNFAIL  65
-#define XP_TE_CONNECT   66
-#define XP_TE_CONNECTED 67
-#define XP_TE_SCONNECT  68
-#define XP_TE_DISCON    69
-#define XP_TE_CHANMODES 70
-#define XP_TE_RAWMODES  71
-#define XP_TE_KILL      72
-#define XP_TE_SERVERLOOKUP 73
-#define XP_TE_SERVERCONNECTED 74
-#define XP_TE_SERVERERROR  75
-#define XP_TE_SERVERGENMESSAGE 76
-#define XP_HIGHLIGHT       77
-#define XP_TE_MOTD 78
-#define XP_IF_SEND 79
-#define XP_IF_RECV 80
+#define XP_TE_QUIT      30
+#define XP_TE_PARTREASON 31
+#define XP_TE_NOTICE    32
+#define XP_TE_MSGSEND      33
+#define XP_TE_UCHANMSG  34
+#define XP_TE_AWAY    35
+#define XP_TE_UCHANGENICK 36
+#define XP_TE_UKICK     37
+#define XP_TE_CHANSETKEY 38
+#define XP_TE_CHANSETLIMIT 39
+#define XP_TE_CHANOP    40
+#define XP_TE_CHANVOICE 41
+#define XP_TE_CHANBAN   42
+#define XP_TE_CHANRMKEY 43
+#define XP_TE_CHANRMLIMIT 44
+#define XP_TE_CHANDEOP  45
+#define XP_TE_CHANDEVOICE 46
+#define XP_TE_CHANUNBAN 47
+#define XP_TE_CHANEXEMPT 48
+#define XP_TE_CHANRMEXEMPT 49
+#define XP_TE_CHANINVITE 50
+#define XP_TE_CHANRMINVITE 51
+#define XP_TE_CHANMODEGEN 52
+#define XP_TE_USERLIMIT 53
+#define XP_TE_BANNED    54
+#define XP_TE_INVITE    55
+#define XP_TE_KEYWORD   56
+#define XP_TE_MOTDSKIP  57
+#define XP_TE_SERVTEXT  58
+#define XP_TE_NICKCLASH 59
+#define XP_TE_NICKFAIL  60
+#define XP_TE_UKNHOST   61
+#define XP_TE_CONNFAIL  62
+#define XP_TE_CONNECT   63
+#define XP_TE_CONNECTED 64
+#define XP_TE_SCONNECT  65
+#define XP_TE_DISCON    66
+#define XP_TE_KILL      67
+#define XP_TE_SERVERLOOKUP 68
+#define XP_TE_SERVERCONNECTED 69
+#define XP_TE_SERVERERROR  70
+#define XP_TE_SERVERGENMESSAGE 71
+#define XP_HIGHLIGHT       72
+#define XP_TE_MOTD 73
+#define XP_IF_SEND 74
+#define XP_IF_RECV 75
 
-#define NUM_XP		   81
+#define NUM_XP		   76
 
 extern int current_signal;
 

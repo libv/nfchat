@@ -1,5 +1,6 @@
-/* X-Chat
- * Copyright (C) 1998 Peter Zelezny.
+/*
+ * NF-Chat: A cut down version of X-chat, cut down by _Death_
+ * Largely based upon X-Chat 1.4.2 by Peter Zelezny. (www.xchat.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-
-/* signal.c by Adam Langley */
 
 #define	SIGNALS_C
 

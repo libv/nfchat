@@ -1,5 +1,6 @@
-/* X-Chat
- * Copyright (C) 1998 Peter Zelezny.
+/*
+ * NF-Chat: A cut down version of X-chat, cut down by _Death_
+ * Largely based upon X-Chat 1.4.2 by Peter Zelezny. (www.xchat.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,9 +37,9 @@ extern void PrintText(char *text);
 extern void change_nick (char *oldnick, char *newnick);
 extern void process_data_init (unsigned char *buf, char *cmd, char *word[], char *word_eol[]);
 extern struct xchatprefs prefs;
+extern int fe_timeout_add (int interval, void *callback, void *userdata);
 extern void fe_set_topic (char *topic);
 extern void fe_clear_channel (void);
-extern void fe_set_channel (void);
 extern void fe_set_title (void);
 extern void fe_set_nick (char *newnick);
 /* userlist.c */
@@ -221,7 +222,6 @@ user_new_nick (char *outbuf, char *nick, char *newnick, int quiet)
    if (!strcasecmp (session->channel, nick))
      {
        strncpy (session->channel, newnick, 200);
-       fe_set_channel ();
        fe_set_title ();
      }
    if (me)
@@ -232,30 +232,43 @@ static void
 you_joined (char *outbuf, char *nick)
 {
   strncpy (session->channel, session->waitchannel, 200);
-  fe_set_channel ();
   fe_set_title ();
   session->waitchannel[0] = 0;
   session->end_of_names = FALSE;
   sprintf (outbuf, "MODE %s\r\n", session->channel);
   tcp_send (outbuf);
   clear_user_list ();
-  fire_signal (XP_TE_JOIN, nick, session->channel, NULL, NULL, 0);
+  fire_signal (XP_TE_JOIN, nick, NULL, NULL, NULL, 0);
+}
+
+static int
+join_channel (char *tbuf)
+{
+  if (prefs.channel)
+    {
+      strcpy (session->waitchannel, prefs.channel);
+      if (session->channelkey[0] == '\0')
+	sprintf (tbuf, "JOIN %s\r\n", session->waitchannel);
+      else
+	sprintf (tbuf, "JOIN %s %s\r\n", session->waitchannel,
+		 session->channelkey);
+      tcp_send (tbuf);
+    }
+  return 0; /* to remove the timeout */
 }
 
 static void
 you_kicked (char *tbuf, char *kicker, char *reason)
 {
-  fire_signal (XP_TE_UKICK, server->nick, session->channel, kicker, reason, 0);
+  fire_signal (XP_TE_UKICK, server->nick, kicker, reason, NULL, 0);
   clear_channel ();
-  if (prefs.autorejoin)
-    {
-      if (session->channelkey[0] == '\0')
-	sprintf (tbuf, "JOIN %s\r\n", session->channel);
-      else
-	sprintf (tbuf, "JOIN %s %s\r\n", session->channel, session->channelkey);
-      tcp_send (tbuf);
-      strcpy (session->waitchannel, session->channel);
-    }
+  join_channel (tbuf);
+}
+
+static void
+join_timeout (char *tbuf)
+{
+  fe_timeout_add(prefs.rejoin_delay * 1000, join_channel, tbuf);
 }
 
 static void
@@ -263,8 +276,6 @@ names_list (char *tbuf, char *names)
 {
    char name[64];
    int pos = 0;
-
-   fire_signal (XP_TE_USERSONCHAN, session->channel, names, NULL, NULL, 0);
 
    if (session->end_of_names)
    {
@@ -354,7 +365,7 @@ topic (char *buf)
       new_topic = strip_color (po + 2);
       fe_set_topic (new_topic);
       free (new_topic);
-      fire_signal (XP_TE_TOPIC, buf, po + 2, NULL, NULL, 0);
+      fire_signal (XP_TE_TOPIC, po + 2, NULL, NULL, NULL, 0);
    }
 }
 
@@ -371,14 +382,14 @@ user_joined (char *outbuf, char *user)
    if (fire_signal (XP_JOIN, session->channel, user, NULL, NULL, 0) == 1)
       return;
 
-   fire_signal (XP_TE_JOIN, user, session->channel, NULL, NULL, 0);
+   fire_signal (XP_TE_JOIN, user, NULL, NULL, NULL, 0);
    add_name (user);
 }
 
 static void
 user_kicked (char *outbuf, char *user, char *kicker, char *reason)
 {
-  fire_signal (XP_TE_KICK, kicker, user, session->channel, reason, 0);
+  fire_signal (XP_TE_KICK, kicker, user, reason, NULL, 0);
   sub_name (user);
 }
 
@@ -386,35 +397,10 @@ static void
 user_parted (char *user, char *reason)
 {
   if (*reason)
-    fire_signal (XP_TE_PARTREASON, user, session->channel, reason, NULL, 0);
+    fire_signal (XP_TE_PARTREASON, user, reason, NULL, NULL, 0);
   else
-    fire_signal (XP_TE_PART, user, session->channel, NULL, NULL, 0);
+    fire_signal (XP_TE_PART, user, NULL, NULL, NULL, 0);
   sub_name (user);
-}
-
-static void
-channel_date (char *tbuf, char *timestr)
-{
-   long n = atol (timestr);
-   char *p, *tim = ctime (&n);
-   p = strchr (tim, '\n');
-   if (p)
-      *p = 0;
-   fire_signal (XP_TE_CHANDATE, session->channel, tim, NULL, NULL, 0);
-}
-
-static void
-topic_nametime (char *tbuf, char *nick, char *date)
-{
-   long n = atol (date);
-   char *tim = ctime (&n);
-   char *p;
-
-   p = strchr (tim, '\n');
-   if (p)
-      *p = 0;
-
-   fire_signal(XP_TE_TOPICDATE, session->channel, nick, tim, NULL, 0);
 }
 
 void
@@ -426,9 +412,6 @@ set_server_name (char *name)
   strcpy (server->servername, name);
   
   fe_set_title ();
-  
-  /*  strcpy (session->channel, name); */
-  fe_set_channel ();
 }
 
 static void
@@ -671,22 +654,6 @@ channel_modes (char *outbuf, char *word[], char *nick, int displacement)
 }
 
 static void
-check_willjoin_channels (char *tbuf)
-{
-  if (session->willjoinchannel[0] != 0)
-    {
-      strcpy (session->waitchannel, session->willjoinchannel);
-      session->willjoinchannel[0] = 0;
-      if (session->channelkey[0] == '\0')
-	sprintf (tbuf, "JOIN %s\r\n", session->waitchannel);
-      else
-	sprintf (tbuf, "JOIN %s %s\r\n", session->waitchannel,
-		 session->channelkey);
-      tcp_send (tbuf);
-    }
-}
-
-static void
 next_nick (char *outbuf, char *nick)
 {
   server->nickcount++;
@@ -788,17 +755,14 @@ process_line (void)
 		  case 323:
 		    break;
 		  case 324:
-		    fire_signal (XP_TE_CHANMODES, session->channel, word_eol[5], NULL, NULL, 0);
 		    channel_modes (outbuf, word, word[3], 1);
 		    break;
 		  case 329:
-		    channel_date (outbuf, word[5]);
 		    break;
 		  case 332:
 		    topic (text);
 		    break;
 		  case 333:
-		    topic_nametime (outbuf, find_word (pdibuf, 5), find_word (pdibuf, 6));
 		    break;
 		  case 352:          /* WHO */
 		    if (!server->skip_next_who)
@@ -838,7 +802,7 @@ process_line (void)
 		  case 422:          /* end of motd */
 		    server->end_of_motd = TRUE;
 		    set_default_modes (outbuf);
-		    check_willjoin_channels (outbuf);
+		    join_channel(outbuf);
 		    goto def;
 		  case 433:
 		    if (server->end_of_motd)
@@ -854,15 +818,19 @@ process_line (void)
 		    break;
 		  case 471:
 		    fire_signal (XP_TE_USERLIMIT, session->channel, NULL, NULL, NULL, 0);
+		    join_timeout (outbuf);
 		    break;
 		  case 473:
 		    fire_signal (XP_TE_INVITE, session->channel, NULL, NULL, NULL, 0);
+		    join_timeout (outbuf);
 		    break;
 		  case 474:
 		    fire_signal (XP_TE_BANNED, session->channel, NULL, NULL, NULL, 0);
+		    join_timeout (outbuf);
 		    break;
 		  case 475:
 		    fire_signal (XP_TE_KEYWORD, session->channel, NULL, NULL, NULL, 0);
+		    join_timeout (outbuf);
 		    break;
 		    
 		  default:

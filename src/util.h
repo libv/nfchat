@@ -1,14 +1,20 @@
-/************************************************************************
- *    This technique was borrowed in part from the source code to 
- *    ircd-hybrid-5.3 to implement case-insensitive string matches which
- *    are fully compliant with Section 2.2 of RFC 1459, the copyright
- *    of that code being (C) 1990 Jarkko Oikarinen and under the GPL.
- *    
- *    A special thanks goes to Mr. Okarinen for being the one person who
- *    seems to have ever noticed this section in the original RFC and
- *    written code for it.  Shame on all the rest of you (myself included).
- *    
- *        --+ Dagmar d'Surreal
+/*
+ * NF-Chat: A cut down version of X-chat, cut down by _Death_
+ * Largely based upon X-Chat 1.4.2 by Peter Zelezny. (www.xchat.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
 #undef toupper

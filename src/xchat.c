@@ -1,5 +1,6 @@
-/* X-Chat
- * Copyright (C) 1998 Peter Zelezny.
+/*
+ * NF-Chat: A cut down version of X-chat, cut down by _Death_
+ * Largely based upon X-Chat 1.4.2 by Peter Zelezny. (www.xchat.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +46,7 @@ extern int fe_args (int argc, char *argv[]);
 extern void fe_init (void);
 extern void fe_main (void);
 extern void fe_exit (void);
-extern int fe_timeout_add (int interval, void *callback);
+extern int fe_timeout_add (int interval, void *callback, void *userdata);
 extern void fe_new_window (void);
 extern void fe_input_remove (int tag);
 extern void fe_session_callback (void);
@@ -122,7 +123,7 @@ tcp_send_len (char *buf, int len)
    {
       buf = strdup (buf);
       if (!server->outbound_queue)
-         fe_timeout_add (QUEUE_TIMEOUT, tcp_send_queue);
+         fe_timeout_add (QUEUE_TIMEOUT, tcp_send_queue, NULL);
       server->outbound_queue = g_slist_append (server->outbound_queue, buf);
       return 1;
    }
@@ -149,11 +150,8 @@ timeout_auto_reconnect (void)
 void 
 reconnect (void)
 {
-  if (prefs.channel)
-    strcpy (session->willjoinchannel, prefs.channel);
-  
   if (prefs.recon_delay)
-    fe_timeout_add (prefs.recon_delay * 1000, timeout_auto_reconnect);
+    fe_timeout_add (prefs.recon_delay * 1000, timeout_auto_reconnect, NULL);
   else
     connect_server (server->hostname, server->port, FALSE);
 }
@@ -162,8 +160,6 @@ void
 auto_reconnect (int send_quit, int err)
 {
   disconnect_server (send_quit, err);
-
-  
   reconnect ();
 }
 
@@ -179,7 +175,7 @@ read_data (int blah, int sok)
 	 len = recv (sok, lbuf, sizeof lbuf - 2, 0);
      else
        {
-	 fprintf(stderr, "Error: read_data: unable to write to socket\n");
+	 fprintf(stderr, "NF-CHAT Error: read_data: unable to write to socket\n");
 	 exit (70);
        }
      if (len < 1)
@@ -220,7 +216,7 @@ read_data (int blah, int sok)
 		   server->pos++;
 		   if (server->pos == 2047)
 		     {
-		       fprintf (stderr, "*** NF-Chat: Buffer overflow - shit server!\n");
+		       fprintf (stderr, "NF-CHAT Error: Buffer overflow - shit server!\n");
 		       server->pos = 2046;
 		     }
 		 }
@@ -274,7 +270,7 @@ kill_server_callback (void)
     {
       if (server->iotag != -1)
 	fe_input_remove (server->iotag);
-      if (fe_timeout_add (5000, close_socket) == -1)
+      if (fe_timeout_add (5000, close_socket, NULL) == -1)
 	close (server->sok);
     }
   if (server->connecting)
@@ -337,23 +333,38 @@ xchat_init (void)
 
   if (!prefs.server || !prefs.channel)
     {
-      fprintf(stderr, "Check your options!\n");
+      fprintf(stderr, "NF-CHAT Error: Check your options!\n");
       exit;
     }
 
   if (prefs.serverpass)
    strcpy (server->password, prefs.serverpass);
 
-  if (prefs.channel)
-    strcpy (session->willjoinchannel, prefs.channel);
-
   connect_server(prefs.server, prefs.port, FALSE);
-  
+}
+static void
+got_hup (int z)
+{
+  auto_reconnect ( 1, 0);
+}
+
+static void
+got_quit (int z)
+{
+  kill_session_callback ();
 }
 
 int
 main (int argc, char *argv[])
 {
+  struct sigaction sv;  /* i got this from eggdrop - _Death_ */
+
+  sv.sa_handler = got_hup;
+  sigaction(SIGHUP, &sv, NULL);
+  sv.sa_handler = got_quit;
+  sigaction(SIGQUIT, &sv, NULL);
+  sigaction(SIGTERM, &sv, NULL);
+
 #ifdef SOCKS
    SOCKSinit (argv[0]);
 #endif

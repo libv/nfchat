@@ -1,3 +1,22 @@
+/*
+ * NF-Chat: A cut down version of X-chat, cut down by _Death_
+ * Largely based upon X-Chat 1.4.2 by Peter Zelezny. (www.xchat.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ */
+
 #include "../config.h"
 
 #ifndef VERSION               /* for broken autoconf */
@@ -75,6 +94,7 @@ struct xchatprefs
   int mainwindow_width;
   int mainwindow_height;
   int recon_delay;
+  int rejoin_delay;
   int userlist_sort;
   int bt_color;
   unsigned long local_ip;
@@ -83,7 +103,6 @@ struct xchatprefs
   unsigned int autoreconnectonfail;
   unsigned int invisible;
   unsigned int skipmotd;
-  unsigned int autorejoin;
   unsigned int nickcompletion;
   unsigned int transparent;
   unsigned int tint;
@@ -97,7 +116,6 @@ struct session_t
    char channel[202];
    char waitchannel[202];       /* waiting to join this channel */
    char nick[202];
-   char willjoinchannel[202];   /* /join done for this channel */
    char channelkey[64];         /* XXX correct max length? */
    int limit;			  /* channel user limit */
    char lastnick[64];           /* last nick you /msg'ed */

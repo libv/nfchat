@@ -1,5 +1,6 @@
-/* X-Chat
- * Copyright (C) 1998 Peter Zelezny.
+/*
+ * NF-Chat: A cut down version of X-chat, cut down by _Death_
+ * Largely based upon X-Chat 1.4.2 by Peter Zelezny. (www.xchat.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -9,17 +10,11 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
- * =========================================================================
- *
- * xtext, the text widget used by X-Chat.
- *
- * By Peter Zelezny <zed@linux.com>.
- * Some functions used from Zvt and Eterm (transparency stuff).
- *
  */
 
 #define REFRESH_TIMEOUT 20
@@ -989,7 +984,7 @@ gtk_xtext_load_trans (GtkXText *xtext)
    rootpix = get_pixmap_prop (GDK_WINDOW_XWINDOW(widget->window));
    if (rootpix == None)
    {
-     fprintf(stderr,  "Unable to get root window pixmap!\n\n"
+     fprintf(stderr,  "NF-CHAT Error: Unable to get root window pixmap!\n\n"
 	     "You may need to use Esetroot or Gnome\n"
 	     "control-center to set your background.\n");
       xtext->transparent = FALSE;

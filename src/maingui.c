@@ -1,5 +1,6 @@
-/* X-Chat
- * Copyright (C) 1998 Peter Zelezny.
+/*
+ * NF-Chat: A cut down version of X-chat, cut down by _Death_
+ * Largely based upon X-Chat 1.4.2 by Peter Zelezny. (www.xchat.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,17 +98,10 @@ fe_set_title (void)
 }
 
 void
-fe_set_channel (void)
-{
-   gtk_label_set_text (GTK_LABEL (session->gui->changad), session->channel);
-}
-
-void
 fe_clear_channel (void)
 {
    gtk_entry_set_text (GTK_ENTRY (session->gui->topicgad), "");
    gtk_label_set_text (GTK_LABEL (session->gui->namelistinfo), " ");
-   gtk_label_set_text (GTK_LABEL (session->gui->changad), "<none>");
 
    clear_user_list ();
 
@@ -241,10 +235,6 @@ create_window (void)
    gtk_box_pack_start (GTK_BOX (vbox), tbox, FALSE, TRUE, 2);
    gtk_widget_show (tbox);
    
-   session->gui->changad = gtk_label_new ("<none>");
-   gtk_box_pack_start (GTK_BOX (tbox), session->gui->changad, FALSE, FALSE, 5);
-   gtk_widget_show (session->gui->changad);
-
    session->gui->topicgad = gtk_entry_new ();
    gtk_entry_set_editable (GTK_ENTRY (session->gui->topicgad), FALSE);
    gtk_container_add (GTK_CONTAINER (tbox), session->gui->topicgad);

@@ -1,5 +1,6 @@
-/* NF-Chat: A cut down version of X-chat, cut down by _Death_ 
- * based upon X-Chat by Peter Zelezny.
+/*
+ * NF-Chat: A cut down version of X-chat, cut down by _Death_ 
+ * Largely based upon X-Chat 1.4.2 by Peter Zelezny. (www.xchat.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +42,7 @@ extern int tcp_send (char *buf);
 extern void read_data (gint sok);
 extern void notc_msg (void);
 extern void PrintText (char *text);
-extern int fe_timeout_add (int interval, void *callback);
+extern int fe_timeout_add (int interval, void *callback, void *userdata);
 extern void fe_new_window (void);
 extern int fe_input_add (int sok, int read, int write, int ex, void *func);
 extern void fe_input_remove (int tag);
@@ -154,7 +155,8 @@ connected_signal (int sok)
 	      sprintf (outbuf, "PASS %s\r\n", server->password);
 	      tcp_send (outbuf);
 	    }
-	  snprintf (outbuf, 511, "NICK %s\r\nUSER %s 0 0 :%s\r\n", server->nick, prefs.username, prefs.realname);
+	  snprintf (outbuf, 511, "NICK %s\r\nUSER %s 0 0 :%s\r\n", server->nick, prefs.username,
+prefs.realname);
 	  tcp_send (outbuf);
 	}
       else
@@ -232,7 +234,7 @@ disconnect_server (int sendquit, int err)
    /* close it in 5 seconds so the QUIT doesn't get lost. Technically      *
     * we should send a QUIT and then wait for the server to disconnect us, *
       but that would hold up the GUI                                       */
-   if (fe_timeout_add (5000, close_socket) == -1)
+   if (fe_timeout_add (5000, close_socket, NULL) == -1)
       close (server->sok);
 
    server->sok = -1;
@@ -323,7 +325,8 @@ connect_server (char *server_str, int port, int no_login)
          HostAddr = gethostbyname (server_str);
          if (HostAddr)
          {
-            printf ("3\n%s\n%s\n%d\n", HostAddr->h_name, inet_ntoa (*((struct in_addr *) HostAddr->h_addr)), port);
+            printf ("3\n%s\n%s\n%d\n", HostAddr->h_name, inet_ntoa (*((struct in_addr
+*) HostAddr->h_addr)), port);
             fflush (stdout);
             memset (&SAddr, 0, sizeof (SAddr));
             SAddr.sin_port = htons (port);

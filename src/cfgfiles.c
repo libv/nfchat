@@ -1,5 +1,6 @@
-/* X-Chat
- * Copyright (C) 1998 Peter Zelezny.
+/*
+ * NF-Chat: A cut down version of X-chat, cut down by _Death_
+ * Largely based upon X-Chat 1.4.2 by Peter Zelezny. (www.xchat.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,7 +122,7 @@ check_prefs_dir (void)
    char *xdir = get_xdir ();
    if (access (xdir, F_OK) != 0)
      if (mkdir (xdir, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
-       fprintf (stderr, "Error: Cannot create ~/.nfchat");
+       fprintf (stderr, "NF-CHAT Error: Cannot create ~/.nfchat");
 }
 
 static char *
@@ -155,7 +156,6 @@ static struct prefs vars[] = {
 {"autoreconnectonfail", PREFS_OFFINT(autoreconnectonfail), TYPE_BOOL},
 {"invisible",           PREFS_OFFINT(invisible),           TYPE_BOOL},
 {"skipmotd",            PREFS_OFFINT(skipmotd),            TYPE_BOOL},
-{"autorejoin",          PREFS_OFFINT(autorejoin),          TYPE_BOOL},
 {"nickcompletion",      PREFS_OFFINT(nickcompletion),      TYPE_BOOL},
 {"transparent",         PREFS_OFFINT(transparent),         TYPE_BOOL},
 {"tint",                PREFS_OFFINT(tint),                TYPE_BOOL},
@@ -168,6 +168,7 @@ static struct prefs vars[] = {
 {"max_lines",           PREFS_OFFINT(max_lines),            TYPE_INT},
 {"bt_color",            PREFS_OFFINT(bt_color),             TYPE_INT},
 {"reconnect_delay",     PREFS_OFFINT(recon_delay),          TYPE_INT},
+{"rejoin_delay",        PREFS_OFFINT(rejoin_delay),         TYPE_INT},
 {"tint_red",            PREFS_OFFINT(tint_red),             TYPE_INT},
 {"tint_green",          PREFS_OFFINT(tint_green),           TYPE_INT},
 {"tint_blue",           PREFS_OFFINT(tint_blue),            TYPE_INT},
@@ -256,7 +257,6 @@ load_config (void)
    {
       /* put in default values, anything left out is automatically zero */
       prefs.indent_pixels = 80;
-      prefs.autorejoin = 1;
       prefs.autoreconnect = 1;
       prefs.recon_delay = 2;
       prefs.nickcompletion = 1;
@@ -268,6 +268,7 @@ load_config (void)
       prefs.tint_green = 0;
       prefs.tint_blue = 0;
       prefs.port = 6667;
+      prefs.rejoin_delay = 30;
       strcpy (prefs.nick1, username);
       strcpy (prefs.nick2, username);
       strcat (prefs.nick2, "_");

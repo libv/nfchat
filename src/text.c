@@ -1,5 +1,6 @@
-/* X-Chat
- * Copyright (C) 1998 Peter Zelezny.
+/*
+ * NF-Chat: A cut down version of X-chat, cut down by _Death_
+ * Largely based upon X-Chat 1.4.2 by Peter Zelezny. (www.xchat.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +38,7 @@ extern void check_special_chars (char *text);
 extern char **environ;
 extern void PrintText (char *text);
 
-int pevt_build_string (char *input, char **output, int *max_arg);
+static int pevt_build_string (char *input, char **output, int *max_arg);
 
 /* Print Events stuff here --AGL */
 
@@ -114,7 +115,7 @@ struct text_event
 
 /* *BBIIGG* struct ahead!! --AGL */
 
-struct text_event te[] =
+static struct text_event te[] =
 {
    /* Padding for all the non-text signals */
 /*000*/   {NULL, NULL, 0},
@@ -141,71 +142,64 @@ struct text_event te[] =
 
    /* Now we get down to business */
 
-/*021*/   {"Join", "-%C10-%C11>%O$t%B$1%B%C has joined $2", 2},
+/*021*/   {"Join", "-%C10-%C11>%O$t%B$1%B%C has joined.", 1},
 /*022*/   {"Channel Action", "%C13*%O$t$1 $2%O", 2},
 /*023*/   {"Channel Message", "%C2<%O$1%C2>%O$t$2%O", 2},
 /*024*/   {"Private Message", "%C12*%C13$1%C12*$t%O$2%O", 2},
-/*025*/   {"Change Nick", "-%C10-%C11-%O$t$1 is now known as $2", 2},
+/*025*/   {"Change Nick", "-%C10-%C11-%O$t$1 is now known as $2.", 2},
 /*026*/   {"New Topic", "-%C10-%C11-%O$t$1 has changed the topic to: $2%O", 3},
-/*027*/   {"Topic", "-%C10-%C11-%O$tTopic for %C11$1%C is %C11$2%O", 2},
-/*028*/   {"Kick", "<%C10-%C11-%O$t$1 has kicked $2 from $3 ($4%O)", 4},
-/*029*/   {"Part", "<%C10-%C11-%O$t$1%C has left $2", 2},
-/*030*/   {"Channel Creation", "-%C10-%C11-%O$tChannel $1 created on $2", 2},
-/*031*/   {"Topic Creation", "-%C10-%C11-%O$tTopic for %C11$1%C set by %C11$2%C at %C11$3%O", 3},
-/*032*/   {"Quit", "<%C10-%C11-%O$t$1 has quit %C14(%O$2%O%C14)%O", 2},
-/*033*/   {"Part with Reason", "<%C10-%C11-%O$t$1%C has left $2 %C14(%O$3%C14)%O", 3},
-/*034*/   {"Notice", "%C12-%C13$1%C12-%O$t$2%O", 2},
-/*035*/   {"Message Send", "%C3>%O$1%C3<%O$t$2%O", 2},
-/*036*/   {"Your Message", "%C6<%O$1%C6>%O$t$2%O", 2},
-/*037*/   {"Away Line", "-%C10-%C11-%O$t%C12[%O$1%C12] %Cis away %C14(%O$2%O%C14)", 2},
-/*038*/   {"Your Nick Changing", "-%C10-%C11-%O$tYou are now known as $2", 2},
-/*039*/   {"You're Kicked", "-%C10-%C11-%O$tYou have been kicked from $2 by $3 ($4%O)", 4},
-/*040*/   {"Channel Set Key", "-%C10-%C11-%O$t$1 sets channel keyword to $2", 2},
-/*041*/   {"Channel Set Limit", "-%C10-%C11-%O$t$1 sets channel limit to $2", 2},
-/*042*/   {"Channel Operator", "-%C10-%C11-%O$t$1 gives channel operator status to $2", 2},
-/*043*/   {"Channel Voice", "-%C10-%C11-%O$t$1 gives voice to $2", 2},
-/*044*/   {"Channel Ban", "-%C10-%C11-%O$t$1 sets ban on $2", 2},
-/*045*/   {"Channel Remove Keyword", "-%C10-%C11-%O$t$1 removes channel keyword", 1},
-/*046*/   {"Channel Remove Limit", "-%C10-%C11-%O$t$1 removes user limit", 1},
-/*047*/   {"Channel DeOp", "-%C10-%C11-%O$t$1 removes channel operator status from $2", 2},
-/*048*/   {"Channel DeVoice", "-%C10-%C11-%O$t$1 removes voice from $2", 2},
-/*049*/   {"Channel UnBan", "-%C10-%C11-%O$t$1 removes ban on $2", 2},
-/*050*/   {"Channel Exempt", "-%C10-%C11-%O$t$1 sets exempt on $2", 2},
-/*051*/   {"Channel Remove Exempt", "-%C10-%C11-%O$t$1 removes exempt on $2", 2},
-/*052*/   {"Channel INVITE", "-%C10-%C11-%O$t$1 sets invite on $2", 2},
-/*053*/   {"Channel Remove INVITE", "-%C10-%C11-%O$t$1 removes invite on $2", 2},
-/*054*/   {"Channel Mode Generic", "-%C10-%C11-%O$t$1 sets mode $2$3 $4", 4},
-
-/*055*/   {"User Limit", "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(User limit reached).", 1},
-/*056*/   {"Banned", "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(You are banned).", 1},
-/*057*/   {"Invite", "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(Channel is invite only).", 1},
-/*058*/   {"Keyword", "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(Requires keyword).", 1},
-/*059*/   {"MOTD Skipped", "-%C10-%C11-%O$tMOTD Skipped.", 0},
-/*060*/   {"Server Text", "-%C10-%C11-%O$t$1%O", 1},
-
-/*061*/   {"Users On Channel", "-%C10-%C11-%O$t%C11Users on $1:%C $2", 2},
-/*062*/   {"Nick Clash", "-%C10-%C11-%O$t$1 already in use. Retrying with $2..", 2},
-/*063*/   {"Nick Failed", "-%C10-%C11-%O$tNickname already in use. Use /NICK to try another.", 0},
-/*064*/   {"Unknown Host", "-%C10-%C11-%O$tUnknown host. Maybe you misspelled it?", 0},
-/*065*/   {"Connection Failed", "-%C10-%C11-%O$tConnection failed. Error: $1", 1},
-/*066*/   {"Connecting", "-%C10-%C11-%O$tConnecting to %C11$1 %C14(%C11$2%C14)%C port %C11$3%C..", 3},
-/*067*/   {"Connected", "-%C10-%C11-%O$tConnected. Now logging in..", 0},
-/*068*/   {"Stop Connection", "-%C10-%C11-%O$tStopped previous connection attempt (pid=$1)", 1},
-/*069*/   {"Disconnected", "-%C10-%C11-%O$tDisconnected ($1).", 1},
-/*070*/   {"Channel Modes", "-%C10-%C11-%O$tChannel $1 modes: $2", 2},
-/*071*/   {"Raw Modes", "-%C10-%C11-%O$t$1 sets modes%B %C14[%O$2%B%C14]%O", 2},
-/*072*/   {"Killed", "-%C10-%C11-%O$tYou have been killed by $1 ($2%O)", 2},
-/*073*/   {"Server Lookup", "-%C10-%C11-%O$tLooking up %C11$1%C..", 1},
-/*074*/   {"Server Connected", "-%C10-%C11-%O$tConnected.", 0},
-/*075*/   {"Server Error", "-%C10-%C11-%O$t$1%O", 1},
-/*076*/   {"Server Generic Message", "-%C10-%C11-%O$t$1%O", 1},
-/*077*/   {NULL, NULL, 0},  /* XP_HIGHLIGHT */
-/*078*/   {"Motd", "-%C10-%C11-%O$t$1%O", 1},
-/*079*/   {NULL, NULL, 0},	/* XP_IF_SEND */
-/*080*/   {NULL, NULL, 0},	/* XP_IF_RECV */
+/*027*/   {"Topic", "-%C10-%C11-%O$tTopic is %C11$1%O", 1},
+/*028*/   {"Kick", "<%C10-%C11-%O$t$1 has kicked $2 ($3%O)", 3},
+/*029*/   {"Part", "<%C10-%C11-%O$t$1%C has left.", 1},
+/*030*/   {"Quit", "<%C10-%C11-%O$t$1 has quit %C14(%O$2%O%C14)%O", 2},
+/*031*/   {"Part with Reason", "<%C10-%C11-%O$t$1%C has left %C14(%O$2%C14)%O", 2},
+/*032*/   {"Notice", "%C12-%C13$1%C12-%O$t$2%O", 2},
+/*033*/   {"Message Send", "%C3>%O$1%C3<%O$t$2%O", 2},
+/*034*/   {"Your Message", "%C6<%O$1%C6>%O$t$2%O", 2},
+/*035*/   {"Away Line", "-%C10-%C11-%O$t%C12[%O$1%C12] %Cis away %C14(%O$2%O%C14)", 2},
+/*036*/   {"Your Nick Changing", "-%C10-%C11-%O$tYou are now known as $2.", 2},
+/*037*/   {"You're Kicked", "-%C10-%C11-%O$tYou have been kicked by $2 ($3%O)", 3},
+/*038*/   {"Channel Set Key", "-%C10-%C11-%O$t$1 sets keyword to $2.", 2},
+/*039*/   {"Channel Set Limit", "-%C10-%C11-%O$t$1 sets limit to $2.", 2},
+/*040*/   {"Channel Operator", "-%C10-%C11-%O$t$1 gives operator status to $2.", 2},
+/*041*/   {"Channel Voice", "-%C10-%C11-%O$t$1 gives voice to $2.", 2},
+/*042*/   {"Channel Ban", "-%C10-%C11-%O$t$1 sets ban on $2.", 2},
+/*043*/   {"Channel Remove Keyword", "-%C10-%C11-%O$t$1 removes keyword.", 1},
+/*044*/   {"Channel Remove Limit", "-%C10-%C11-%O$t$1 removes user limit.", 1},
+/*045*/   {"Channel DeOp", "-%C10-%C11-%O$t$1 removes operator status from $2.", 2},
+/*046*/   {"Channel DeVoice", "-%C10-%C11-%O$t$1 removes voice from $2.", 2},
+/*047*/   {"Channel UnBan", "-%C10-%C11-%O$t$1 removes ban on $2.", 2},
+/*048*/   {"Channel Exempt", "-%C10-%C11-%O$t$1 sets exempt on $2.", 2},
+/*049*/   {"Channel Remove Exempt", "-%C10-%C11-%O$t$1 removes exempt on $2.", 2},
+/*050*/   {"Channel INVITE", "-%C10-%C11-%O$t$1 sets invite on $2.", 2},
+/*051*/   {"Channel Remove INVITE", "-%C10-%C11-%O$t$1 removes invite on $2.", 2},
+/*052*/   {"Channel Mode Generic", "-%C10-%C11-%O$t$1 sets mode $2$3 $4", 4},
+/*053*/   {"User Limit", "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(User limit reached).", 1},
+/*054*/   {"Banned", "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(You are banned).", 1},
+/*055*/   {"Invite", "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(Channel is invite only).", 1},
+/*056*/   {"Keyword", "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(Requires keyword).", 1},
+/*057*/   {"MOTD Skipped", "-%C10-%C11-%O$tMOTD Skipped.", 0},
+/*058*/   {"Server Text", "-%C10-%C11-%O$t$1%O", 1},
+/*059*/   {"Nick Clash", "-%C10-%C11-%O$t$1 already in use. Retrying with $2..", 2},
+/*060*/   {"Nick Failed", "-%C10-%C11-%O$tNickname already in use. Use /NICK to try another.", 0},
+/*061*/   {"Unknown Host", "-%C10-%C11-%O$tUnknown host. Maybe you misspelled it?", 0},
+/*062*/   {"Connection Failed", "-%C10-%C11-%O$tConnection failed. Error: $1", 1},
+/*063*/   {"Connecting", "-%C10-%C11-%O$tConnecting to %C11$1 %C14(%C11$2%C14)%C port %C11$3%C..", 3},
+/*064*/   {"Connected", "-%C10-%C11-%O$tConnected. Now logging in..", 0},
+/*065*/   {"Stop Connection", "-%C10-%C11-%O$tStopped previous connection attempt (pid=$1)", 1},
+/*066*/   {"Disconnected", "-%C10-%C11-%O$tDisconnected. ($1).", 1},
+/*067*/   {"Killed", "-%C10-%C11-%O$tYou have been killed by $1 ($2%O)", 2},
+/*068*/   {"Server Lookup", "-%C10-%C11-%O$tLooking up %C11$1%C..", 1},
+/*069*/   {"Server Connected", "-%C10-%C11-%O$tConnected.", 0},
+/*070*/   {"Server Error", "-%C10-%C11-%O$t$1%O", 1},
+/*071*/   {"Server Generic Message", "-%C10-%C11-%O$t$1%O", 1},
+/*072*/   {NULL, NULL, 0},  /* XP_HIGHLIGHT */
+/*073*/   {"Motd", "-%C10-%C11-%O$t$1%O", 1},
+/*074*/   {NULL, NULL, 0},	/* XP_IF_SEND */
+/*075*/   {NULL, NULL, 0},	/* XP_IF_RECV */
 };
 
-int
+static int
 text_event (int i)
 {
    if (te[i].name == NULL)
@@ -214,7 +208,7 @@ text_event (int i)
       return 1;
 }
 
-void
+static void
 pevent_load_defaults ()
 {
    int i, len;
@@ -232,35 +226,27 @@ pevent_load_defaults ()
    }
 }
 
-void
+static void
 pevent_make_pntevts ()
 {
-   int i, m, len;
-
-   for (i = 0; i < NUM_XP; i++)
-   {
+  int i, m;
+  
+  for (i = 0; i < NUM_XP; i++)
+    {
       if (!text_event (i))
-         continue;
+	continue;
       if (pntevts[i] != NULL)
-         free (pntevts[i]);
+	free (pntevts[i]);
       if (pevt_build_string (pntevts_text[i], &(pntevts[i]), &m) != 0)
-      {
-         fprintf (stderr, "Error parsing event %s.\nLoading default", te[i].name);
-         free (pntevts_text[i]);
-         len = strlen (te[i].def) + 1;
-         pntevts_text[i] = malloc (len);
-         memcpy (pntevts_text[i], te[i].def, len);
-         if (pevt_build_string (pntevts_text[i], &(pntevts[i]), &m) != 0)
-         {
-            fprintf (stderr, "Error: default event text from  %sfailed to build!\n", te[i].name);
-            abort ();
-         }
-      }
+	{
+	  fprintf (stderr, "NF-CHAT Error: Default event text from  %sfailed to build!\n", te[i].name);
+	  abort ();
+	}
       check_special_chars (pntevts[i]);
-   }
+    }
 }
 
-void
+static void
 pevent_check_all_loaded ()
 {
    int i, len;
@@ -318,7 +304,7 @@ display_event (char *i, int numargs, char **args)
          ii += sizeof (int);
          if (oi + len > sizeof (o))
          {
-            printf ("Overflow in display_event (%s)\n", i);
+            fprintf (stderr, "NF-CHAT Error: display_event: Overflow in display_event (%s)\n", i);
             return;
          }
          memcpy (&(o[oi]), &(i[ii]), len);
@@ -329,13 +315,13 @@ display_event (char *i, int numargs, char **args)
          a = i[ii++];
          if (a > numargs)
          {
-            fprintf (stderr, "NFChat DEBUG: display_event: arg > numargs (%d %d %s)\n", a, numargs, i);
+            fprintf (stderr, "NF-CHAT Error: display_event: arg > numargs (%d %d %s)\n", a, numargs, i);
 	     break;
          }
          ar = (int *) args[(int) a];
          if (ar == NULL)
          {
-            printf ("Error args[a] == NULL in display_event\n");
+            printf ("NF-CHAT Error: Error args[a] == NULL in display_event\n");
             abort ();
          }
          len = strlen ((char *) ar);
@@ -358,7 +344,7 @@ display_event (char *i, int numargs, char **args)
    PrintText (o);
 }
 
-int
+static int
 pevt_build_string (char *input, char **output, int *max_arg)
 {
    struct pevt_stage1 *s = NULL, *base = NULL,
@@ -410,7 +396,7 @@ pevt_build_string (char *input, char **output, int *max_arg)
       }
       if (ii == len)
       {
-         fprintf (stderr, "String ends with a $");
+         fprintf (stderr, "NF-CHAT Error: pevt_build_string: String ends with a $");
          return 1;
       }
       d = i[ii++];
@@ -438,10 +424,10 @@ pevt_build_string (char *input, char **output, int *max_arg)
          continue;
 
        a_len_error:
-         fprintf (stderr, "Error: String ends in $a");
+         fprintf (stderr, "NF-CHAT Error: pevt_build_string: String ends in $a");
          return 1;
        a_range_error:
-         fprintf (stderr, "Error: $a value is greater then 255");
+         fprintf (stderr, "NF-CHAT Error: pevt_build_string: $a value is greater then 255");
          return 1;
       }
       if (d == 't') {
@@ -463,7 +449,7 @@ pevt_build_string (char *input, char **output, int *max_arg)
       }
       if (d < '0' || d > '9')
       {
-         fprintf (stderr, "Error: invalid argument $%c\n", d);
+         fprintf (stderr, "NF-CHAT Error: invalid argument $%c\n", d);
          return 1;
       }
       d -= '0';
