@@ -54,7 +54,6 @@ extern void ctcp_gui_load (GtkWidget * list);
 extern void ctcp_gui_save (GtkWidget * igad);
 extern void editlist_gui_open (GSList * list, char *, char *, char *, char *help);
 extern void ctcp_gui_open (void);
-extern void url_opengui (GtkWidget *, gpointer);
 extern void cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 extern void xchat_cleanup (GtkWidget * wid, gpointer sess);
 extern struct server *new_server (void);
@@ -959,7 +958,6 @@ static struct mymenu mymenu[] =
    {M_MENU, N_ ("DCC Receive Window.."), (menucallback)fe_dcc_open_recv_win, 0, 1},
    {M_MENU, N_ ("DCC Chat Window.."), (menucallback)fe_dcc_open_chat_win, 0, 1},
    {M_MENU, N_ ("Raw Log Window.."), (menucallback)menu_rawlog, 0, 1},
-   {M_MENU, N_ ("URL Grabber Window.."), (menucallback)url_opengui, 0, 1},
    {M_SEP, 0, 0, 0, 0},
    {M_MENU, N_ ("Flush Buffer"), (menucallback)menu_flushbuffer, 0, 1},
    {M_MENU, N_ ("Save Buffer.."), (menucallback)menu_savebuffer, 0, 1},  /* 23 */

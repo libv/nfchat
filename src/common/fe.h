@@ -41,7 +41,6 @@ void fe_dcc_open_chat_win (void);
 void fe_clear_channel (struct session *sess);
 void fe_session_callback (struct session *sess);
 void fe_server_callback (struct server *serv);
-void fe_checkurl (char *text);
 void fe_pluginlist_update (void);
 void fe_buttons_update (struct session *sess);
 void fe_dcc_send_filereq (struct session *sess, char *nick);

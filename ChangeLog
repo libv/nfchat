@@ -3,6 +3,16 @@ NF-chat;
 
 start gtk strip
 
+0.1.7;
+""""""
+  - removed urlgrab.c
+  - removed url_autosave from fe-gtk.c
+## prefs.autosave_url
+  - removed url_open_gui from menu.c
+  - removed fe_url_check from src/common/dcc.c fe.h inbound.c
+  - edited Makefile.am
+## url in all source trees
+
 0.1.6;
 """"""
   - removed usermenu.c & .h
@@ -22,7 +32,7 @@ start gtk strip
 
 0.1.4;
 """"""
-  - removed ignoregui.c
+  - removed notifygui.c
   - removed notify_gui_update from fe_notify_update in src/fe-gtk/fe-gtk.h 
   - removed fe_notify_update from src/fe-gtk/fe-gtk.h
   - removed notify_opengui from src/fe-gtk/menu.c

@@ -59,7 +59,6 @@ extern void create_window (struct session *);
 extern GtkStyle *my_widget_get_style (char *bg_pic);
 extern void PrintText (struct session *, char *);
 extern struct session *new_session (struct server *serv, char *from);
-extern void url_autosave (void);
 extern void init_userlist_xpm (struct session *sess);
 extern struct session *find_session_from_waitchannel (char *target, struct server *serv);
 extern void tree_blue_style (struct session *);
@@ -202,9 +201,6 @@ void
 fe_cleanup (void)
 {
    palette_save ();
-
-   if (prefs.autosave_url)
-      url_autosave ();
 }
 
 void

@@ -359,8 +359,6 @@ dcc_read_chat (struct DCC *dcc, gint sok)
 #else
             skip = 0;
 #endif
-            fe_checkurl (dcc->dccchat->linebuf);
-
             if (!skip)
             {
                if (dcc->dccchat->linebuf[0] == 1 && !strncasecmp (dcc->dccchat->linebuf + 1, "ACTION", 6))

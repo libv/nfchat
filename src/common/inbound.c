@@ -1037,8 +1037,7 @@ process_line (struct session *sess, struct server *serv, char *buf)
    int n;
 
    fe_add_rawlog (serv, buf, FALSE);
-   fe_checkurl (buf);
-/*   command_level = 0; */
+ /*   command_level = 0; */
 
    process_data_init (pdibuf, buf + 1, word, word_eol);
 
