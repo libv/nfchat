@@ -27,7 +27,7 @@
 #include "util.h"
 #include "popup.h"
 #include "signals.h"
-#include "../common/util.h"
+#include "util.h"
 
 
 extern void my_system (char *cmd);

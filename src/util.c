@@ -28,7 +28,7 @@
 #include <ctype.h>
 #include <sys/utsname.h>
 #include "util.h"
-#include "../../config.h"
+#include "../config.h"
 #ifdef SOCKS
 #include <socks.h>
 #endif

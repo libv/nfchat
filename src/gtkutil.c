@@ -22,7 +22,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "../common/xchat.h"
+#include "xchat.h"
 #include "fe-gtk.h"
 #include <gdk/gdkx.h>
 #include <X11/Xlib.h>

@@ -28,13 +28,11 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <ctype.h>
-#include "../common/xchat.h"
-#include "../common/fe.h"
+#include "xchat.h"
+#include "fe.h"
 #include "fe-gtk.h"
 #include "gtkutil.h"
-#ifdef USE_IMLIB
 #include <gdk_imlib.h>
-#endif
 #include <gdk/gdkkeysyms.h>
 #include "xtext.h"
 

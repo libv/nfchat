@@ -1,7 +1,13 @@
 ## Process this file with automake to produce Makefile.in
 
-if DO_GTK
-gtk_fe = fe-gtk
-endif
+bin_PROGRAMS = nfchat
 
-SUBDIRS = common $(gtk_fe)
+LIBS = $(GUI_LIBS)
+
+INCLUDES = \
+	-I$(includedir)
+
+nfchat_SOURCES = cfgfiles.c ctcp.c history.c inbound.c outbound.c \
+		signals.c server.c text.c userlist.c util.c xchat.c \
+		fe-gtk.c fkeys.c gtkutil.c maingui.c \
+		textgui.c userlistgui.c xtext.c

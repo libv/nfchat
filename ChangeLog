@@ -1,5 +1,26 @@
 NF-chat;
 
+0.3.3;
+""""""
+     a) first some cleanups
+	- removed po, intl
+	- edited configure.in
+	- edited Makefile.am
+	- moved fe-gtk to common
+	- edited Makefile.am's 	
+	- removed USE_IMLIB from fe-gtk.c, maingui.c
+	  userlistgui.c, xtext.c
+	- moving src subdirs to src
+	- edited userlistgui.c to the new xpm dir
+	- edited configure.in
+	- removed  USE_MYGLIB from xchat.h
+
+### From now on this client will have 1 window only
+### this means that i can remove mouse stuff, multiple windows stuff
+### this will mean a huge cut in size
+
+     b) 
+
 0.3.2;
 """"""
      a) cleanin out all the unneccessary commands from outbound.c

@@ -1,5 +1,5 @@
 #ifndef SKIPCONFIG
-#include "../../config.h"
+#include "../config.h"
 #endif
 
 #include <gtk/gtk.h>

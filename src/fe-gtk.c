@@ -20,14 +20,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "../common/xchat.h"
-#include "../common/fe.h"
+#include "xchat.h"
+#include "fe.h"
 #include "fe-gtk.h"
 #include "gtkutil.h"
 #include "xtext.h"
-#ifdef USE_IMLIB
 #include <gdk_imlib.h>
-#endif
 
 static int autoconnect = 0;
 
@@ -104,10 +102,7 @@ fe_args (int argc, char *argv[])
 
    gtk_init (&argc, &argv);
 
-#ifdef USE_IMLIB
    gdk_imlib_init ();
-#endif
-
    return 1;
 }
 
@@ -229,9 +224,7 @@ my_widget_get_style (char *bg_pic)
 {
    GtkStyle *style;
    GdkPixmap *pixmap;
-#ifdef USE_IMLIB
    GdkImlibImage *img;
-#endif
 
    style = gtk_style_new ();
 
@@ -247,7 +240,6 @@ my_widget_get_style (char *bg_pic)
    {
       if (access (bg_pic, R_OK) == 0)
       {
-#ifdef USE_IMLIB
          img = gdk_imlib_load_image (bg_pic);
          if (img)
          {
@@ -256,15 +248,8 @@ my_widget_get_style (char *bg_pic)
             gdk_imlib_destroy_image (img);
             style->bg_pixmap[GTK_STATE_NORMAL] = pixmap;
          }
-#else
-         pixmap = gdk_pixmap_create_from_xpm (0, 0,
-                                              &style->bg[GTK_STATE_NORMAL], bg_pic);
-         style->bg_pixmap[0] = pixmap;
-#endif
       } else
-      {
          fprintf (stderr, "Error: Cannot access %s", bg_pic);
-      }
    }
    return style;
 }

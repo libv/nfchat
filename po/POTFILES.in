@@ -1,5 +1,0 @@
-src/common/cfgfiles.c
-src/common/ctcp.c
-src/fe-gtk/fkeys.c
-src/fe-gtk/gtkutil.c
-src/common/xchat.c

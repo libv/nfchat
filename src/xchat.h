@@ -1,7 +1,7 @@
-#include "../../config.h"
+#include "../config.h"
 
 #ifndef VERSION               /* for broken autoconf */
-#define VERSION "0.0.1"
+#define VERSION "0.3.3"
 #endif
 
 #ifndef PACKAGE
@@ -12,11 +12,7 @@
 #define PREFIX "/usr"
 #endif
 
-#ifdef USE_MYGLIB
-#include "../fe-text/myglib.h"
-#else
 #include <glib.h>
-#endif
 #include <time.h>
 #include <sys/types.h>
 #include <sys/socket.h>

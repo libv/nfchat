@@ -27,7 +27,7 @@
 #define TINT_VALUE 195           /* 195/255 of the brightness. */
 #define MARGIN 2
 
-#include "../../config.h"
+#include "config.h"
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -38,9 +38,7 @@
 #include <gtk/gtkselection.h>
 #include <gdk/gdkx.h>
 #include "xtext.h"
-#ifdef USE_IMLIB
 #include <gdk_imlib.h>
-#endif
 
 #undef GTK_WIDGET
 #define GTK_WIDGET(n) ((GtkWidget*)n)
@@ -1586,8 +1584,6 @@ get_pixmap_prop (Window the_window)
    return pix;
 }
 
-#ifdef USE_IMLIB
-
 static GdkPixmap *
 create_shaded_pixmap (GtkXText *xtext, Pixmap p, int x, int y, int w, int h)
 {
@@ -1647,8 +1643,6 @@ create_shaded_pixmap (GtkXText *xtext, Pixmap p, int x, int y, int w, int h)
   return pix;
 }
 
-#endif
-
 /* free transparency xtext->pixmap */
 
 static void
@@ -1697,7 +1691,6 @@ gtk_xtext_load_trans (GtkXText *xtext)
       &x, &y,
       &childret);
 
-#ifdef USE_IMLIB
    if (xtext->shaded)
    {
       int width, height;
@@ -1707,15 +1700,10 @@ gtk_xtext_load_trans (GtkXText *xtext)
       gdk_gc_set_ts_origin (xtext->bgc, 0, 0);
    } else
    {
-#else
-#warning disabling tinted-transparency support
-#endif
       xtext->pixmap = gdk_pixmap_foreign_new (rootpix);
       gdk_gc_set_tile (xtext->bgc, xtext->pixmap);
       gdk_gc_set_ts_origin (xtext->bgc, -x, -y);
-#ifdef USE_IMLIB
    }
-#endif
    gdk_gc_set_fill (xtext->bgc, GDK_TILED);
 }
 
@@ -1928,10 +1916,6 @@ gtk_xtext_set_font (GtkXText *xtext, GdkFont *font, char *name)
 void
 gtk_xtext_set_background (GtkXText *xtext, GdkPixmap *pixmap, int trans, int shaded)
 {
-#ifndef USE_IMLIB
-   shaded = FALSE;
-#endif
-
    if (xtext->pixmap)
    {
       if (xtext->transparent)

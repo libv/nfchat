@@ -23,9 +23,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include "../common/xchat.h"
-#include "../common/cfgfiles.h"
-#include "../common/userlist.h"
+#include "xchat.h"
+#include "cfgfiles.h"
+#include "userlist.h"
 #include "fe-gtk.h"
 #include "gtkutil.h"
 #include "xtext.h"

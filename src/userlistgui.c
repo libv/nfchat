@@ -17,17 +17,15 @@
  */
 
 #include <stdio.h>
-#include "../common/xchat.h"
+#include "xchat.h"
 #include "fe-gtk.h"
-#include "../common/util.h"
-#include "../common/userlist.h"
+#include "util.h"
+#include "userlist.h"
 #include "gtkutil.h"
-#ifdef USE_IMLIB
 #include <gdk_imlib.h>
-#endif
 
-#include "../pixmaps/op.xpm"
-#include "../pixmaps/voice.xpm"
+#include "op.xpm"
+#include "voice.xpm"
 
 extern GdkColor colors[]; 
 extern struct xchatprefs prefs;
@@ -45,17 +43,9 @@ static GdkPixmap *
 create_pixmap_from_data (GtkWidget *window, GdkBitmap **mask, GtkWidget *style_widget, char **data)
 {
   GdkPixmap *pixmap = 0;
-#ifndef USE_IMLIB
-  GtkStyle *style;
-  if (!style_widget)
-    style = gtk_widget_get_default_style ();
-  else
-    style = gtk_widget_get_style (style_widget);
-  pixmap = gdk_pixmap_create_from_xpm_d (window->window, mask,
-                                         &style->bg[GTK_STATE_NORMAL], data);
-#else
+
   gdk_imlib_data_to_pixmap (data, &pixmap, mask);
-#endif 
+
   return(pixmap);
 }
 
