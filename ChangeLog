@@ -19,14 +19,66 @@ NF-chat;
 ### this means that i can remove mouse stuff, multiple windows stuff
 ### this will mean a huge cut in size
 
-     b) - removed my_system, child_handler from xchat.c
+     b) 0)
+	- removed my_system, child_handler from xchat.c
 	- saving, huge change ahead...
+	1)
 	- there will be only one server from now on.
 	- changed all server structs to server_t
- 
-
+	- moving in xchat.c
+	  - tcp_send_queue, tcp_send_len (moved to static)
+	  - tcp_send in ctcp.c, inbound.c, outbound.c, server.c, xchat.c 
+	  - removing is_server
+### find another method to check whether the server is still connected
+    in timeout_auto_reconnect
+	  - find_session_from_channel in ctcp.c, inbound.c, xchat.c
+	  - find_session_from_nick in inbound.c, xchat.c
+	  - find_session_from_waitchannel in fe-gtk.c, xchat.c
+	  - timeout_auto_reconnect
+	  - auto_reconnect in outbound.c, server.c, xchat.c
+	  - read_data in server.c
+	  - flush_server_queue in server.c, xchat.c
+	  - new_session in fe-gtk.c, xchat.c
+	  - removed serv_list from new_server
+	  - moved new_server to static void init_server and edited xchat.c
+	  - kill_server_callback, send_quit_or_part, kill_session_callback
+	  - find_away_message in inbound.c, xchat.c
+	  - save_away_message in inbound.c
+	  - xchat_init, xchat_cleanup
+	- adding extern server_t *server; to xchat.h
+	- cfgfiles.c/h & ctcp.c = clean
+	- fe-gtk.c
+	  - find_unused_session, fe_new_window_popup, fe_progressbar_end
+	- fe.h
+	  - fe_set_nick in inbound.c, maingui.c
+	  - fe_new_window_popup in inbound.c
+	- fkeys.c, gtkutil.c/h, history.c/h = clean
+	- inbound.c
+	  - private_msg (moved to static)
+	  - channel_msg in outbound.c
+	  - user_new_nick in outbound.c
+	  - you_joined, you_kicked, you_parted, names_list, topic,
+	    new_topic, user_joined, user_kicked, user_parted,
+	    topic_nametime
+	  - set_server_name in server.c
+	  - user_quit, notice, handle_away, channel_mode, channel_modes
+	    end_of_names, check_willjoin_channels, set_default_modes
+	  - process_line in xchat.c, set buf to server->linebuf
+	- maingui.c = clean
+	- outbound.c
+	  - cmd_reconnect
+	- popup.h = clean
+	- server.c
+	  - server_cleanup, connected_signal
+	- signals.c/h, text.c, textgui.c = clean
+	- userlist.c
+	  - find_name_global
+	- userlist.h, userlistgui.c, util.c/h, xtext.c/h = clean
+	- removing ->server
+	2)
+	  
 ### cleanup current_tab
-
+### remove fe_progressbar
 0.3.2;
 """"""
      a) cleanin out all the unneccessary commands from outbound.c

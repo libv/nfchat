@@ -93,14 +93,14 @@ void
 fe_set_title (struct session *sess)
 {
    char tbuf[200];
-   if (!sess->server->connected)
+   if (!server->connected)
       strcpy (tbuf, "NF-Chat [" VERSION "]");
    else
    {
       if (sess->channel[0] == 0 || sess->is_server)
-         snprintf (tbuf, sizeof tbuf, "NF-Chat [" VERSION "]: %s", sess->server->servername);
+         snprintf (tbuf, sizeof tbuf, "NF-Chat [" VERSION "]: %s", server->servername);
       else
-         snprintf (tbuf, sizeof tbuf, "NF-Chat [" VERSION "]: %s / %s", sess->server->servername, sess->channel);
+         snprintf (tbuf, sizeof tbuf, "NF-Chat [" VERSION "]: %s / %s", server->servername, sess->channel);
    }
    if (sess->is_tab)
    {
@@ -133,16 +133,15 @@ fe_clear_channel (struct session *sess)
 }
 
 void
-fe_set_nick (server_t *serv, char *newnick)
+fe_set_nick (char *newnick)
 {
    GSList *list = sess_list;
    struct session *sess;
-   strcpy (serv->nick, newnick);
+   strcpy (server->nick, newnick);
    while (list)
    {
       sess = (struct session *) list->data;
-      if (sess->server == serv) 
-         gtk_label_set_text (GTK_LABEL (sess->gui->nickgad), newnick);
+      gtk_label_set_text (GTK_LABEL (sess->gui->nickgad), newnick);
       list = list->next;
    }
 }
@@ -156,12 +155,12 @@ focus_in (GtkWindow * win, GtkWidget * wid, struct session *sess)
       {
 	gtk_widget_grab_focus (current_tab->gui->inputgad);
 	if (!prefs.use_server_tab)
-	  current_tab->server->front_session = current_tab;
+	  server->front_session = current_tab;
       }
    } else
    {
       if (!prefs.use_server_tab)
-         sess->server->front_session = sess;
+         server->front_session = sess;
       gtk_widget_grab_focus (sess->gui->inputgad);
    }
 }
@@ -230,7 +229,7 @@ gui_new_tab (session *sess)
 {
    current_tab = sess;
    if (!prefs.use_server_tab)
-      sess->server->front_session = sess;
+      server->front_session = sess;
    fe_set_title (sess);
    gtk_widget_grab_focus (sess->gui->inputgad);
 
@@ -387,8 +386,8 @@ create_window (struct session *sess)
    GtkWidget *vbox, *tbox, *bbox, *nlbox, *wid;
    int justopened = FALSE;
   
-   if (!sess->server->front_session)
-      sess->server->front_session = sess;
+   if (!server->front_session)
+      server->front_session = sess;
 
    if (prefs.tabchannels)
      {
@@ -493,7 +492,7 @@ create_window (struct session *sess)
    gtk_box_pack_start (GTK_BOX (bbox), sess->gui->op_box, FALSE, FALSE, 2);
    gtk_widget_show (sess->gui->op_box);
 
-   sess->gui->nickgad = gtk_label_new (sess->server->nick);
+   sess->gui->nickgad = gtk_label_new (server->nick);
    gtk_box_pack_start (GTK_BOX (bbox), sess->gui->nickgad, FALSE, FALSE, 4);
    gtk_widget_show (sess->gui->nickgad);
 
@@ -617,7 +616,7 @@ fe_session_callback (struct session *sess)
    if (sess->gui->bar)
    {
       fe_progressbar_end (sess);
-      sess->server->connecting = TRUE;
+      server->connecting = TRUE;
    }
 
    if (sess->is_tab && main_book)

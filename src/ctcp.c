@@ -31,9 +31,9 @@
 
 
 extern int handle_command (char *cmd, void *sess, int history, int nocommand);
-extern int tcp_send (server_t *serv, char *buf);
+extern int tcp_send (char *buf);
 extern void channel_action (struct session *sess, char *tbuf, char *chan, char *from, char *text, int fromme);
-extern struct session *find_session_from_channel (char *chan, server_t *serv);
+extern struct session *find_session_from_channel (char *chan);
 
 
 extern GSList *ctcp_list;
@@ -136,7 +136,7 @@ handle_ctcp (struct session *sess, char *outbuf, char *to, char *nick, char *msg
       sprintf (outbuf,
                "NOTICE %s :\001VERSION xc! "VERSION" %s: http://xchat.org\001\r\n",
                nick, get_cpu_str (0));
-      tcp_send (sess->server, outbuf);
+      tcp_send (outbuf);
    }
 
    if (!ctcp_check ((void *) sess, outbuf, nick, word, word_eol, word[4] + 2))
@@ -155,15 +155,15 @@ handle_ctcp (struct session *sess, char *outbuf, char *to, char *nick, char *msg
       po[0] = 0;
    if (!is_channel (to))
    {
-      EMIT_SIGNAL (XP_TE_CTCPGEN, sess->server->front_session, msg, nick, NULL, NULL, 0);
+      EMIT_SIGNAL (XP_TE_CTCPGEN, server->front_session, msg, nick, NULL, NULL, 0);
    } else
    {
-      chansess = find_session_from_channel (to, sess->server);
+      chansess = find_session_from_channel (to);
       if (chansess)
       {
          EMIT_SIGNAL (XP_TE_CTCPGENC, chansess, msg, nick, to, NULL, 0);
          return;
       }
-      EMIT_SIGNAL (XP_TE_CTCPGENC, sess->server->front_session, msg, nick, to, NULL, 0);
+      EMIT_SIGNAL (XP_TE_CTCPGENC, server->front_session, msg, nick, to, NULL, 0);
    }
 }

@@ -105,7 +105,7 @@ find_name (struct session *sess, char *name)
 }
 
 struct user *
-find_name_global (server_t *serv, char *name)
+find_name_global (char *name)
 {
    struct user *user;
    session *sess;
@@ -113,12 +113,9 @@ find_name_global (server_t *serv, char *name)
    while (list)
    {
       sess = (session *)list -> data;
-      if (sess->server == serv)
-      {
-         user = find_name (sess, name);
-         if (user)
-            return user;
-      }
+      user = find_name (sess, name);
+      if (user)
+	return user;
       list = list -> next;
    }
    return 0;

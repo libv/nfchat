@@ -33,12 +33,11 @@
 
 /* xchat.c */
 
-extern int tcp_send_len (server_t *serv, char *buf, int len);
-extern int tcp_send (server_t *serv, char *buf);
-extern struct session *find_session_from_nick (char *nick, server_t *serv);
-extern struct session *find_session_from_channel (char *chan, server_t *serv);
-struct away_msg *find_away_message (server_t *serv, char *nick);
-void save_away_message (server_t *serv, char *nick, char *msg);
+extern int tcp_send (char *buf);
+extern struct session *find_session_from_nick (char *nick);
+extern struct session *find_session_from_channel (char *chan);
+struct away_msg *find_away_message (char *nick);
+void save_away_message (char *nick, char *msg);
 
 /* text.c */
 
@@ -67,7 +66,7 @@ extern struct session *current_tab;
 #define find_word(a, b) word[b]
 
 
-void channel_msg (server_t *serv, char *outbuf, char *chan, char *from, char *text, char fromme);
+void channel_msg (char *outbuf, char *chan, char *from, char *text, char fromme);
 
 
 /* black n white(0/1) are bad colors for nicks, and we'll use color 2 for us */
@@ -82,15 +81,15 @@ clear_channel (struct session *sess)
    fe_set_title (sess);
 }
 
-void
-private_msg (server_t *serv, char *tbuf, char *from, char *ip, char *text)
+static void
+private_msg (char *tbuf, char *from, char *ip, char *text)
 {
    struct session *sess;
 
-   if (EMIT_SIGNAL (XP_PRIVMSG, serv, from, ip, text, NULL, 0) == 1)
+   if (EMIT_SIGNAL (XP_PRIVMSG, server, from, ip, text, NULL, 0) == 1)
       return;
 
-   sess = serv->front_session;
+   sess = server->front_session;
    EMIT_SIGNAL (XP_TE_PRIVMSG, sess, from, text, NULL, NULL, 0);
 }
 
@@ -111,7 +110,7 @@ channel_action (struct session *sess, char *tbuf, char *chan, char *from, char *
      strcpy (tbuf, from);
    
    if (is_channel (chan) || fromme)
-      sess = find_session_from_channel (chan, sess->server);
+      sess = find_session_from_channel (chan);
 
    if (sess)
       EMIT_SIGNAL (XP_TE_CHANACTION, sess, tbuf, text, NULL, NULL, 0);
@@ -150,21 +149,21 @@ SearchNick (char *text, char *nicks)
 }
 
 void
-channel_msg (server_t *serv, char *outbuf, char *chan, char *from, char *text, char fromme)
+channel_msg (char *outbuf, char *chan, char *from, char *text, char fromme)
 {
    struct user *user;
    char *real_outbuf = outbuf;
    struct session *sess;
    int highlight = FALSE;
 
-   sess = find_session_from_channel (chan, serv);
+   sess = find_session_from_channel (chan);
    if (!sess)
       return;
 
    user = find_name (sess, from);
    if (user) user->lasttalk = time (0);
 
-   if (EMIT_SIGNAL (XP_CHANMSG, serv, chan, from, text, NULL, fromme) == 1)
+   if (EMIT_SIGNAL (XP_CHANMSG, server, chan, from, text, NULL, fromme) == 1)
       return;
 
    if (fromme)
@@ -172,7 +171,7 @@ channel_msg (server_t *serv, char *outbuf, char *chan, char *from, char *text, c
    else
    {
 
-      if (SearchNick (text, serv->nick) || SearchNick (text, prefs.bluestring))
+      if (SearchNick (text, server->nick) || SearchNick (text, prefs.bluestring))
       {
          if (EMIT_SIGNAL (XP_HIGHLIGHT, sess, chan, from, text, NULL, fromme) == 1)
             return;
@@ -197,7 +196,7 @@ channel_msg (server_t *serv, char *outbuf, char *chan, char *from, char *text, c
 }
 
 void
-user_new_nick (server_t *serv, char *outbuf, char *nick, char *newnick, int quiet)
+user_new_nick (char *outbuf, char *nick, char *newnick, int quiet)
 {
    int me;
    struct session *sess;
@@ -205,70 +204,67 @@ user_new_nick (server_t *serv, char *outbuf, char *nick, char *newnick, int quie
 
    if (*newnick == ':')
       newnick++;
-   if (!strcasecmp (nick, serv->nick))
+   if (!strcasecmp (nick, server->nick))
    {
       me = TRUE;
-      strcpy (serv->nick, newnick);
+      strcpy (server->nick, newnick);
    } else
       me = FALSE;
 
-   if (EMIT_SIGNAL (XP_CHANGENICK, serv, nick, newnick, NULL, NULL, me) == 1)
+   if (EMIT_SIGNAL (XP_CHANGENICK, server, nick, newnick, NULL, NULL, me) == 1)
       return;
 
    while (list)
    {
       sess = (struct session *) list->data;
-      if (sess->server == serv)
-      {
-         if (me || find_name (sess, nick))
-         {
-            if (!quiet)
+      
+      if (me || find_name (sess, nick))
+	{
+	  if (!quiet)
             {
-
-               if (me)
-                  EMIT_SIGNAL (XP_TE_UCHANGENICK, sess, nick, newnick, NULL, NULL, 0);
-               else
-                  EMIT_SIGNAL (XP_TE_CHANGENICK, sess, nick, newnick, NULL, NULL, 0);
+	      
+	      if (me)
+		EMIT_SIGNAL (XP_TE_UCHANGENICK, sess, nick, newnick, NULL, NULL, 0);
+	      else
+		EMIT_SIGNAL (XP_TE_CHANGENICK, sess, nick, newnick, NULL, NULL, 0);
             }
-            change_nick (sess, nick, newnick);
-         }
-         if (!strcasecmp (sess->channel, nick))
-         {
-            strncpy (sess->channel, newnick, 200);
-            fe_set_channel (sess);
-            fe_set_title (sess);
-         }
-      }
+	  change_nick (sess, nick, newnick);
+	}
+      if (!strcasecmp (sess->channel, nick))
+	{
+	  strncpy (sess->channel, newnick, 200);
+	  fe_set_channel (sess);
+	  fe_set_title (sess);
+	}
       list = list->next;
    }
-
    if (me)
-      fe_set_nick (serv, newnick);
+     fe_set_nick (newnick);
 }
 
 static void
-you_joined (server_t *serv, char *outbuf, char *chan, char *nick, char *ip)
+you_joined (char *outbuf, char *chan, char *nick, char *ip)
 {
-  struct session *sess = fe_new_window_popup (chan, serv);
+  struct session *sess = fe_new_window_popup (chan);
 
   if (sess)
     {
       sess->waitchannel[0] = 0;
       sess->end_of_names = FALSE;
       sprintf (outbuf, "MODE %s\r\n", chan);
-      tcp_send (sess->server, outbuf);
+      tcp_send (outbuf);
       clear_user_list (sess);
       EMIT_SIGNAL (XP_TE_UJOIN, sess, nick, chan, ip, NULL, 0);
     }
 }
 
 static void
-you_kicked (server_t *serv, char *tbuf, char *chan, char *kicker, char *reason)
+you_kicked (char *tbuf, char *chan, char *kicker, char *reason)
 {
-   struct session *sess = find_session_from_channel (chan, serv);
+   struct session *sess = find_session_from_channel (chan);
    if (sess)
    {
-      EMIT_SIGNAL (XP_TE_UKICK, sess, serv->nick, chan, kicker, reason, 0);
+      EMIT_SIGNAL (XP_TE_UKICK, sess, server->nick, chan, kicker, reason, 0);
       clear_channel (sess);
       if (prefs.autorejoin)
       {
@@ -276,37 +272,37 @@ you_kicked (server_t *serv, char *tbuf, char *chan, char *kicker, char *reason)
             sprintf (tbuf, "JOIN %s\r\n", chan);
          else
             sprintf (tbuf, "JOIN %s %s\r\n", chan, sess->channelkey);
-         tcp_send (sess->server, tbuf);
+         tcp_send (tbuf);
          strcpy (sess->waitchannel, chan);
       }
    }
 }
 
 static void
-you_parted (server_t *serv, char *tbuf, char *chan, char *ip, char *reason)
+you_parted (char *tbuf, char *chan, char *ip, char *reason)
 {
-   struct session *sess = find_session_from_channel (chan, serv);
+   struct session *sess = find_session_from_channel (chan);
    if (sess)
    {
       if (*reason)
-         EMIT_SIGNAL (XP_TE_UPARTREASON, sess, serv->nick, ip, chan, reason, 0);
+         EMIT_SIGNAL (XP_TE_UPARTREASON, sess, server->nick, ip, chan, reason, 0);
       else
-         EMIT_SIGNAL (XP_TE_UPART, sess, serv->nick, ip, chan, NULL, 0);
+         EMIT_SIGNAL (XP_TE_UPART, sess, server->nick, ip, chan, NULL, 0);
       clear_channel (sess);
    }
 }
 
 static void
-names_list (server_t *serv, char *tbuf, char *chan, char *names)
+names_list (char *tbuf, char *chan, char *names)
 {
    struct session *sess;
    char name[64];
    int pos = 0;
 
-   sess = find_session_from_channel (chan, serv);
+   sess = find_session_from_channel (chan);
    if (!sess)
    {
-      EMIT_SIGNAL (XP_TE_USERSONCHAN, serv->front_session, chan, names, NULL,
+      EMIT_SIGNAL (XP_TE_USERSONCHAN, server->front_session, chan, names, NULL,
                    NULL, 0);
       return;
    }
@@ -342,7 +338,7 @@ names_list (server_t *serv, char *tbuf, char *chan, char *names)
 }
 
 static void
-topic (server_t *serv, char *tbuf, char *buf)
+topic (char *tbuf, char *buf)
 {
    session *sess;
    char *po, *new_topic;
@@ -351,7 +347,7 @@ topic (server_t *serv, char *tbuf, char *buf)
    if (po)
    {
       po[0] = 0;
-      sess = find_session_from_channel (buf, serv);
+      sess = find_session_from_channel (buf);
       if (sess)
       {
          new_topic = strip_color (po + 2);
@@ -363,9 +359,9 @@ topic (server_t *serv, char *tbuf, char *buf)
 }
 
 static void
-new_topic (server_t *serv, char *tbuf, char *nick, char *chan, char *topic)
+new_topic (char *tbuf, char *nick, char *chan, char *topic)
 {
-   struct session *sess = find_session_from_channel (chan, serv);
+   struct session *sess = find_session_from_channel (chan);
    if (sess)
    {
       fe_set_topic (sess, topic);
@@ -374,11 +370,11 @@ new_topic (server_t *serv, char *tbuf, char *nick, char *chan, char *topic)
 }
 
 static void
-user_joined (server_t *serv, char *outbuf, char *chan, char *user, char *ip)
+user_joined (char *outbuf, char *chan, char *user, char *ip)
 {
-   struct session *sess = find_session_from_channel (chan, serv);
+   struct session *sess = find_session_from_channel (chan);
 
-   if (EMIT_SIGNAL (XP_JOIN, serv, chan, user, ip, NULL, 0) == 1)
+   if (EMIT_SIGNAL (XP_JOIN, server, chan, user, ip, NULL, 0) == 1)
       return;
 
    if (sess)
@@ -389,9 +385,9 @@ user_joined (server_t *serv, char *outbuf, char *chan, char *user, char *ip)
 }
 
 static void
-user_kicked (server_t *serv, char *outbuf, char *chan, char *user, char *kicker, char *reason)
+user_kicked (char *outbuf, char *chan, char *user, char *kicker, char *reason)
 {
-   struct session *sess = find_session_from_channel (chan, serv);
+   struct session *sess = find_session_from_channel (chan);
    if (sess)
    {
       EMIT_SIGNAL (XP_TE_KICK, sess, kicker, user, chan, reason, 0);
@@ -400,16 +396,15 @@ user_kicked (server_t *serv, char *outbuf, char *chan, char *user, char *kicker,
 }
 
 static void
-user_parted (server_t *serv, char *chan, char *user, char *ip, char *reason)
+user_parted (char *chan, char *user, char *ip, char *reason)
 {
-   struct session *sess = find_session_from_channel (chan, serv);
+   struct session *sess = find_session_from_channel (chan);
    if (sess)
    {
       if (*reason)
          EMIT_SIGNAL (XP_TE_PARTREASON, sess, user, ip, chan, reason, 0);
       else
          EMIT_SIGNAL (XP_TE_PART, sess, user, ip, chan, NULL, 0);
-      
       sub_name (sess, user);
    }
 }
@@ -426,12 +421,12 @@ channel_date (struct session *sess, char *tbuf, char *chan, char *timestr)
 }
 
 static void
-topic_nametime (server_t *serv, char *tbuf, char *chan, char *nick, char *date)
+topic_nametime (char *tbuf, char *chan, char *nick, char *date)
 {
    long n = atol (date);
    char *tim = ctime (&n);
    char *p;
-   struct session *sess = find_session_from_channel (chan, serv);
+   struct session *sess = find_session_from_channel (chan);
 
    p = strchr (tim, '\n');
    if (p)
@@ -441,31 +436,30 @@ topic_nametime (server_t *serv, char *tbuf, char *chan, char *nick, char *date)
 }
 
 void
-set_server_name (server_t *serv, char *name)
+set_server_name (char *name)
 {
    GSList *list = sess_list;
    struct session *sess;
 
    if (name[0] == 0)
-      name = serv->hostname;
+      name = server->hostname;
 
-   strcpy (serv->servername, name);
+   strcpy (server->servername, name);
    while (list)
    {
       sess = (struct session *) list->data;
-      if (sess->server == serv)
-         fe_set_title (sess);
+      fe_set_title (sess);
       list = list->next;
    }
-   if (serv->front_session->is_server)
+   if (server->front_session->is_server)
    {
-      strcpy (serv->front_session->channel, name);
-      fe_set_channel (serv->front_session);
+      strcpy (server->front_session->channel, name);
+      fe_set_channel (server->front_session);
    }
 }
 
 static void
-user_quit (server_t *serv, char *outbuf, char *nick, char *reason)
+user_quit (char *outbuf, char *nick, char *reason)
 {
    GSList *list = sess_list;
    struct session *sess;
@@ -473,9 +467,8 @@ user_quit (server_t *serv, char *outbuf, char *nick, char *reason)
    while (list)
    {
       sess = (struct session *) list->data;
-      if (sess->server == serv)
-         if (sub_name (sess, nick))
-            EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, NULL, NULL, 0);
+      if (sub_name (sess, nick))
+	EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, NULL, NULL, 0);
       list = list->next;
    }
 }
@@ -502,19 +495,19 @@ got_ping_reply (struct session *sess, char *outbuf,
 }
 
 static void
-notice (server_t *serv, char *outbuf, char *to, char *nick, char *msg, char *ip)
+notice (char *outbuf, char *to, char *nick, char *msg, char *ip)
 {
    char *po;
    struct session *sess = 0;
 
    if (is_channel (to))
-      sess = find_session_from_channel (to, serv);
+      sess = find_session_from_channel (to);
 
    if (!sess)
    {
-      sess = find_session_from_nick (nick, serv);
+      sess = find_session_from_nick (nick);
       if (!sess)
-         sess = serv->front_session;
+         sess = server->front_session;
    }
 
    if (msg[0] == 1)
@@ -533,26 +526,26 @@ notice (server_t *serv, char *outbuf, char *to, char *nick, char *msg, char *ip)
 }
 
 static void
-handle_away (server_t *serv, char *outbuf, char *nick, char *msg)
+handle_away (char *outbuf, char *nick, char *msg)
 {
-   struct away_msg *away = find_away_message (serv, nick);
+   struct away_msg *away = find_away_message (nick);
    struct session *sess = NULL;
 
    if (away && !strcmp (msg, away->message))  /* Seen the msg before? */
-      save_away_message (serv, nick, msg);
+      save_away_message (nick, msg);
 
-   if (!serv->inside_whois)
-      sess = find_session_from_nick (nick, serv);
+   if (!server->inside_whois)
+      sess = find_session_from_nick (nick);
    if (!sess)
-      sess = serv->front_session;
+      sess = server->front_session;
 
    EMIT_SIGNAL (XP_TE_WHOIS5, sess, nick, msg, NULL, NULL, 0);
 }
 
 static void
-channel_mode (server_t *serv, char *outbuf, char *chan, char *nick, char sign, char mode, char *extra, int quiet)
+channel_mode (char *outbuf, char *chan, char *nick, char sign, char mode, char *extra, int quiet)
 {
-   struct session *sess = find_session_from_channel (chan, serv);
+   struct session *sess = find_session_from_channel (chan);
    char tbuf[2][2];
 
    if (sess)
@@ -689,14 +682,14 @@ channel_mode (server_t *serv, char *outbuf, char *chan, char *nick, char sign, c
          tbuf[1][0] = mode;
          tbuf[1][1] = 0;
 
-         EMIT_SIGNAL (XP_TE_CHANMODEGEN, serv->front_session, nick, tbuf[0],
+         EMIT_SIGNAL (XP_TE_CHANMODEGEN, server->front_session, nick, tbuf[0],
                     tbuf[1], chan, 0);
       }
    }
 }
 
 static void
-channel_modes (server_t *serv, char *outbuf, char *word[], char *nick, int displacement)
+channel_modes (char *outbuf, char *word[], char *nick, int displacement)
 {
    char *chan = find_word (pdibuf, 3 + displacement);
    if (*chan)
@@ -729,11 +722,11 @@ stupidcode:
                case 'b':
                case 'e':
                case 'I':
-                  channel_mode (serv, outbuf, chan, nick, sign, modes[0], word[i], displacement);
+                  channel_mode (outbuf, chan, nick, sign, modes[0], word[i], displacement);
                   i++;
                   break;
                default:
-                  channel_mode (serv, outbuf, chan, nick, sign, modes[0], "", displacement);
+                  channel_mode (outbuf, chan, nick, sign, modes[0], "", displacement);
                }
             } else
             {
@@ -746,11 +739,11 @@ stupidcode:
                case 'b':
                case 'e':
                case 'I':
-                  channel_mode (serv, outbuf, chan, nick, sign, modes[0], word[i], displacement);
+                  channel_mode (outbuf, chan, nick, sign, modes[0], word[i], displacement);
                   i++;
                   break;
                default:
-                  channel_mode (serv, outbuf, chan, nick, sign, modes[0], "", displacement);
+                  channel_mode (outbuf, chan, nick, sign, modes[0], "", displacement);
                }
             }
             modes++;
@@ -769,7 +762,7 @@ stupidcode:
 }
 
 static void
-end_of_names (server_t *serv, char *outbuf, char *chan, char *text)
+end_of_names (char *outbuf, char *chan, char *text)
 {
    struct session *sess;
    GSList *list;
@@ -780,43 +773,36 @@ end_of_names (server_t *serv, char *outbuf, char *chan, char *text)
       while (list)
       {
          sess = (struct session *) list->data;
-         if (sess->server == serv)
-         {
-            sess->end_of_names = TRUE;
-         }
+	 sess->end_of_names = TRUE;
          list = list->next;
       }
       return;
    }
-   sess = find_session_from_channel (chan, serv);
+   sess = find_session_from_channel (chan);
    if (sess)
-   {
       sess->end_of_names = TRUE;
-   }
 }
 
 static void
-check_willjoin_channels (server_t *serv, char *tbuf)
+check_willjoin_channels (char *tbuf)
 {
    struct session *sess;
    GSList *list = sess_list;
    while (list)
    {
       sess = (struct session *) list->data;
-      if (sess->server == serv)
-      {
-         if (sess->willjoinchannel[0] != 0)
-         {
-            strcpy (sess->waitchannel, sess->willjoinchannel);
-            sess->willjoinchannel[0] = 0;
-            if (sess->channelkey[0] == '\0')
-               sprintf (tbuf, "JOIN %s\r\n", sess->waitchannel);
-            else
-               sprintf (tbuf, "JOIN %s %s\r\n", sess->waitchannel,
-                    sess->channelkey);
-            tcp_send (serv, tbuf);
-         }
-      }
+      if (sess->willjoinchannel[0] != 0)
+	{
+	  strcpy (sess->waitchannel, sess->willjoinchannel);
+	  sess->willjoinchannel[0] = 0;
+	  if (sess->channelkey[0] == '\0')
+	    sprintf (tbuf, "JOIN %s\r\n", sess->waitchannel);
+	  else
+	    sprintf (tbuf, "JOIN %s %s\r\n", sess->waitchannel,
+		     sess->channelkey);
+	  tcp_send (tbuf);
+	}
+      
       list = list->next;
    }
 }
@@ -824,20 +810,20 @@ check_willjoin_channels (server_t *serv, char *tbuf)
 static void
 next_nick (struct session *sess, char *outbuf, char *nick)
 {
-   sess->server->nickcount++;
+   server->nickcount++;
 
-   switch (sess->server->nickcount)
+   switch (server->nickcount)
    {
    case 2:
       sprintf (outbuf, "NICK %s\r\n", prefs.nick2);
-      tcp_send (sess->server, outbuf);
+      tcp_send (outbuf);
       EMIT_SIGNAL (XP_TE_NICKCLASH, sess, nick, prefs.nick2, NULL, NULL, 0);
 
       break;
 
    case 3:
       sprintf (outbuf, "NICK %s\r\n", prefs.nick3);
-      tcp_send (sess->server, outbuf);
+      tcp_send (outbuf);
       EMIT_SIGNAL (XP_TE_NICKCLASH, sess, nick, prefs.nick3, NULL, NULL, 0);
 
       break;
@@ -848,41 +834,32 @@ next_nick (struct session *sess, char *outbuf, char *nick)
 }
 
 static void
-set_default_modes (server_t *serv, char *outbuf)
+set_default_modes (char *outbuf)
 {
   if (!prefs.invisible)
     return;
-  sprintf (outbuf, "MODE %s +i\r\n", serv->nick);
-  tcp_send (serv, outbuf);  
+  sprintf (outbuf, "MODE %s +i\r\n", server->nick);
+  tcp_send (outbuf);  
 }
 
 /* process_line() */
 
 void
-process_line (struct session *sess, server_t *serv, char *buf)
+process_line (struct session *sess)
 {
    char pdibuf[4096];
    char outbuf[4096];
    char *word[32];
-   char *word_eol[32];
+   char *word_eol[32], *buf;
    int n;
 
+   buf = server->linebuf;
    process_data_init (pdibuf, buf + 1, word, word_eol);
 
    if (!sess)
-   {
-      GSList *list = sess_list;
-      while (list)
-      {
-         sess = (struct session *) list->data;
-         if (sess->server == serv)
-            break;
-         list = list->next;
-      }
-      if (!sess)
-         sess = (struct session *) sess_list->data;  /* HACK !!! */
-   }
-   if (EMIT_SIGNAL (XP_INBOUND, sess, serv, buf, NULL, NULL, 0) == 1)
+     sess = (struct session *) sess_list->data;  /* HACK !!! */
+
+   if (EMIT_SIGNAL (XP_INBOUND, sess, server, buf, NULL, NULL, 0) == 1)
       return;
 
    if (*buf != ':')
@@ -894,7 +871,7 @@ process_line (struct session *sess, server_t *serv, char *buf)
       if (!strncmp (buf, "PING ", 5))
       {
          sprintf (outbuf, "PONG %s\r\n", buf + 5);
-         tcp_send (serv, outbuf);
+         tcp_send (outbuf);
          return;
       }
       if (!strncmp (buf, "ERROR", 5))
@@ -915,18 +892,18 @@ process_line (struct session *sess, server_t *serv, char *buf)
          char *text = find_word_to_end (buf, 3);
          if (*text)
          {
-            if (!strncasecmp (serv->nick, text, strlen (serv->nick)))
-               text += strlen (serv->nick) + 1;
+            if (!strncasecmp (server->nick, text, strlen (server->nick)))
+               text += strlen (server->nick) + 1;
             if (*text == ':')
                text++;
             switch (n)
             {
             case 1:
-               user_new_nick (serv, outbuf, serv->nick, word[3], TRUE);
-               set_server_name (serv, pdibuf);
+               user_new_nick (outbuf, server->nick, word[3], TRUE);
+               set_server_name (pdibuf);
                goto def;
             case 301:
-               handle_away (serv, outbuf, find_word (pdibuf, 4),
+               handle_away (outbuf, find_word (pdibuf, 4),
                             find_word_to_end (buf, 5) + 1);
                break;
 	    case 303:
@@ -940,7 +917,7 @@ process_line (struct session *sess, server_t *serv, char *buf)
                             word_eol[5], NULL, NULL, 0);
                break;
             case 311:
-               serv->inside_whois = 1;
+               server->inside_whois = 1;
                /* FALL THROUGH */
             case 314:
                EMIT_SIGNAL (XP_TE_WHOIS1, sess,
@@ -954,23 +931,23 @@ process_line (struct session *sess, server_t *serv, char *buf)
                   char *po, *tim = ctime (&n);
                   sprintf (outbuf, "%02ld:%02ld:%02ld", idle / 3600, (idle / 60) % 60, idle % 60);
                   if (n == 0)
-                     EMIT_SIGNAL (XP_TE_WHOIS4, serv->front_session, find_word (pdibuf, 4), outbuf, NULL, NULL, 0);
+                     EMIT_SIGNAL (XP_TE_WHOIS4, server->front_session, find_word (pdibuf, 4), outbuf, NULL, NULL, 0);
                   else
                   {
                      if ((po = strchr (tim, '\n')))
                         *po = 0;
-                     EMIT_SIGNAL (XP_TE_WHOIS4T, serv->front_session, find_word (pdibuf, 4), outbuf, tim, NULL, 0);
+                     EMIT_SIGNAL (XP_TE_WHOIS4T, server->front_session, find_word (pdibuf, 4), outbuf, tim, NULL, 0);
                   }
                }
                break;
             case 318:
-               serv->inside_whois = 0;
-               EMIT_SIGNAL (XP_TE_WHOIS6, serv->front_session, word[4], NULL,
+               server->inside_whois = 0;
+               EMIT_SIGNAL (XP_TE_WHOIS6, server->front_session, word[4], NULL,
                        NULL, NULL, 0);
                break;
             case 313:
             case 319:
-               EMIT_SIGNAL (XP_TE_WHOIS2, serv->front_session, word[4], word_eol[5] + 1, NULL, NULL, 0);
+               EMIT_SIGNAL (XP_TE_WHOIS2, server->front_session, word[4], word_eol[5] + 1, NULL, NULL, 0);
                break;
             case 321:
                 break;
@@ -984,32 +961,32 @@ process_line (struct session *sess, server_t *serv, char *buf)
             case 323:
                break;
             case 324:
-               sess = find_session_from_channel (word[4], serv);
+               sess = find_session_from_channel (word[4]);
                if (!sess)
-                  sess = serv->front_session;
+                  sess = server->front_session;
                EMIT_SIGNAL (XP_TE_CHANMODES, sess, word[4], word_eol[5],
                                NULL, NULL, 0);
-               channel_modes (serv, outbuf, word, word[3], 1);
+               channel_modes (outbuf, word, word[3], 1);
                break;
             case 329:
-               sess = find_session_from_channel (word[4], serv);
+               sess = find_session_from_channel (word[4]);
                if (sess)
                   channel_date (sess, outbuf, word[4], word[5]);
                break;
             case 332:
-               topic (serv, outbuf, text);
+               topic (outbuf, text);
                break;
             case 333:
-               topic_nametime (serv, outbuf, find_word (pdibuf, 4),
+               topic_nametime (outbuf, find_word (pdibuf, 4),
                find_word (pdibuf, 5),
                find_word (pdibuf, 6));
                break;
             case 352:          /* WHO */
-               if (!serv->skip_next_who)
+               if (!server->skip_next_who)
                {
                   struct session *who_sess;
 		  
-                  who_sess = find_session_from_channel (word[4], serv);
+                  who_sess = find_session_from_channel (word[4]);
                   if (who_sess)
 		    {
 		    sprintf (outbuf, "%s@%s", word[5], word[6]);
@@ -1019,32 +996,29 @@ process_line (struct session *sess, server_t *serv, char *buf)
 			  goto def;
                      }
                   } else
-		    if (!serv->doing_who)
+		    if (!server->doing_who)
 		      goto def;
                   
                } else
                {
-                  if (!strcasecmp (word[8], serv->nick))
+                  if (!strcasecmp (word[8], server->nick))
                   {
                      struct hostent *HostAddr;
 
                      HostAddr = gethostbyname (word[6]);
                      if (HostAddr)
-                     {
                         EMIT_SIGNAL (XP_TE_FOUNDIP, sess,
                                      inet_ntoa (*((struct in_addr *) HostAddr->h_addr)), NULL, NULL, NULL, 0);
-                     }
                   }
                }
                break;
             case 315:          /* END OF WHO */
-               if (serv->skip_next_who)
-               {
-                  serv->skip_next_who = FALSE;
-               } else
+               if (server->skip_next_who)
+                  server->skip_next_who = FALSE;
+               else
                {
                   struct session *who_sess;
-                  who_sess = find_session_from_channel (word[4], serv);
+                  who_sess = find_session_from_channel (word[4]);
                   if (who_sess)
                   {
                      if (who_sess->doing_who)
@@ -1053,8 +1027,8 @@ process_line (struct session *sess, server_t *serv, char *buf)
                         goto def;
                   } else
                   {
-                     if (serv->doing_who)
-                        serv->doing_who = FALSE;
+                     if (server->doing_who)
+                        server->doing_who = FALSE;
                      else
                         goto def;
                   }
@@ -1068,20 +1042,20 @@ process_line (struct session *sess, server_t *serv, char *buf)
                   names = word_eol[6];
                   if (*names == ':')
                      names++;
-                  names_list (serv, outbuf, chan, names);
+                  names_list (outbuf, chan, names);
                }
                break;
             case 366:
-               end_of_names (serv, outbuf, find_word (pdibuf, 4), text);
+               end_of_names (outbuf, find_word (pdibuf, 4), text);
                break;
             case 376:
             case 422:          /* end of motd */
-               serv->end_of_motd = TRUE;
-               set_default_modes (serv, outbuf);
-               check_willjoin_channels (serv, outbuf);
+               server->end_of_motd = TRUE;
+               set_default_modes (outbuf);
+               check_willjoin_channels (outbuf);
                goto def;
             case 433:
-               if (serv->end_of_motd)
+               if (server->end_of_motd)
                   goto def;
                else
                   next_nick (sess, outbuf, word[4]);
@@ -1107,13 +1081,13 @@ process_line (struct session *sess, server_t *serv, char *buf)
 
             default:
              def:
-               if (prefs.skipmotd && !serv->motd_skipped)
+               if (prefs.skipmotd && !server->motd_skipped)
                {
                   if (n == 375 || n == 372)
                      return;
                   if (n == 376)
                   {
-                     serv->motd_skipped = TRUE;
+                     server->motd_skipped = TRUE;
                      EMIT_SIGNAL (XP_TE_MOTDSKIP, sess, NULL, NULL, NULL,
                              NULL, 0);
                      return;
@@ -1121,7 +1095,7 @@ process_line (struct session *sess, server_t *serv, char *buf)
                }
                if (n == 375 || n == 372 || n == 376 || n == 422)
                {
-                  EMIT_SIGNAL (XP_TE_MOTD, serv->front_session, text, NULL,
+                  EMIT_SIGNAL (XP_TE_MOTD, server->front_session, text, NULL,
                                NULL, NULL, 0);
                   return;
                }
@@ -1129,18 +1103,18 @@ process_line (struct session *sess, server_t *serv, char *buf)
                if (is_channel (text))
                {
                   char *chan = find_word (pdibuf, 3);
-                  if (!strncasecmp (serv->nick, chan, strlen (serv->nick)))
-                     chan += strlen (serv->nick) + 1;
+                  if (!strncasecmp (server->nick, chan, strlen (server->nick)))
+                     chan += strlen (server->nick) + 1;
                   if (*chan == ':')
                      chan++;
-                  realsess = find_session_from_channel (chan, serv);
+                  realsess = find_session_from_channel (chan);
                   if (!realsess)
                      realsess = sess;
                   EMIT_SIGNAL (XP_TE_SERVTEXT, realsess, text, NULL, NULL,
                              NULL, 0);
                } else
                {
-                  EMIT_SIGNAL (XP_TE_SERVTEXT, serv->front_session, text, NULL,
+                  EMIT_SIGNAL (XP_TE_SERVTEXT, server->front_session, text, NULL,
                        NULL, NULL, 0);
                }
             }
@@ -1196,20 +1170,20 @@ process_line (struct session *sess, server_t *serv, char *buf)
 
                   if (*chan == ':')
                      chan++;
-                  if (!strcasecmp (nick, serv->nick))
-		    you_joined (serv, outbuf, chan, nick, ip);
+                  if (!strcasecmp (nick, server->nick))
+		    you_joined (outbuf, chan, nick, ip);
 		  else 
-                     user_joined (serv, outbuf, chan, nick, ip);
+                     user_joined (outbuf, chan, nick, ip);
                   return;
                }
                if (!strcmp ("MODE", cmd))
                {
-		 channel_modes (serv, outbuf, word, nick, 0);
+		 channel_modes (outbuf, word, nick, 0);
 		 return;
                }
                if (!strcmp ("NICK", cmd))
                {
-                  user_new_nick (serv, outbuf, nick, find_word_to_end (buf, 3),
+                  user_new_nick (outbuf, nick, find_word_to_end (buf, 3),
                                FALSE);
                   return;
                }
@@ -1221,13 +1195,13 @@ process_line (struct session *sess, server_t *serv, char *buf)
                      char *msg = find_word_to_end (buf, 4) + 1;
                      /*if (*msg)
                      {*/
-                        if (strcmp (nick, serv->servername) == 0 ||
+                        if (strcmp (nick, server->servername) == 0 ||
                             strchr (nick, '.'))
                         {
                            EMIT_SIGNAL (XP_TE_SERVERGENMESSAGE, sess, msg, NULL, NULL, NULL, 0);
                         } else
                         {
-                           notice (serv, outbuf, to, nick, msg, ip);
+                           notice (outbuf, to, nick, msg, ip);
                         }
                         return;
                      /*}*/
@@ -1242,10 +1216,10 @@ process_line (struct session *sess, server_t *serv, char *buf)
                      chan++;
                   if (*reason == ':')
                      reason++;
-                  if (!strcmp (nick, serv->nick))
-                     you_parted (serv, outbuf, chan, ip, reason);
+                  if (!strcmp (nick, server->nick))
+                     you_parted (outbuf, chan, ip, reason);
                   else
-                     user_parted (serv, chan, nick, ip, reason);
+                     user_parted (chan, nick, ip, reason);
                   return;
                }
                if (!strcmp ("PRIVMSG", cmd))
@@ -1261,10 +1235,10 @@ process_line (struct session *sess, server_t *serv, char *buf)
                      {
                         if (is_channel (to))
                         {
-                           channel_msg (serv, outbuf, to, nick, msg, FALSE);
+                           channel_msg (outbuf, to, nick, msg, FALSE);
                         } else
                         {
-                           private_msg (serv, outbuf, nick, ip, msg);
+                           private_msg (outbuf, nick, ip, msg);
                         }
                      }
                      return;
@@ -1272,19 +1246,19 @@ process_line (struct session *sess, server_t *serv, char *buf)
                }
                if (!strcmp ("PONG", cmd))
                {
-                  got_ping_reply (serv->front_session, outbuf,
+                  got_ping_reply (server->front_session, outbuf,
                                   find_word (pdibuf, 4) + 1,
                                   find_word (pdibuf, 3));
                   return;
                }
                if (!strcmp ("QUIT", cmd))
                {
-                  user_quit (serv, outbuf, nick, find_word_to_end (buf, 3) + 1);
+                  user_quit (outbuf, nick, find_word_to_end (buf, 3) + 1);
                   return;
                }
                if (!strcmp ("TOPIC", cmd))
                {
-                  new_topic (serv, outbuf, nick, find_word (pdibuf, 3),
+                  new_topic (outbuf, nick, find_word (pdibuf, 3),
                              find_word_to_end (buf, 4) + 1);
                   return;
                }
@@ -1293,11 +1267,11 @@ process_line (struct session *sess, server_t *serv, char *buf)
                   char *kicked = find_word (pdibuf, 4);
                   if (*kicked)
                   {
-                     if (!strcmp (kicked, serv->nick))
-                        you_kicked (serv, outbuf, find_word (pdibuf, 3), nick,
+                     if (!strcmp (kicked, server->nick))
+                        you_kicked (outbuf, find_word (pdibuf, 3), nick,
                                     find_word_to_end (buf, 5) + 1);
                      else
-                        user_kicked (serv, outbuf, find_word (pdibuf, 3), kicked,
+                        user_kicked (outbuf, find_word (pdibuf, 3), kicked,
                                      nick, find_word_to_end (buf, 5) + 1);
                      return;
                   }

@@ -49,6 +49,8 @@ fire_signal (int s, char *a, char *b, char *c, char *d,
    GSList *cur;
    struct xp_signal *sig;
    int flag = 0;
+   if (s == 81)
+     fprintf(stderr, "Firesignal: int s %d, a %s, b %s, c %s, d %s, e %s, f %c\n", s, a, b, c, d, e, f);
    
    cur = sigroots[s];
    current_signal = s;

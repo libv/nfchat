@@ -42,24 +42,20 @@ void handle_multiline (struct session *sess, char *cmd, int history, int);
 void check_special_chars (char *cmd);
 
 extern GSList *sess_list;
-extern GSList *serv_list;
 extern struct xchatprefs prefs;
 extern struct session *current_tab;
 
 extern int is_session (session *sess);
-extern void auto_reconnect (server_t *serv, int send_quit, int err);
+extern void auto_reconnect (int send_quit, int err);
 extern void do_dns (struct session *sess, char *tbuf, char *nick, char *host);
-extern int tcp_send_len (server_t *serv, char *buf, int len);
-extern int tcp_send (server_t *serv, char *buf);
-extern struct session *tab_msg_session (char *target, server_t *serv);
-extern struct session *find_session_from_channel (char *chan, server_t *serv);
+extern int tcp_send (char *buf);
 extern int list_delentry (GSList ** list, char *name);
 extern void list_addentry (GSList ** list, char *cmd, char *name);
 extern void PrintText (struct session *sess, char *text);
 extern void connect_server (struct session *sess, char *server, int port, int quiet);
 extern void channel_action (struct session *sess, char *tbuf, char *chan, char *from, char *text, int fromme);
-extern void user_new_nick (server_t *serv, char *outbuf, char *nick, char *newnick, int quiet);
-extern void channel_msg (server_t *serv, char *outbuf, char *chan, char *from, char *text, char fromme);
+extern void user_new_nick (char *outbuf, char *nick, char *newnick, int quiet);
+extern void channel_msg (char *outbuf, char *chan, char *from, char *text, char fromme);
 extern void disconnect_server (struct session *sess, int sendquit, int err);
 
 #ifdef MEMORY_DEBUG
@@ -158,7 +154,7 @@ struct commands cmds[] =
    {"NICK", cmd_nick, 0, 0, "/NICK <nickname>, sets your nick\n"},
    {"PART", cmd_part, 1, 1, "/PART [<channel>] [<reason>], leaves the channel, by default the current one\n"},
    {"QUIT", cmd_quit, 0, 0, "/QUIT [<reason>], disconnects from the current server\n"},
-   {"RECONNECT", cmd_reconnect, 0, 0, "/RECONENCT, reconnects to the current server\n"},
+   {"RECONNECT", cmd_reconnect, 0, 0, "/RECONNECT, reconnects to the current server\n"},
    {"SERVER", cmd_server, 0, 0, "/SERVER <host> [<port>] [<password>], connects to a server, the default port is 6667\n"},
    {0, 0, 0, 0, 0}
 };
@@ -207,26 +203,23 @@ cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[])
       s = (struct session *) list->data;
       sprintf (tbuf, "0x%lx %-10.10s %-10.10s %-10.10s 0x%lx\n",
                (unsigned long) s, s->channel, s->waitchannel, s->willjoinchannel,
-           (unsigned long) s->server);
+           (unsigned long) server);
       PrintText (sess, tbuf);
       list = list->next;
    }
 
-   list = serv_list;
+
    PrintText (sess, "Server    Sock  Name\n");
-   while (list)
-   {
-      v = (server_t *) list->data;
-      sprintf (tbuf, "0x%lx %-5ld %s\n",
-               (unsigned long) v, (unsigned long) v->sok, v->servername);
-      PrintText (sess, tbuf);
-      list = list->next;
-   }
+
+   v = (server_t *) server;
+   sprintf (tbuf, "0x%lx %-5ld %s\n",
+	    (unsigned long) v, (unsigned long) v->sok, v->servername);
+   PrintText (sess, tbuf);
 
    sprintf (tbuf,
             "\nfront_session: %lx\n"
             "current_tab: %lx\n\n",
-            (unsigned long) sess->server->front_session,
+            (unsigned long) server->front_session,
          (unsigned long) current_tab);
    PrintText (sess, tbuf);
 #ifdef MEMORY_DEBUG
@@ -318,7 +311,7 @@ cmd_join (struct session *sess, char *tbuf, char *word[], char *word_eol[])
          sprintf (tbuf, "JOIN %s %s\r\n", chan, pass);
       else
          sprintf (tbuf, "JOIN %s\r\n", chan);
-      tcp_send (sess->server, tbuf);
+      tcp_send (tbuf);
       if (sess->channel[0] == 0)
       {
          po = strchr (chan, ',');
@@ -337,10 +330,10 @@ cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
    char *act = find_word_to_end (cmd, 2);
    if (*act)
    {
-      channel_action (sess, tbuf, sess->channel, sess->server->nick, act, TRUE);
+      channel_action (sess, tbuf, sess->channel, server->nick, act, TRUE);
       sprintf (tbuf, "\001ACTION %s\001\r", act);
       sprintf (tbuf, "PRIVMSG %s :\001ACTION %s\001\r\n", sess->channel, act);
-      tcp_send (sess->server, tbuf);
+      tcp_send (tbuf);
       return TRUE;
    }
    return FALSE;
@@ -369,13 +362,13 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
             return TRUE;
          } else
          {
-            if (!sess->server->connected)
+            if (!server->connected)
             {
                notc_msg (sess);
                return TRUE;
             }
             sprintf (tbuf, "PRIVMSG %s :%s\r\n", nick, msg);
-            tcp_send (sess->server, tbuf);
+            tcp_send (tbuf);
          }
          EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, msg, NULL, NULL, 0);
 
@@ -391,12 +384,12 @@ cmd_nick (struct session *sess, char *tbuf, char *word[], char *word_eol[])
    char *nick = find_word (pdibuf, 2);
    if (*nick)
    {
-      if (sess->server->connected)
+      if (server->connected)
       {
          sprintf (tbuf, "NICK %s\r\n", nick);
-         tcp_send (sess->server, tbuf);
+         tcp_send (tbuf);
       } else
-         user_new_nick (sess->server, tbuf, sess->server->nick, nick, TRUE);
+         user_new_nick (tbuf, server->nick, nick, TRUE);
       return TRUE;
    }
    return FALSE;
@@ -412,7 +405,7 @@ cmd_part (struct session *sess, char *tbuf, char *word[], char *word_eol[])
    if ((*chan) && is_channel (chan))
    {
       sprintf (tbuf, "PART %s :%s\r\n", chan, reason);
-      tcp_send (sess->server, tbuf);
+      tcp_send (tbuf);
       return TRUE;
    }
    return FALSE;
@@ -422,26 +415,11 @@ int
 cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
    int tmp = prefs.recon_delay;
-   GSList *list;
-   server_t *serv;
-
+  
    prefs.recon_delay = 0;
 
-   if (!strcasecmp (word[2], "ALL"))
-   {
-      list = serv_list;
-      while (list)
-      {
-         serv = list->data;
-         if (serv->connected)
-            auto_reconnect (serv, TRUE, -1);
-         list = list->next;
-      }
-   } else
-   {
-      auto_reconnect (sess->server, TRUE, -1);
-   }
-
+   auto_reconnect (TRUE, -1);
+  
    prefs.recon_delay = tmp;
 
    return TRUE;
@@ -450,16 +428,16 @@ cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 int
 cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-   char *server = find_word (pdibuf, 2);
+   char *server_str = find_word (pdibuf, 2);
    char *port = find_word (pdibuf, 3);
    char *pass = find_word (pdibuf, 4);
    char *co;
 
-   if (*server)
+   if (*server_str)
    {
-      if (strncasecmp ("irc://", server, 6) == 0)
-         server += 6;
-      co = strchr (server, ':');
+      if (strncasecmp ("irc://", server_str, 6) == 0)
+         server_str += 6;
+      co = strchr (server_str, ':');
       if (co)
       {
          port = co + 1;
@@ -468,11 +446,11 @@ cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
       }
       sess->willjoinchannel[0] = 0;
       if (pass)
-         strcpy (sess->server->password, pass);
+         strcpy (server->password, pass);
       if (*port)
-         connect_server (sess, server, atoi (port), FALSE);
+         connect_server (sess, server_str, atoi (port), FALSE);
       else
-         connect_server (sess, server, 6667, FALSE);
+         connect_server (sess, server_str, 6667, FALSE);
       return TRUE;
    }
    return FALSE;
@@ -639,7 +617,7 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
             break;
          if (!strcasecmp (pdibuf, cmds[i].name))
          {
-            if (cmds[i].needserver && !sess->server->connected)
+            if (cmds[i].needserver && !server->connected)
             {
                notc_msg (sess);
                return TRUE;
@@ -661,13 +639,13 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
          }
          i++;
       }
-      if (!sess->server->connected)
+      if (!server->connected)
       {
          PrintText (sess, "Unknown Command. Try /help\n");
          return TRUE;
       }
       sprintf (tbuf, "%s\r\n", cmd);
-      tcp_send (sess->server, tbuf);
+      tcp_send (tbuf);
 
    } else
    {
@@ -682,9 +660,9 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
             newcmd[0] = 0;
          if (!newcmd[0])
 	   {
-	     if (sess->server->connected)
+	     if (server->connected)
                {
-		 channel_msg (sess->server, tbuf, sess->channel, sess->server->nick, cmd, TRUE);
+		 channel_msg (tbuf, sess->channel, server->nick, cmd, TRUE);
 		 sprintf (tbuf, "PRIVMSG %s :%s\r\n", sess->channel, cmd);
                } else
 		 {
@@ -693,9 +671,9 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
 		 }
 	   } else
 	     {
-	       if (sess->server->connected)
+	       if (server->connected)
 		 {
-		   channel_msg (sess->server, tbuf, sess->channel, sess->server->nick, newcmd, TRUE);
+		   channel_msg (tbuf, sess->channel, server->nick, newcmd, TRUE);
 		   sprintf (tbuf, "PRIVMSG %s :%s\r\n", sess->channel, newcmd);
 		 } else
 		   {
@@ -703,7 +681,7 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
 		     return TRUE;
 		   }
 	     }
-         tcp_send (sess->server, tbuf);
+         tcp_send (tbuf);
       } else
 	notj_msg (sess);
    }

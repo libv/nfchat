@@ -104,7 +104,6 @@ struct xchatprefs
 
 struct session
 {
-   struct server_t *server;
    GSList *userlist;
    char channel[202];
    char waitchannel[202];       /* waiting to join this channel */
@@ -173,6 +172,8 @@ struct server_t
 
 typedef struct server_t server_t;
 
+extern server_t *server;
+
 typedef int (*cmd_callback) (struct session * sess, char *tbuf, char *word[], char *word_eol[]);
 
 struct commands
@@ -186,7 +187,6 @@ struct commands
 
 struct away_msg
 {
-   server_t *server;
    char nick[64];
    char *message;
 };

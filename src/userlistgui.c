@@ -121,7 +121,7 @@ fe_userlist_insert (struct session *sess, struct user *newuser, int row)
       gtk_clist_insert (GTK_CLIST (sess->gui->namelistgad), row, &name);
    gtk_clist_set_row_data (GTK_CLIST (sess->gui->namelistgad), row, (gpointer) newuser);
 
-   if (!strcmp (newuser->nick, sess->server->nick))
+   if (!strcmp (newuser->nick, server->nick))
    {
       if (newuser->op)
          op_myself (sess);
