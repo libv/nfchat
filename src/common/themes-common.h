@@ -1,0 +1,2 @@
+#define THEME_CONF_PALETTE 1
+#define THEME_CONF_EVENTS 2

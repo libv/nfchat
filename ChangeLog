@@ -1,0 +1,380 @@
+  .----------------------.
+--|   X-Chat ChangeLog   |--------------------------------------------
+  `----------------------'
+
+----------------------------------------------------------------------
+ 1.4.1 -> 1.4.2
+----------------------------------------------------------------------
+
+ - Compilation fixes for IRIX (David Kaelbling).
+ - Compilation fixes for AIX (Rodrigo Barbosa).
+ - Compilation fixes for OpenBSD.
+ - Should now compile with certain beta/alpha versions of Perl.
+ - "Scrollbar snapping to top" bug fixed.
+ - Corrected some text marking behaviour.
+ - Made use of fnmatch(), if available (for chanlist, ignore etc).
+ - Configure script is now generated with a sane version of autoconf.
+ - Alt-minus and Alt-plus now wrap around (AGL).
+
+
+----------------------------------------------------------------------
+ 1.4.0 -> 1.4.1
+----------------------------------------------------------------------
+
+ - Fixed a bug that could make new text not appear while marking text.
+ - xtext: Further improved performance when double buffering is turned
+          off (marking text & URL hilights are almost flicker free).
+ - xtext: Double buffer is now freed at each render operation, this
+          should reduce memory usage if you have many tabs open.
+ - If you closed a server while it was in the reconnect-delay, xchat
+   would crash - fixed.
+ - No more zombies when doing /discon while connection in progress.
+ - Added "/clear all" command (Paul de Regt).
+ - Hilights only work on full word matches now (Brendan O'Dea).
+ - Some Solaris compilation fixes (David Morgan).
+ - Danish translation updated (Birger Langkjer).
+ - Italian translation updated (Stefano Fava).
+ - Greek translation added (Fanis Dokianakis).
+ - Dutch translation upated (Arjan Scherpenisse).
+ - Removed some very old translations: fr_CA, no, pl, ru and sv.
+   (If someone wants to update these, you're welcome to).
+ - Channel mode "+h nick" (half Op) is now reported correctly (still
+   not supported in the userlist though).
+ - Having indent nicks OFF in channel windows and ON in dialog windows
+   didn't work - fixed.
+ - Sometimes ignores wouldn't save - fixed.
+
+
+----------------------------------------------------------------------
+ 1.3.14 -> 1.4.0
+----------------------------------------------------------------------
+
+ - xtext: Improved performance when double buffering is turned off
+   (/set double_buffer 0 and restart). If you don't use a background
+   pixmap, it might be worth a try.
+ - No more phantom server logs.
+ - pt_BR translation updated (Frederic L. W. Meunier).
+ - Fixed a bug in printing text (when indent nicks were off) which
+   could cause a buffer overrun.
+ - %C etc was stripped from userlist popup/buttons - fixed.
+
+
+----------------------------------------------------------------------
+ 1.3.13 -> 1.3.14
+----------------------------------------------------------------------
+
+ - 'X' button can't take focus now, for safety.
+ - 16bit fonts are now semi-supported (at least Korean with kodig font
+   seems to work).
+ - If you didn't use dialog windows and received a ACTION via DCC CHAT
+   xchat would crash - fixed.
+ - Fixed a small bug in /kickban.
+ - French translation updated (Jerome Couderc).
+ - PageUp/Down actually moves a whole page instead of half a page.
+ - When a server connection is lost, the errno is now reported.
+   ($1 in the "Disconnected" print event).
+ - Fixed a bug that caused a crash in xtext under certain GTK themes.
+ - Fixed another crash-on-exit bug (only the Quit menu item).
+
+
+----------------------------------------------------------------------
+ 1.3.12 -> 1.3.13
+----------------------------------------------------------------------
+
+ - Rewrote the command execution code for userlist-buttons and popup
+   menu. This should fix at least 1 known bug.
+ - Blank lines disappeared if you had indent nicks off - fixed.
+ - "/reconnect ALL" will now reconnect on all servers.
+ - The KWM_WIN_ICON is now set so you can see an icon in KDE and Gnome
+   tasklist applet (I just need someone to draw a good 16x16 icon).
+ - Smooth tab switching should now work even without a paned userlist.
+ - Changing the Tabs' position would mess up the text window - fixed.
+   (delinking a window could do a similar thing, also fixed).
+ - /lastlog is back.
+ - Korean translation updated (Kim SeungBaeck).
+ - Fixed a bug in logging the server tab.
+
+
+----------------------------------------------------------------------
+ 1.3.11 -> 1.3.12
+----------------------------------------------------------------------
+
+ - Fixes to themes/xpm related stuff (David Härdeman).
+   (and --disable-imlib should work again).
+ - Fixed the crash-on-exit if running a perl script.
+ - Fixed the "gtk_widget_queue_draw" bug (this time for real?).
+ - Fixed a crash caused by receiving a NOTICE at the wrong time.
+ - While you are in the scrollback, the text won't move if someone
+   talks.
+ - Timestamps and Auto Indent can now work together.
+ - Switching tabs is now super smooth, no gray flash at all.
+
+
+----------------------------------------------------------------------
+ 1.3.10 -> 1.3.11
+----------------------------------------------------------------------
+
+ - More cleanups/fixes to serverlist code (David Härdeman).
+ - If the "-- You have new mail" message poped up while you were in a
+   shell tab, xchat would crash - fixed.
+ - /set mail_check 0 will actually work now.
+ - Alot of changes to configure script, it should compile on Solaris
+   and FreeBSD now. Please report any failed compiles.
+ - Hungarian translation updated (Horvath Szabolcs).
+ - TreeView now removes channels when you close them.
+ - Themes support added, themes section on xchat.org coming soon.
+   (David Härdeman).
+ - xtext: Marking past the page boundry should work now (this is not
+          100% yet, but good enough to general use).
+ - xtext: Wordwrap should now work properly.
+ - xtext: You can now turn off double buffering with
+   /set double_buffer 0 (requires a restart), it'll use less RAM & CPU
+   but it will flicker a bit.
+ - Logging the server window/tab should work now too.
+ - Non-gnome interface now has the menu inside a HandleBox.
+ - Doing /SET will show the list in alphabetical order.
+ - Added "Auto Adjust" to the Settings GUI.
+ - Startup screen and version reply recognizes SMP and mhz on a PPC.
+ - %h was broken in Userlist buttons - fixed.
+ - Fixed the "gtk_widget_queue_draw" bug (I think?).
+ - Lots of small cleanups and fixes.
+
+
+----------------------------------------------------------------------
+ 1.3.9 -> 1.3.10
+----------------------------------------------------------------------
+
+ - xtext: Switching between tabs is faster.
+ - xtext: Dialog windows should keep their scrollbar at the bottom.
+ - xtext: Fixed a problem with proportional fonts & indented nicks.
+ - xtext: You can now click & drag the separator bar with the mouse.
+ - xtext: Added "auto_indent" feature which changes the separator
+          bar position when needed. Use /set auto_indent to turn it
+          off or on (Note: this works badly with Timestamps).
+ - xtext: Added wordwrap option in Setup->ChannelWindows (this is
+          broken/incomplete).
+ - DCC resume should work better for IP Masquerade users.
+ - Timestamps are back. If you are using Indented nicks, they are
+   not markable! You may need to increase your indent width for this.
+ - Colors/Attribs stripped for "Save Buffer.." option.
+ - Log filename is customizable (see Setup->Logging) (AGL).
+ - Added Tree view of servers/channels (see Setup->MainWindow->Show
+   SessionTreeView) (AGL).
+ - "Change in realtime" toggle for tint settings (background changes
+   as you move the sliders).
+ - Brazilian Portuguese translation updated (Frederic L. W. Meunier).
+ - Danish translation updated (Lars Christensen).
+ - Korean translation updated (Kim SeungBaeck).
+ - Hungarian translation added (Horvath Szabolcs).
+ - Added support for PART reasons and two new text events for it.
+ - Received MODEs of a channel you havn't joined are no longer 
+   filtered out.
+ - UnrealIRCD modes are filtered out from nicknames (~, * and %).
+ - Misc fix in unloading plugins (AGL).
+ - /server now accepts 3 formats:
+              /server <host> [<port>] [<password>]
+              /server <host>:<port> [<password>]
+              /server irc://<host>[:<port>] [<password>]
+ - DND into dialog windows should work again (for dcc send).
+ - Added 2 extra colors for background/foreground, this way color 0
+   and 1 can stay unchanged for mIRC colors.
+ - You can now make channeltabs appear on the top/bottom/left/right
+   (see Setup->Window Layout).
+ - Added a simple local mail checker (probably only works in Linux).
+ - The --with-included-gettext option should now work.
+ - Changed the way files are renamed when you DCC receive a file
+   you already have. New files are named <file>.1 <file>.2 etc.
+ - Simplified the IP Settings. Can someone confirm that it works
+   on a machine with multiple interfaces/IP's, including DCC send?
+ - The "Search Buffer.." feature is usable now.
+
+
+----------------------------------------------------------------------
+ 1.3.8 -> 1.3.9
+----------------------------------------------------------------------
+
+ - Imlib wasn't used in 1.3.8 due to error in configure.in - fixed.
+ - Cancel buttons in the ServerList should now work (David Härdeman).
+ - Korean translation updated (Kim SeungBaeck).
+ - French translation updated (Jerome Couderc).
+ - Couple of extra python/plugin signals added (Tomokazu Matsumaru).
+ - Added XTEXT - a new text widget. GtkText & ZVT Support has been
+   removed, which cleaned up alot of code. This is the MAJOR change
+   in this version and also adds "Indent Nicks" feature (ala AmIRC)
+   and the ability to set the RGB value of your transparency tint.
+   URLs, nicknames, channels etc are now underlined as you move the
+   mouse over them (See TODO list in src/fe-gtk/xtext.c).
+ - Replaced lastlog with a "Search Buffer.." feature (this is work
+   in progress).
+ - German translation updated (Matthias Warkus).
+ - Nickname in KILL msgs was wrong - fixed.
+ - Color Paste option (in bottom right "<" button).
+ - No more zombies when clicking URLs (I hope).
+ - Editable URL handlers
+ - URLs in the url grabber window are right-clickable.
+ - Added /newserver, which opens a new window and then connects.
+ - Server connections no longer leak file descriptors.
+ - Compiling with --enable-socks should work again.
+ - "Get my IP from Server" should work again (for DCC send).
+ - Added /SET command.
+ - EventTexts are saved in a new format (pevents.conf) (AGL).
+ - Fixed a GtkStyle leak in channel windows.
+ - Added translation table support (character sets) (Sergey Zhumatiy).
+   See Setup->CharacterSet to load a ircII translation file.
+ - Fixed a ~10k mem leak in loading text events (AGL).
+
+
+----------------------------------------------------------------------
+ 1.3.7 -> 1.3.8
+----------------------------------------------------------------------
+
+ - Notify Check Interval changed to seconds, so change your settings!
+   (milliseconds was just stupid while everything else was in seconds).
+ - URL clicking in the scrollback should work now too (in zvt).
+ - Korean translation updated (Kim SeungBaeck).
+ - Plugins didn't load in 1.3.7 - fixed.
+ - NewShellTab now handles titlebar changes.
+ - A big overhaul in the UserList code, please check for bugs. This
+   can affect tabkey nick completion too. (changed it to a GSList).
+ - Cursor is hidden in zvt windows (needs gnome-libs 1.0.54+).
+   (This doesn't seem to work ???).
+ - When text was feed to a zvt window, before it reached gtk_main, the
+   word wrapping was done incorrectly - workaround done.
+ - Added option: 'Never-give-up ReConnect'. This will keep trying to
+   connect even if connect() fails.
+ - SaveSettingsOnExit seemed to be broken in 1.3.7 - fixed.
+
+
+----------------------------------------------------------------------
+ 1.3.6 -> 1.3.7
+----------------------------------------------------------------------
+
+ - "Announce Away Messages" now works with the menu item aswell as
+   the /away command.
+ - Right clicking nicknames shows their country and realname. Also
+   added /country command.
+ - Fixed small bug in handling of +i/-i channel modes.
+ - More DCC fixes, is it 100% now? You tell me.
+ - Fixed %c code for usermenu popup and added %h for hostname.
+ - ~/.xchat/*.py python scripts are now autoloaded.
+ - Python stuff added to "Scripts&Plugins" menu.
+ - Updated help buttons in Edit: UserCommands, CTCP, Userlist popup.
+
+
+----------------------------------------------------------------------
+ 1.3.5 -> 1.3.6
+----------------------------------------------------------------------
+
+ - Window left & right position settings should work again.
+ - /QUIT <reason> should work again.
+ - "Send Block Size" option added (for DCC Send).
+ - DCC windows are now updated every 2 seconds rather than 4k of data.
+   (This should be great for cablemodems/T1+ etc).
+ - FastDCCSend could block the GUI towards the end of a xfer - fixed.
+ - Python script support added! Read the top of src/common/python.c
+   for more information. Commands are /pload /pkill and /plist (AGL).
+
+
+----------------------------------------------------------------------
+ 1.3.4 -> 1.3.5
+----------------------------------------------------------------------
+
+ - URL highlight for zvt (Jeremy Katz)
+ - Updated Czech translation (Jakub Moc)
+ - In 1.3.4 the outbound queue sent in reverse order - fixed.
+ - Mousewheel support should work better now.
+ - "Reload Settings" menu item added.
+ - Now compiles with -ggdb by default.
+ - User menu feature added.
+
+
+----------------------------------------------------------------------
+ 1.3.3 -> 1.3.4
+----------------------------------------------------------------------
+
+ - Updated Serbian translation (Zoltan Csala).
+ - Ignore, RawLog, DCC etc windows are now de/relinkable (AGL).
+ - Some touchups to the ServerList.
+ - /EXEC uses a shell again, so you can do "/exec ps | grep xchat" or
+   whatever.
+ - Fixed NewShellTab crashes.
+ - Topic widget now has an unlimited buffer (Oskar Liljeblad).
+ - "Use gdk_fontset_load" option added.
+ - The "Private Message to Dialog" event is now actually used.
+ - /MSG will now only send through DCC CHAT if you do /MSG =nick <msg>
+   (Note: dialog windows still use DCC CHAT if available).
+ - Updated Spanish translation (Juan Pablo Puerta).
+ - OPEN button in the DCC RECV window is back (uses gnome mimetypes).
+ - Added --enable-debug configure option (currently only does
+   memory debug).
+
+
+----------------------------------------------------------------------
+ 1.3.2 -> 1.3.3
+----------------------------------------------------------------------
+
+ - Added "Use tabs for DCC, Ignore, Notify etc windows" feature
+   (still a bit buggy, but worth a look).
+ - Added "<" button to all channel windows (try it).
+ - Added an ASCII chart window.
+ - Added "Userlist Sorted by:" option (settings->setup->interface).
+ - If you close the main notebook window, it'll send 1 QUIT instead
+   of multiple PARTs (per server).
+ - Optimized /wallchop a bit (sends 5 per line).
+ - ETA field in DCC send should now be correct when resuming.
+ - Korean translation updated (Kim SeungBaeck). 
+ - /Exec code cleanups (AGL).
+ - Some optimization for people who use zvt and a background picture.
+
+
+----------------------------------------------------------------------
+ 1.3.1 -> 1.3.2
+----------------------------------------------------------------------
+
+ - Fixed some more compile problems.
+ - Flush Buffer menu item crashed - fixed.
+ - Added /reconnect command.
+ - Added Move-left/Move-right buttons (lets you reorder the tabs).
+ - Palette wasn't saving - fixed.
+ - Added support for +e and +I channel modes (as used on IRCNet) 
+   (Axel Franke).
+ - DCC Send/Receive window now has a ETA field (Bryan Whitehead).
+ - The Conference-Mode button should work again.
+ - Added Slovene translation (Bo¹tjan Muller).
+ - An ASCII 14 could confuse the client (zvt) - fixed.
+
+
+----------------------------------------------------------------------
+ 1.3.0 -> 1.3.1
+----------------------------------------------------------------------
+
+ - Fixed some compile problems for various systems.
+ - Fixed a small mem leak in Perl timeout events.
+ - Fixed some bugs in xchat-text
+ - Updated Danish translation (Birger Langkjer).
+ - Added arg --cfgdir (if you don't want to use ~/.xchat)
+    example: ./xchat --cfgdir /home/user/.xchat2
+ - Added Japanese translation (Yuusuke Tahara).
+ - Added QUIET arg for /ignore and /unignore (probably only usefull
+   for script writers).
+ - Added NOSAVE arg for /ignore (won't save that ignore when you
+   exit, again it's probably only usefull for scripts).
+
+
+----------------------------------------------------------------------
+ 1.2.0 -> 1.3.0
+----------------------------------------------------------------------
+
+ - HUGE code reworking, the GUI code is now separated from the main
+   IRC code. The start of a text frontend is done, it works but only
+   in dumb terminal mode.
+ - Added "Give the Input Box style" option.
+ - Danish translation added (Birger Langkjer).
+ - Added perl function: IRC::user_info ( nickname ).
+   (Give it a nickname of "" to find info about yourself).
+ - Updated docs (AGL).
+ - /dns now works on nicknames and IP/hostnames (David Hill).
+
+
+http://xchat.org
+zed@linux.com
