@@ -541,8 +541,7 @@ kill_server_callback (server *serv)
       close (serv->childwrite);
       close (serv->sok);
    }
-   fe_server_callback (serv);
-
+   
    serv_list = g_slist_remove (serv_list, serv);
 
    dcc_notify_kill (serv);

@@ -1246,7 +1246,7 @@ relink_window (GtkWidget * w, struct session *sess)
    }
 }
 
-/* 'X' button pressed */
+/* 'X' button pressed - only used by dialog.c */
 
 void
 X_session (GtkWidget * button, struct session *sess)
@@ -1360,7 +1360,7 @@ create_window (struct session *sess)
    gtk_container_set_border_width (GTK_CONTAINER (tbox), 0);
    gtk_box_pack_start (GTK_BOX (vbox), tbox, FALSE, TRUE, 2);
    gtk_widget_show (tbox);
-
+   
    wid = gtk_button_new_with_label ("X");
    GTK_WIDGET_UNSET_FLAGS (wid, GTK_CAN_FOCUS);
    gtk_box_pack_start (GTK_BOX (tbox), wid, 0, 0, 0);
@@ -1388,7 +1388,7 @@ create_window (struct session *sess)
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
 			     GTK_SIGNAL_FUNC (maingui_moveright), 0);
    gtk_widget_show (wid);
-   add_tip (wid, "Move tab right");
+   add_tip (wid, "Move tab right"); 
 
    if (!prefs.tabchannels)
    {
@@ -1642,7 +1642,8 @@ maingui_new_tab (char *title, char *name, void *close_callback, void *userdata)
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
                        GTK_SIGNAL_FUNC (gtkutil_destroy), box);
    gtk_widget_show (wid);
-   add_tip (wid, "Close Tab");
+   add_tip (wid, "Close Tab"); 
+
    wid = gtk_button_new_with_label("^");
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
                        GTK_SIGNAL_FUNC (maingui_delink_nontab), box);
@@ -1706,11 +1707,6 @@ fe_session_callback (struct session *sess)
       if (gtk_notebook_get_nth_page (GTK_NOTEBOOK (main_book), 0) == NULL)
          gtk_widget_destroy (main_book);
    }
-}
-
-void
-fe_server_callback (struct server *serv)
-{
 }
 
 void

@@ -26,7 +26,6 @@ void fe_userlist_clear (struct session *sess);
 void fe_userlist_hide (struct session *sess);
 void fe_clear_channel (struct session *sess);
 void fe_session_callback (struct session *sess);
-void fe_server_callback (struct server *serv);
 void fe_buttons_update (struct session *sess);
 void fe_set_channel (struct session *sess);
 void fe_set_title (struct session *sess);
