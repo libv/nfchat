@@ -3,6 +3,23 @@ NF-chat;
 
 start gtk strip
 
+0.1.6;
+""""""
+  - removed usermenu.c & .h
+  - removed usermenu stuff from src/fe-gtk/editlist.c & menu.c
+  - src/fe-gtk/fe-gtk.h
+  - src/common/xchat.c, removed the default conf
+  - edited Makefile.am
+
+0.1.5;
+""""""
+  - removed chanlist.c
+  - removed chanlist_opengui from src/fe-gtk/menu.c
+  - removed chanlist variables from src/fe-gtk/fe-gtk.c & h
+  - removed fe_add_chan_list/fe_is_chanwindow/fe_chan_list_end
+    from src/fe-gtk/fe-gtk.c & src/common/fe.h & notify.c
+  - edited Makefile.am
+
 0.1.4;
 """"""
   - removed ignoregui.c

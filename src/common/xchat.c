@@ -48,7 +48,6 @@ GSList *dcc_list = 0;
 GSList *url_list = 0;
 GSList *away_list = 0;
 GSList *ignore_list = 0;
-GSList *usermenu_list = 0;
 GSList *urlhandler_list = 0;
 
 int notify_tag = -1;
@@ -932,23 +931,6 @@ xchat_misc_checks (void) /* this gets called every 2 seconds */
    "NAME WALLOPS\nCMD /quote WALLOPS :&2\n\n"\
    "NAME WII\nCMD /quote WHOIS %2 %2\n\n"
 
-#define defaultconf_usermenu \
-   "NAME Disconnect\nCMD /discon\n\n"\
-   "NAME Reconnect\nCMD /reconnect\n\n"\
-   "NAME irc.xchat.org #Linux\nCMD /servchan irc.xchat.org 6667 #linux\n\n"\
-   "NAME Part Channel\nCMD /part\n\n"\
-   "NAME Cycle Channel\nCMD /cycle\n\n"\
-   "NAME SEP\nCMD \n\n"\
-   "NAME Connect to EFNet\nCMD /server irc.efnet.net\n\n"\
-   "NAME Run XMMS\nCMD /exec xmms&\n\n"\
-   "NAME Show Debug\nCMD /debug\n\n"\
-   "NAME Hide CTCP Version\nCMD /set hide_version 1\n\n"\
-   "NAME Show CTCP Version\nCMD /set hide_version 0\n\n"\
-   "NAME Who Am I?\nCMD /quote WHOIS %n\n\n"\
-   "NAME Ping Server\nCMD /ping\n\n"\
-   "Name Script Info\nCMD /scpinfo\n\n"\
-   "Name Server Map\nCMD /map\n\n"
-
 #define defaultconf_urlhandlers \
    "NAME -> Netscape (Existing)" "\n" "CMD !netscape -remote 'openURL(%s)'" "\n\n"\
    "NAME -> Netscape (New Window)" "\n" "CMD !netscape -remote 'openURL(%s,new-window)'" "\n\n"\
@@ -981,7 +963,6 @@ xchat_init (void)
    list_loadconf ("buttons.conf", &button_list, defaultconf_buttons);
    list_loadconf ("commands.conf", &command_list, defaultconf_commands);
    list_loadconf ("replace.conf", &replace_list, defaultconf_replace);
-   list_loadconf ("usermenu.conf", &usermenu_list, defaultconf_usermenu);
    list_loadconf ("urlhandlers.conf", &urlhandler_list, defaultconf_urlhandlers);
 
    if (prefs.use_trans)

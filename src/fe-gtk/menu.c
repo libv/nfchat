@@ -25,7 +25,6 @@
 #include "../common/xchat.h"
 #include "fe-gtk.h"
 #include "menu.h"
-#include "usermenu.h"
 #include "../common/cfgfiles.h"
 #include "gtkutil.h"
 #include "../common/ignore.h"
@@ -78,7 +77,6 @@ extern GSList *button_list;
 extern GSList *command_list;
 extern GSList *ctcp_list;
 extern GSList *replace_list;
-extern GSList *usermenu_list;
 extern GSList *urlhandler_list;
 static GSList *submenu_list;
 
@@ -893,12 +891,6 @@ menu_rpopup (void)
 }
 
 static void
-menu_usermenu (void)
-{
-   editlist_gui_open (usermenu_list, "X-Chat: User menu", "usermenu", "usermenu.conf", 0);
-}
-
-static void
 menu_urlhandlers (void)
 {
    editlist_gui_open (urlhandler_list, "X-Chat: URL Handlers", "urlhandlers", "urlhandlers.conf", url_help);
@@ -1024,15 +1016,12 @@ static struct mymenu mymenu[] =
    {M_MENU, N_ ("Unload All Plugins"), 0, 0, 0},
    {M_MENU, N_ ("Plugin List"), 0, 0, 0},
 #endif
-   {M_NEWMENU, N_ ("User Menu"), (menucallback)-1, 0, 1},
-   {M_MENU, N_ ("Edit User Menu"), (menucallback) menu_usermenu, 0, 1},
-   {M_SEP, 0, 0, 0, 0},
    {M_NEWMENURIGHT, N_ ("Help"), 0, 0, 1},
    {M_MENU, N_ ("Help.."), (menucallback) menu_help, 0, 1},
    {M_SEP, 0, 0, 0, 0},
    {M_MENU, N_ ("X-Chat Homepage.."), (menucallback) menu_webpage, 0, 1},
    {M_MENU, N_ ("Online Docs.."), (menucallback) menu_docs, 0, 1},
-   {M_END, 0, 0, 0, 0},
+   {M_END, 0, 0, 0, 0}, 
 };
 
 
@@ -1044,7 +1033,7 @@ createmenus (struct session *sess)
    GtkWidget *menu = 0;
    GtkWidget *menu_item = 0;
    GtkWidget *menu_bar = gtk_menu_bar_new ();
-   GtkWidget *usermenu = 0;
+  /* GtkWidget *usermenu = 0; */
 
    if (!menu_sess)
       menu_sess = sess;
@@ -1069,8 +1058,9 @@ createmenus (struct session *sess)
          if (menu)
             gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item), menu);
          menu = gtk_menu_new ();
-         if (mymenu[i].callback == (void *)-1)
-            usermenu = menu;
+         /* not sure about this though*/
+         /* if (mymenu[i].callback == (void *)-1)
+            usermenu = menu;*/
          menu_item = gtk_menu_item_new_with_label (mymenu[i].text);
          if (mymenu[i].type == M_NEWMENURIGHT)
             gtk_menu_item_right_justify ((GtkMenuItem *) menu_item);
@@ -1105,9 +1095,6 @@ createmenus (struct session *sess)
       case M_END:
          if (menu)
             gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item), menu);
-         if (usermenu)
-            usermenu_create (usermenu);
-         sess->gui->usermenu = usermenu;
          return (menu_bar);
       }
       i++;

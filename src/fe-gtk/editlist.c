@@ -26,7 +26,6 @@
 #include "fe-gtk.h"
 #include "menu.h"
 #include "gtkutil.h"
-#include "usermenu.h"
 
 extern void maingui_updatebuttons (struct session *sess);
 extern int buf_get_line (char *, char **, int *, int);
@@ -40,7 +39,6 @@ extern GSList *popup_list;
 extern GSList *button_list;
 extern GSList *command_list;
 extern GSList *replace_list;
-extern GSList *usermenu_list;
 extern GSList *urlhandler_list;
 
 static GtkWidget *editlist_gui_entry_name;
@@ -208,16 +206,8 @@ editlist_gui_save (GtkWidget *igad)
                   list_loadconf (editlist_file, &command_list, 0);
                } else
                {
-                  if (editlist_list == usermenu_list)
-                  {
-                     list_free (&usermenu_list);
-                     list_loadconf (editlist_file, &usermenu_list, 0);
-                     usermenu_update ();
-                  } else
-                  {
-                     list_free (&urlhandler_list);
-                     list_loadconf (editlist_file, &urlhandler_list, 0);
-                  }
+                 list_free (&urlhandler_list);
+                 list_loadconf (editlist_file, &urlhandler_list, 0);
                }
             }
          }
