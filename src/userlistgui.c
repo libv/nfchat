@@ -50,7 +50,7 @@ create_pixmap_from_data (GtkWidget *window, GdkBitmap **mask, GtkWidget *style_w
 }
 
 void
-init_userlist_xpm (struct session *sess)
+init_userlist_xpm (session_t *sess)
 {
   op_pixmap = create_pixmap_from_data (sess->gui->window, &op_mask_bmp, 
 			     sess->gui->window, op_xpm);
@@ -59,7 +59,7 @@ init_userlist_xpm (struct session *sess)
 }
 
 void
-voice_myself (struct session *sess)
+voice_myself (session_t *sess)
 {
    if (sess->gui->op_xpm)
       gtk_widget_destroy (sess->gui->op_xpm);
@@ -69,7 +69,7 @@ voice_myself (struct session *sess)
 }
 
 void
-op_myself (struct session *sess)
+op_myself (session_t *sess)
 {
    if (sess->gui->op_xpm)
       gtk_widget_destroy (sess->gui->op_xpm);
@@ -79,7 +79,7 @@ op_myself (struct session *sess)
 }
 
 void
-fe_userlist_numbers (struct session *sess)
+fe_userlist_numbers (session_t *sess)
 {
    char tbuf[42];
    sprintf (tbuf, "%d ops, %d total", sess->ops, sess->total);
@@ -87,7 +87,7 @@ fe_userlist_numbers (struct session *sess)
 }
 
 void
-fe_userlist_remove (struct session *sess, struct user *user)
+fe_userlist_remove (session_t *sess, struct user *user)
 {
    gint row = gtk_clist_find_row_from_data (GTK_CLIST (sess->gui->namelistgad),
                                             (gpointer) user);
@@ -106,7 +106,7 @@ fe_userlist_remove (struct session *sess, struct user *user)
 }
 
 int
-fe_userlist_insert (struct session *sess, struct user *newuser, int row)
+fe_userlist_insert (session_t *sess, struct user *newuser, int row)
 {
    char *name = newuser->nick;
    GtkAdjustment *adj;
@@ -152,7 +152,7 @@ fe_userlist_insert (struct session *sess, struct user *newuser, int row)
 }
 
 void
-fe_userlist_move (struct session *sess, struct user *user, int new_row)
+fe_userlist_move (session_t *sess, struct user *user, int new_row)
 {
    gint old_row;
    int sel = FALSE;
@@ -170,7 +170,7 @@ fe_userlist_move (struct session *sess, struct user *user, int new_row)
 }
 
 void
-fe_userlist_clear (struct session *sess)
+fe_userlist_clear (session_t *sess)
 {
    gtk_clist_clear (GTK_CLIST (sess->gui->namelistgad));
 }

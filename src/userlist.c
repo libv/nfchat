@@ -25,12 +25,12 @@
 extern struct xchatprefs prefs;
 extern GSList *sess_list;
 
-int add_name (struct session *sess, char *name, char *hostname);
-int sub_name (struct session *sess, char *name);
+int add_name (session_t *sess, char *name, char *hostname);
+int sub_name (session_t *sess, char *name);
 
 
 int
-userlist_add_hostname (struct session *sess, char *nick, char *hostname, char *realname, char *servername)
+userlist_add_hostname (session_t *sess, char *nick, char *hostname, char *realname, char *servername)
 {
    struct user *user;
 
@@ -64,7 +64,7 @@ nick_cmp_az_ops (struct user *user1, struct user *user2)
 }
 
 void
-clear_user_list (struct session *sess)
+clear_user_list (session_t *sess)
 {
    struct user *user;
    GSList *list = sess->userlist;
@@ -88,7 +88,7 @@ clear_user_list (struct session *sess)
 }
 
 struct user *
-find_name (struct session *sess, char *name)
+find_name (session_t *sess, char *name)
 {
    struct user *user;
    GSList *list;
@@ -108,11 +108,11 @@ struct user *
 find_name_global (char *name)
 {
    struct user *user;
-   session *sess;
+   session_t *sess;
    GSList *list = sess_list;
    while (list)
    {
-      sess = (session *)list -> data;
+      sess = (session_t *)list -> data;
       user = find_name (sess, name);
       if (user)
 	return user;
@@ -122,7 +122,7 @@ find_name_global (char *name)
 }
 
 void
-update_entry (struct session *sess, struct user *user)
+update_entry (session_t *sess, struct user *user)
 {
    int row;
 
@@ -134,7 +134,7 @@ update_entry (struct session *sess, struct user *user)
 }
 
 void
-ul_op_name (struct session *sess, char *name)
+ul_op_name (session_t *sess, char *name)
 {
    struct user *user = find_name (sess, name);
    if (user && !user->op)
@@ -146,7 +146,7 @@ ul_op_name (struct session *sess, char *name)
 }
 
 void
-deop_name (struct session *sess, char *name)
+deop_name (session_t *sess, char *name)
 {
    struct user *user = find_name (sess, name);
    if (user && user->op)
@@ -158,7 +158,7 @@ deop_name (struct session *sess, char *name)
 }
 
 void
-voice_name (struct session *sess, char *name)
+voice_name (session_t *sess, char *name)
 {
    struct user *user = find_name (sess, name);
    if (user)
@@ -169,7 +169,7 @@ voice_name (struct session *sess, char *name)
 }
 
 void
-devoice_name (struct session *sess, char *name)
+devoice_name (session_t *sess, char *name)
 {
    struct user *user = find_name (sess, name);
    if (user)
@@ -180,7 +180,7 @@ devoice_name (struct session *sess, char *name)
 }
 
 void
-change_nick (struct session *sess, char *oldname, char *newname)
+change_nick (session_t *sess, char *oldname, char *newname)
 {
    struct user *user = find_name (sess, oldname);
    if (user)
@@ -191,7 +191,7 @@ change_nick (struct session *sess, char *oldname, char *newname)
 }
 
 int
-sub_name (struct session *sess, char *name)
+sub_name (session_t *sess, char *name)
 {
    struct user *user;
 
@@ -218,7 +218,7 @@ sub_name (struct session *sess, char *name)
 }
 
 int
-userlist_insertname_sorted (struct session *sess, struct user *newuser)
+userlist_insertname_sorted (session_t *sess, struct user *newuser)
 {
    int row = 0;
    struct user *user;
@@ -240,7 +240,7 @@ userlist_insertname_sorted (struct session *sess, struct user *newuser)
 }
 
 int
-add_name (struct session *sess, char *name, char *hostname)
+add_name (session_t *sess, char *name, char *hostname)
 {
    struct user *user;
    int row;
@@ -279,11 +279,11 @@ void
 update_all_of (char *name)
 {
    struct user *user;
-   struct session *sess;
+   session_t *sess;
    GSList *list = sess_list;
    while (list)
    {
-      sess = (struct session *) list->data;
+      sess = (session_t *) list->data;
       user = find_name (sess, name);
       if (user)
       {

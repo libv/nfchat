@@ -32,13 +32,12 @@
 
 extern GtkWidget *main_window, *main_book;
 extern int waitline (int sok, char *buf, int bufsize);
-extern int handle_multiline (struct session *sess, char *cmd, int history,
-                       int nocommand);
+extern int handle_multiline (session_t *sess, char *cmd, int history, int nocommand);
 
 extern GSList *sess_list;
 extern struct commands cmds[1];
 
-extern void PrintText (struct session *sess, unsigned char *text);
+extern void PrintText (session_t *sess, unsigned char *text);
 extern int buf_get_line (char *, char **, int *, int len);
 extern void history_up (GtkWidget * widget, struct history *his);
 extern void history_down (GtkWidget * widget, struct history *his);
@@ -80,7 +79,7 @@ struct key_binding
 struct key_action
 {
    int (*handler) (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
-               struct session * sess);
+               session_t * sess);
    char *name;
    char *help;
 };
@@ -89,25 +88,25 @@ int key_load_kbs ();
 void key_load_defaults ();
 
 static int key_action_handle_command (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, struct session *sess);
+      char *d2, session_t *sess);
 static int key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1,
-char *d2, struct session *sess);
+char *d2, session_t *sess);
 int key_action_insert (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, struct session *sess);
+      char *d2, session_t *sess);
 static int key_action_scroll_page (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, struct session *sess);
+      char *d2, session_t *sess);
 static int key_action_set_buffer (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, struct session *sess);
+      char *d2, session_t *sess);
 static int key_action_history_up (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, struct session *sess);
+      char *d2, session_t *sess);
 static int key_action_history_down (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, struct session *sess);
+      char *d2, session_t *sess);
 static int key_action_tab_comp (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, struct session *sess);
+      char *d2, session_t *sess);
 static int key_action_comp_chng (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, struct session *sess);
+      char *d2, session_t *sess);
 static int key_action_replace (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, struct session *sess);
+      char *d2, session_t *sess);
 
 static struct key_binding *keys_root = NULL;
 
@@ -173,7 +172,7 @@ key_init ()
  */
 
 int
-key_handle_key_press (GtkWidget * wid, GdkEventKey * evt, struct session *sess)
+key_handle_key_press (GtkWidget * wid, GdkEventKey * evt, session_t *sess)
 {
    struct key_binding *kb, *last = NULL;
    int keyval = evt->keyval;
@@ -493,7 +492,7 @@ key_load_kbs (void)
 
 int
 key_action_handle_command (GtkWidget * wid, GdkEventKey * evt, char *d1,
-       char *d2, struct session *sess)
+       char *d2, session_t *sess)
 {
    int ii, oi, len;
    char out[2048], d = 0;
@@ -532,7 +531,7 @@ key_action_handle_command (GtkWidget * wid, GdkEventKey * evt, char *d1,
 
 static int
 key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
-                 struct session *sess)
+                 session_t *sess)
 {
    int len, i, num;
 
@@ -576,7 +575,7 @@ key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
 
 int
 key_action_insert (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
-                 struct session *sess)
+                 session_t *sess)
 {
    int tmp_pos;
 
@@ -592,7 +591,7 @@ key_action_insert (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
 /* handles PageUp/Down keys */
 int
 key_action_scroll_page (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
-                 struct session *sess)
+                 session_t *sess)
 {
    int value, end;
    GtkAdjustment *adj;
@@ -623,7 +622,7 @@ key_action_scroll_page (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
 
 int
 key_action_set_buffer (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
-                 struct session *sess)
+                 session_t *sess)
 {
    if (!d1)
       return 1;
@@ -636,7 +635,7 @@ key_action_set_buffer (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
 
 int
 key_action_history_up (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
-                 struct session *sess)
+                 session_t *sess)
 {
    history_up (wid, &sess->history);
    return 2;
@@ -644,7 +643,7 @@ key_action_history_up (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
 
 int
 key_action_history_down (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
-                 struct session *sess)
+			 session_t *sess)
 {
    history_down (wid, &sess->history);
    return 2;
@@ -652,7 +651,7 @@ key_action_history_down (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
 
 int
 key_action_tab_comp (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
-                 struct session *sess)
+                 session_t *sess)
 {
    if (d1 && d1[0])
    {
@@ -671,7 +670,7 @@ key_action_tab_comp (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
 
 int
 key_action_comp_chng (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
-                 struct session *sess)
+                 session_t *sess)
 {
    if (d1 && d1[0] != 0)
       nick_comp_chng (wid, 1);
@@ -683,7 +682,7 @@ key_action_comp_chng (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
 
 int
 key_action_replace (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
-                 struct session *sess)
+                 session_t *sess)
 {
    replace_handle (wid);
    return 1;
@@ -743,16 +742,16 @@ replace_handle (GtkWidget * t)
 
 }
 
-struct session *
+session_t *
 find_session_from_inputgad (GtkWidget * w)
 {
    GSList *list = sess_list;
-   struct session *sess = 0;
+   session_t *sess = 0;
 
    /* First find the session from the widget */
    while (list)
    {
-      sess = (struct session *) list->data;
+      sess = (session_t *) list->data;
       if (sess->gui->inputgad == w)
          break;
       list = list->next;
@@ -800,7 +799,7 @@ nick_comp_get_nick (char *tx, char *n)
 void
 nick_comp_chng (GtkWidget * t, int updown)
 {
-   struct session *sess;
+   session_t *sess;
    struct user *user, *last = NULL;
    char *text, nick[64];
    int len, slen;
@@ -879,7 +878,7 @@ tab_comp_cmd (GtkWidget * t)
 {
    char *text, *last = NULL, *cmd, *postfix = NULL;
    int len, i, slen;
-   struct session *sess;
+   session_t *sess;
    char buf[2048];
    char lcmd[2048];
 
@@ -967,7 +966,7 @@ tab_comp_cmd (GtkWidget * t)
    and c5 is *after* (because c5 is next after b4, get it??) --AGL */
 
 int
-tab_nick_comp_next (struct session *sess, GtkWidget * wid, char *b4,
+tab_nick_comp_next (session_t *sess, GtkWidget * wid, char *b4,
       char *nick, char *c5, int shift)
 {
    struct user *user = 0, *last = NULL;
@@ -1011,7 +1010,7 @@ tab_nick_comp_next (struct session *sess, GtkWidget * wid, char *b4,
 int
 tab_nick_comp (GtkWidget * t, int shift)
 {
-   struct session *sess;
+   session_t *sess;
    struct user *user, *best = NULL;
    char *text;
    int len, slen, highest = -10000, first = 0,

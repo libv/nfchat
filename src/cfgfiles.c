@@ -34,7 +34,7 @@
 extern struct xchatprefs prefs;
 
 extern int buf_get_line (char *, char **, int *, int len);
-extern void PrintText (struct session *sess, unsigned char *text);
+extern void PrintText (session_t *sess, unsigned char *text);
 
 
 void
@@ -408,7 +408,7 @@ load_config (void)
 
 
 static void
-set_list (session *sess, char *tbuf)
+set_list (session_t *sess, char *tbuf)
 {
    struct prefs tmp_pref;
    struct prefs sorted_vars[sizeof (vars) / sizeof (tmp_pref)];
@@ -454,7 +454,7 @@ set_list (session *sess, char *tbuf)
 }
 
 int
-cmd_set (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_set (session_t *sess, char *tbuf, char *word[], char *word_eol[])
 {
    int i = 0;
    char *var = word[2];

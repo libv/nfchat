@@ -30,7 +30,7 @@ PrintTextLine (GtkWidget *textwidget, unsigned char *text, int len)
 {
   char *tab;
   int leftlen;
-  session *sess;
+  session_t *sess;
   
   if (len == -1)
     len = strlen (text);

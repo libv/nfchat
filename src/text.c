@@ -55,13 +55,13 @@ timecat (char *buf)
 }
 
 void
-PrintText (struct session *sess, unsigned char *text)
+PrintText (session_t *sess, unsigned char *text)
 {
    if (!sess)
    {
       if (!sess_list)
          return;
-      sess = (struct session *) sess_list->data;
+      sess = (session_t *) sess_list->data;
    }
 
    fe_print_text (sess, text);
@@ -838,7 +838,7 @@ load_text_events ()
 }
 
 static void
-display_event (char *i, struct session *sess, int numargs, char **args)
+display_event (char *i, session_t *sess, int numargs, char **args)
 {
    int len, oi, ii, *ar;
    char o[4096], d, a, done_all = FALSE;
@@ -1075,7 +1075,7 @@ pevt_build_string (char *input, char **output, int *max_arg)
 }
 
 static int
-textsignal_handler (struct session *sess, void *b, void *c,
+textsignal_handler (session_t *sess, void *b, void *c,
              void *d, void *e, char f)
 {
    /* This handler *MUST* always be the last in the chain

@@ -32,8 +32,8 @@
 
 extern int handle_command (char *cmd, void *sess, int history, int nocommand);
 extern int tcp_send (char *buf);
-extern void channel_action (struct session *sess, char *tbuf, char *chan, char *from, char *text, int fromme);
-extern struct session *find_session_from_channel (char *chan);
+extern void channel_action (session_t *sess, char *tbuf, char *chan, char *from, char *text, int fromme);
+extern session_t *find_session_from_channel (char *chan);
 
 
 extern GSList *ctcp_list;
@@ -126,10 +126,10 @@ ctcp_check (void *sess, char *tbuf, char *nick, char *word[], char *word_eol[], 
 }
 
 void
-handle_ctcp (struct session *sess, char *outbuf, char *to, char *nick, char *msg, char *word[], char *word_eol[])
+handle_ctcp (session_t *sess, char *outbuf, char *to, char *nick, char *msg, char *word[], char *word_eol[])
 {
    char *po;
-   session *chansess;
+   session_t *chansess;
 
    if (!strncasecmp (msg, "VERSION", 7))
    {
@@ -155,7 +155,7 @@ handle_ctcp (struct session *sess, char *outbuf, char *to, char *nick, char *msg
       po[0] = 0;
    if (!is_channel (to))
    {
-      EMIT_SIGNAL (XP_TE_CTCPGEN, server->front_session, msg, nick, NULL, NULL, 0);
+      EMIT_SIGNAL (XP_TE_CTCPGEN, server->session, msg, nick, NULL, NULL, 0);
    } else
    {
       chansess = find_session_from_channel (to);
@@ -164,6 +164,6 @@ handle_ctcp (struct session *sess, char *outbuf, char *to, char *nick, char *msg
          EMIT_SIGNAL (XP_TE_CTCPGENC, chansess, msg, nick, to, NULL, 0);
          return;
       }
-      EMIT_SIGNAL (XP_TE_CTCPGENC, server->front_session, msg, nick, to, NULL, 0);
+      EMIT_SIGNAL (XP_TE_CTCPGENC, server->session, msg, nick, to, NULL, 0);
    }
 }

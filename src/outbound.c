@@ -37,39 +37,39 @@
 #include "popup.h"
 
 
-int handle_command (char *cmd, struct session *sess, int history, int);
-void handle_multiline (struct session *sess, char *cmd, int history, int);
+int handle_command (char *cmd, session_t *sess, int history, int);
+void handle_multiline (session_t *sess, char *cmd, int history, int);
 void check_special_chars (char *cmd);
 
 extern GSList *sess_list;
 extern struct xchatprefs prefs;
-extern struct session *current_tab;
+extern session_t *current_tab;
 
-extern int is_session (session *sess);
+extern int is_session (session_t *sess);
 extern void auto_reconnect (int send_quit, int err);
-extern void do_dns (struct session *sess, char *tbuf, char *nick, char *host);
+extern void do_dns (session_t *sess, char *tbuf, char *nick, char *host);
 extern int tcp_send (char *buf);
 extern int list_delentry (GSList ** list, char *name);
 extern void list_addentry (GSList ** list, char *cmd, char *name);
-extern void PrintText (struct session *sess, char *text);
-extern void connect_server (struct session *sess, char *server, int port, int quiet);
-extern void channel_action (struct session *sess, char *tbuf, char *chan, char *from, char *text, int fromme);
+extern void PrintText (session_t *sess, char *text);
+extern void connect_server (session_t *sess, char *server, int port, int quiet);
+extern void channel_action (session_t *sess, char *tbuf, char *chan, char *from, char *text, int fromme);
 extern void user_new_nick (char *outbuf, char *nick, char *newnick, int quiet);
 extern void channel_msg (char *outbuf, char *chan, char *from, char *text, char fromme);
-extern void disconnect_server (struct session *sess, int sendquit, int err);
+extern void disconnect_server (session_t *sess, int sendquit, int err);
 
 #ifdef MEMORY_DEBUG
 extern int current_mem_usage;
 #endif
 
 void
-notj_msg (struct session *sess)
+notj_msg (session_t *sess)
 {
    PrintText (sess, "No channel joined. Try /join #<channel>\n");
 }
 
 void
-notc_msg (struct session *sess)
+notc_msg (session_t *sess)
 {
    PrintText (sess, "Not connected. Try /server <host> [<port>]\n");
 }
@@ -132,17 +132,17 @@ process_data_init (unsigned char *buf, char *cmd, char *word[], char *word_eol[]
    }
 }
 
-static int cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
+static int cmd_debug (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
 
-int cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_join (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_nick (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_part (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_quit (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
+int cmd_help (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
+static int cmd_join (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
+static int cmd_me (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
+static int cmd_msg (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
+static int cmd_nick (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
+static int cmd_part (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
+static int cmd_quit (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
+static int cmd_reconnect (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
+static int cmd_server (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
 
 struct commands cmds[] =
 {
@@ -160,7 +160,7 @@ struct commands cmds[] =
 };
 
 static void
-help (struct session *sess, char *helpcmd, int quiet)
+help (session_t *sess, char *helpcmd, int quiet)
 {
    int i = 0;
    while (1)
@@ -191,16 +191,16 @@ help (struct session *sess, char *helpcmd, int quiet)
 #define find_word(a, b) word[b]
 
 int
-cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_debug (session_t *sess, char *tbuf, char *word[], char *word_eol[])
 {
-   struct session *s;
+   session_t *s;
    server_t *v;
    GSList *list = sess_list;
 
    PrintText (sess, "Session   Channel    WaitChan  WillChan  Server\n");
    while (list)
    {
-      s = (struct session *) list->data;
+      s = (session_t *) list->data;
       sprintf (tbuf, "0x%lx %-10.10s %-10.10s %-10.10s 0x%lx\n",
                (unsigned long) s, s->channel, s->waitchannel, s->willjoinchannel,
            (unsigned long) server);
@@ -217,9 +217,9 @@ cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[])
    PrintText (sess, tbuf);
 
    sprintf (tbuf,
-            "\nfront_session: %lx\n"
+            "\nsession: %lx\n"
             "current_tab: %lx\n\n",
-            (unsigned long) server->front_session,
+            (unsigned long) server->session,
          (unsigned long) current_tab);
    PrintText (sess, tbuf);
 #ifdef MEMORY_DEBUG
@@ -231,7 +231,7 @@ cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 int
-cmd_quit (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_quit (session_t *sess, char *tbuf, char *word[], char *word_eol[])
 {
    if (*word_eol[2])
       sess->quitreason = word_eol[2];
@@ -242,7 +242,7 @@ cmd_quit (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 int
-cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_help (session_t *sess, char *tbuf, char *word[], char *word_eol[])
 {
    int i = 0, longfmt = 0;
    char *helpcmd = "";
@@ -301,7 +301,7 @@ cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 int
-cmd_join (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_join (session_t *sess, char *tbuf, char *word[], char *word_eol[])
 {
    char *chan = find_word (pdibuf, 2);
    if (*chan)
@@ -325,7 +325,7 @@ cmd_join (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 int
-cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_me (session_t *sess, char *tbuf, char *word[], char *word_eol[])
 {
    char *act = find_word_to_end (cmd, 2);
    if (*act)
@@ -340,7 +340,7 @@ cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 int
-cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_msg (session_t *sess, char *tbuf, char *word[], char *word_eol[])
 {
    char *nick = find_word (pdibuf, 2);
    char *msg = find_word_to_end (cmd, 3);
@@ -379,7 +379,7 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 int
-cmd_nick (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_nick (session_t *sess, char *tbuf, char *word[], char *word_eol[])
 {
    char *nick = find_word (pdibuf, 2);
    if (*nick)
@@ -396,7 +396,7 @@ cmd_nick (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 int
-cmd_part (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_part (session_t *sess, char *tbuf, char *word[], char *word_eol[])
 {
    char *chan = find_word (pdibuf, 2);
    char *reason = word_eol[3];
@@ -412,7 +412,7 @@ cmd_part (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 int
-cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_reconnect (session_t *sess, char *tbuf, char *word[], char *word_eol[])
 {
    int tmp = prefs.recon_delay;
   
@@ -426,7 +426,7 @@ cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 int
-cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_server (session_t *sess, char *tbuf, char *word[], char *word_eol[])
 {
    char *server_str = find_word (pdibuf, 2);
    char *port = find_word (pdibuf, 3);
@@ -531,7 +531,7 @@ check_special_chars (char *cmd) /* check for %X */
 #endif
 
 static void
-check_nick_completion (struct session *sess, char *cmd, char *tbuf)
+check_nick_completion (session_t *sess, char *cmd, char *tbuf)
 {
    long len;
    char *space = strchr (cmd, ' ');
@@ -582,7 +582,7 @@ check_nick_completion (struct session *sess, char *cmd, char *tbuf)
 }
 
 int
-handle_command (char *cmd, struct session *sess, int history, int nocommand)
+handle_command (char *cmd, session_t *sess, int history, int nocommand)
 {
    int user_cmd = FALSE, i;
    unsigned char pdibuf[2048];
@@ -689,7 +689,7 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
 }
 
 void
-handle_multiline (struct session *sess, char *cmd, int history, int nocommand)
+handle_multiline (session_t *sess, char *cmd, int history, int nocommand)
 {
    char *cr;
 

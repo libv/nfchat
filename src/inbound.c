@@ -34,33 +34,33 @@
 /* xchat.c */
 
 extern int tcp_send (char *buf);
-extern struct session *find_session_from_nick (char *nick);
-extern struct session *find_session_from_channel (char *chan);
+extern session_t *find_session_from_nick (char *nick);
+extern session_t *find_session_from_channel (char *chan);
 struct away_msg *find_away_message (char *nick);
 void save_away_message (char *nick, char *msg);
 
 /* text.c */
 
 extern unsigned char *strip_color (unsigned char *text);
-extern void PrintText (struct session *sess, char *text);
+extern void PrintText (session_t *sess, char *text);
 
 /* userlist.c */
 
-extern void change_nick (struct session *sess, char *oldnick, char *newnick);
+extern void change_nick (session_t *sess, char *oldnick, char *newnick);
 
 /* outbound.c */
 
-extern int handle_command (char *cmd, struct session *sess, int history, int nocommand);
+extern int handle_command (char *cmd, session_t *sess, int history, int nocommand);
 extern void process_data_init (unsigned char *buf, char *cmd, char *word[], char *word_eol[]);
 
 /* ctcp.c */
 
-extern void handle_ctcp (struct session *sess, char *outbuf, char *to, char *nick, char *msg, char *word[], char *word_eol[]);
+extern void handle_ctcp (session_t *sess, char *outbuf, char *to, char *nick, char *msg, char *word[], char *word_eol[]);
 
 
 extern GSList *sess_list;
 extern struct xchatprefs prefs;
-extern struct session *current_tab;
+extern session_t *current_tab;
 
 #define find_word_to_end(a, b) word_eol[b]
 #define find_word(a, b) word[b]
@@ -74,7 +74,7 @@ void channel_msg (char *outbuf, char *chan, char *from, char *text, char fromme)
 /* 5,7,8 are all shades of yellow which happen to look dman near the same */
 
 void
-clear_channel (struct session *sess)
+clear_channel (session_t *sess)
 {
    sess->channel[0] = 0;
    fe_clear_channel (sess);
@@ -84,22 +84,22 @@ clear_channel (struct session *sess)
 static void
 private_msg (char *tbuf, char *from, char *ip, char *text)
 {
-   struct session *sess;
+   session_t *sess;
 
    if (EMIT_SIGNAL (XP_PRIVMSG, server, from, ip, text, NULL, 0) == 1)
       return;
 
-   sess = server->front_session;
+   sess = server->session;
    EMIT_SIGNAL (XP_TE_PRIVMSG, sess, from, text, NULL, NULL, 0);
 }
 
 void
-channel_action (struct session *sess, char *tbuf, char *chan, char *from, char *text, int fromme)
+channel_action (session_t *sess, char *tbuf, char *chan, char *from, char *text, int fromme)
 {
-   struct session *def = sess;
+   session_t *def = sess;
 
    if (!sess)
-      fprintf (stderr, "*** XCHAT WARNING: sess = 0x0 in channel_action()\n");
+      fprintf (stderr, "*** NFCHAT WARNING: sess = 0x0 in channel_action()\n");
 
    if (EMIT_SIGNAL (XP_CHANACTION, sess, chan, from, text, NULL, fromme) == 1)
       return;
@@ -153,7 +153,7 @@ channel_msg (char *outbuf, char *chan, char *from, char *text, char fromme)
 {
    struct user *user;
    char *real_outbuf = outbuf;
-   struct session *sess;
+   session_t *sess;
    int highlight = FALSE;
 
    sess = find_session_from_channel (chan);
@@ -199,7 +199,7 @@ void
 user_new_nick (char *outbuf, char *nick, char *newnick, int quiet)
 {
    int me;
-   struct session *sess;
+   session_t *sess;
    GSList *list = sess_list;
 
    if (*newnick == ':')
@@ -216,7 +216,7 @@ user_new_nick (char *outbuf, char *nick, char *newnick, int quiet)
 
    while (list)
    {
-      sess = (struct session *) list->data;
+      sess = (session_t *) list->data;
       
       if (me || find_name (sess, nick))
 	{
@@ -245,7 +245,7 @@ user_new_nick (char *outbuf, char *nick, char *newnick, int quiet)
 static void
 you_joined (char *outbuf, char *chan, char *nick, char *ip)
 {
-  struct session *sess = fe_new_window_popup (chan);
+  session_t *sess = fe_new_window_popup (chan);
 
   if (sess)
     {
@@ -261,7 +261,7 @@ you_joined (char *outbuf, char *chan, char *nick, char *ip)
 static void
 you_kicked (char *tbuf, char *chan, char *kicker, char *reason)
 {
-   struct session *sess = find_session_from_channel (chan);
+   session_t *sess = find_session_from_channel (chan);
    if (sess)
    {
       EMIT_SIGNAL (XP_TE_UKICK, sess, server->nick, chan, kicker, reason, 0);
@@ -281,7 +281,7 @@ you_kicked (char *tbuf, char *chan, char *kicker, char *reason)
 static void
 you_parted (char *tbuf, char *chan, char *ip, char *reason)
 {
-   struct session *sess = find_session_from_channel (chan);
+   session_t *sess = find_session_from_channel (chan);
    if (sess)
    {
       if (*reason)
@@ -295,14 +295,14 @@ you_parted (char *tbuf, char *chan, char *ip, char *reason)
 static void
 names_list (char *tbuf, char *chan, char *names)
 {
-   struct session *sess;
+   session_t *sess;
    char name[64];
    int pos = 0;
 
    sess = find_session_from_channel (chan);
    if (!sess)
    {
-      EMIT_SIGNAL (XP_TE_USERSONCHAN, server->front_session, chan, names, NULL,
+      EMIT_SIGNAL (XP_TE_USERSONCHAN, server->session, chan, names, NULL,
                    NULL, 0);
       return;
    }
@@ -340,7 +340,7 @@ names_list (char *tbuf, char *chan, char *names)
 static void
 topic (char *tbuf, char *buf)
 {
-   session *sess;
+   session_t *sess;
    char *po, *new_topic;
 
    po = strchr (buf, ' ');
@@ -361,7 +361,7 @@ topic (char *tbuf, char *buf)
 static void
 new_topic (char *tbuf, char *nick, char *chan, char *topic)
 {
-   struct session *sess = find_session_from_channel (chan);
+   session_t *sess = find_session_from_channel (chan);
    if (sess)
    {
       fe_set_topic (sess, topic);
@@ -372,7 +372,7 @@ new_topic (char *tbuf, char *nick, char *chan, char *topic)
 static void
 user_joined (char *outbuf, char *chan, char *user, char *ip)
 {
-   struct session *sess = find_session_from_channel (chan);
+   session_t *sess = find_session_from_channel (chan);
 
    if (EMIT_SIGNAL (XP_JOIN, server, chan, user, ip, NULL, 0) == 1)
       return;
@@ -387,7 +387,7 @@ user_joined (char *outbuf, char *chan, char *user, char *ip)
 static void
 user_kicked (char *outbuf, char *chan, char *user, char *kicker, char *reason)
 {
-   struct session *sess = find_session_from_channel (chan);
+   session_t *sess = find_session_from_channel (chan);
    if (sess)
    {
       EMIT_SIGNAL (XP_TE_KICK, sess, kicker, user, chan, reason, 0);
@@ -398,7 +398,7 @@ user_kicked (char *outbuf, char *chan, char *user, char *kicker, char *reason)
 static void
 user_parted (char *chan, char *user, char *ip, char *reason)
 {
-   struct session *sess = find_session_from_channel (chan);
+   session_t *sess = find_session_from_channel (chan);
    if (sess)
    {
       if (*reason)
@@ -410,7 +410,7 @@ user_parted (char *chan, char *user, char *ip, char *reason)
 }
 
 static void
-channel_date (struct session *sess, char *tbuf, char *chan, char *timestr)
+channel_date (session_t *sess, char *tbuf, char *chan, char *timestr)
 {
    long n = atol (timestr);
    char *p, *tim = ctime (&n);
@@ -426,7 +426,7 @@ topic_nametime (char *tbuf, char *chan, char *nick, char *date)
    long n = atol (date);
    char *tim = ctime (&n);
    char *p;
-   struct session *sess = find_session_from_channel (chan);
+   session_t *sess = find_session_from_channel (chan);
 
    p = strchr (tim, '\n');
    if (p)
@@ -439,7 +439,7 @@ void
 set_server_name (char *name)
 {
    GSList *list = sess_list;
-   struct session *sess;
+   session_t *sess;
 
    if (name[0] == 0)
       name = server->hostname;
@@ -447,14 +447,14 @@ set_server_name (char *name)
    strcpy (server->servername, name);
    while (list)
    {
-      sess = (struct session *) list->data;
+      sess = (session_t *) list->data;
       fe_set_title (sess);
       list = list->next;
    }
-   if (server->front_session->is_server)
+   if (server->session->is_server)
    {
-      strcpy (server->front_session->channel, name);
-      fe_set_channel (server->front_session);
+      strcpy (server->session->channel, name);
+      fe_set_channel (server->session);
    }
 }
 
@@ -462,11 +462,11 @@ static void
 user_quit (char *outbuf, char *nick, char *reason)
 {
    GSList *list = sess_list;
-   struct session *sess;
+   session_t *sess;
 
    while (list)
    {
-      sess = (struct session *) list->data;
+      sess = (session_t *) list->data;
       if (sub_name (sess, nick))
 	EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, NULL, NULL, 0);
       list = list->next;
@@ -474,7 +474,7 @@ user_quit (char *outbuf, char *nick, char *reason)
 }
 
 static void
-got_ping_reply (struct session *sess, char *outbuf,
+got_ping_reply (session_t *sess, char *outbuf,
          char *timestring, char *from)
 {
    struct timeval timev;
@@ -498,7 +498,7 @@ static void
 notice (char *outbuf, char *to, char *nick, char *msg, char *ip)
 {
    char *po;
-   struct session *sess = 0;
+   session_t *sess = 0;
 
    if (is_channel (to))
       sess = find_session_from_channel (to);
@@ -507,7 +507,7 @@ notice (char *outbuf, char *to, char *nick, char *msg, char *ip)
    {
       sess = find_session_from_nick (nick);
       if (!sess)
-         sess = server->front_session;
+         sess = server->session;
    }
 
    if (msg[0] == 1)
@@ -529,7 +529,7 @@ static void
 handle_away (char *outbuf, char *nick, char *msg)
 {
    struct away_msg *away = find_away_message (nick);
-   struct session *sess = NULL;
+   session_t *sess = NULL;
 
    if (away && !strcmp (msg, away->message))  /* Seen the msg before? */
       save_away_message (nick, msg);
@@ -537,7 +537,7 @@ handle_away (char *outbuf, char *nick, char *msg)
    if (!server->inside_whois)
       sess = find_session_from_nick (nick);
    if (!sess)
-      sess = server->front_session;
+      sess = server->session;
 
    EMIT_SIGNAL (XP_TE_WHOIS5, sess, nick, msg, NULL, NULL, 0);
 }
@@ -545,7 +545,7 @@ handle_away (char *outbuf, char *nick, char *msg)
 static void
 channel_mode (char *outbuf, char *chan, char *nick, char sign, char mode, char *extra, int quiet)
 {
-   struct session *sess = find_session_from_channel (chan);
+   session_t *sess = find_session_from_channel (chan);
    char tbuf[2][2];
 
    if (sess)
@@ -682,7 +682,7 @@ channel_mode (char *outbuf, char *chan, char *nick, char sign, char mode, char *
          tbuf[1][0] = mode;
          tbuf[1][1] = 0;
 
-         EMIT_SIGNAL (XP_TE_CHANMODEGEN, server->front_session, nick, tbuf[0],
+         EMIT_SIGNAL (XP_TE_CHANMODEGEN, server->session, nick, tbuf[0],
                     tbuf[1], chan, 0);
       }
    }
@@ -764,7 +764,7 @@ stupidcode:
 static void
 end_of_names (char *outbuf, char *chan, char *text)
 {
-   struct session *sess;
+   session_t *sess;
    GSList *list;
 
    if (!strcmp (chan, "*"))
@@ -772,7 +772,7 @@ end_of_names (char *outbuf, char *chan, char *text)
       list = sess_list;
       while (list)
       {
-         sess = (struct session *) list->data;
+         sess = (session_t *) list->data;
 	 sess->end_of_names = TRUE;
          list = list->next;
       }
@@ -786,11 +786,11 @@ end_of_names (char *outbuf, char *chan, char *text)
 static void
 check_willjoin_channels (char *tbuf)
 {
-   struct session *sess;
+   session_t *sess;
    GSList *list = sess_list;
    while (list)
    {
-      sess = (struct session *) list->data;
+      sess = (session_t *) list->data;
       if (sess->willjoinchannel[0] != 0)
 	{
 	  strcpy (sess->waitchannel, sess->willjoinchannel);
@@ -808,7 +808,7 @@ check_willjoin_channels (char *tbuf)
 }
 
 static void
-next_nick (struct session *sess, char *outbuf, char *nick)
+next_nick (session_t *sess, char *outbuf, char *nick)
 {
    server->nickcount++;
 
@@ -845,7 +845,7 @@ set_default_modes (char *outbuf)
 /* process_line() */
 
 void
-process_line (struct session *sess)
+process_line (session_t *sess)
 {
    char pdibuf[4096];
    char outbuf[4096];
@@ -857,7 +857,7 @@ process_line (struct session *sess)
    process_data_init (pdibuf, buf + 1, word, word_eol);
 
    if (!sess)
-     sess = (struct session *) sess_list->data;  /* HACK !!! */
+     sess = (session_t *) sess_list->data;  /* HACK !!! */
 
    if (EMIT_SIGNAL (XP_INBOUND, sess, server, buf, NULL, NULL, 0) == 1)
       return;
@@ -888,7 +888,7 @@ process_line (struct session *sess)
       n = atoi (find_word (pdibuf, 2));
       if (n)
       {
-         struct session *realsess = 0;
+         session_t *realsess = 0;
          char *text = find_word_to_end (buf, 3);
          if (*text)
          {
@@ -931,23 +931,23 @@ process_line (struct session *sess)
                   char *po, *tim = ctime (&n);
                   sprintf (outbuf, "%02ld:%02ld:%02ld", idle / 3600, (idle / 60) % 60, idle % 60);
                   if (n == 0)
-                     EMIT_SIGNAL (XP_TE_WHOIS4, server->front_session, find_word (pdibuf, 4), outbuf, NULL, NULL, 0);
+                     EMIT_SIGNAL (XP_TE_WHOIS4, server->session, find_word (pdibuf, 4), outbuf, NULL, NULL, 0);
                   else
                   {
                      if ((po = strchr (tim, '\n')))
                         *po = 0;
-                     EMIT_SIGNAL (XP_TE_WHOIS4T, server->front_session, find_word (pdibuf, 4), outbuf, tim, NULL, 0);
+                     EMIT_SIGNAL (XP_TE_WHOIS4T, server->session, find_word (pdibuf, 4), outbuf, tim, NULL, 0);
                   }
                }
                break;
             case 318:
                server->inside_whois = 0;
-               EMIT_SIGNAL (XP_TE_WHOIS6, server->front_session, word[4], NULL,
+               EMIT_SIGNAL (XP_TE_WHOIS6, server->session, word[4], NULL,
                        NULL, NULL, 0);
                break;
             case 313:
             case 319:
-               EMIT_SIGNAL (XP_TE_WHOIS2, server->front_session, word[4], word_eol[5] + 1, NULL, NULL, 0);
+               EMIT_SIGNAL (XP_TE_WHOIS2, server->session, word[4], word_eol[5] + 1, NULL, NULL, 0);
                break;
             case 321:
                 break;
@@ -963,7 +963,7 @@ process_line (struct session *sess)
             case 324:
                sess = find_session_from_channel (word[4]);
                if (!sess)
-                  sess = server->front_session;
+                  sess = server->session;
                EMIT_SIGNAL (XP_TE_CHANMODES, sess, word[4], word_eol[5],
                                NULL, NULL, 0);
                channel_modes (outbuf, word, word[3], 1);
@@ -984,7 +984,7 @@ process_line (struct session *sess)
             case 352:          /* WHO */
                if (!server->skip_next_who)
                {
-                  struct session *who_sess;
+                  session_t *who_sess;
 		  
                   who_sess = find_session_from_channel (word[4]);
                   if (who_sess)
@@ -1017,7 +1017,7 @@ process_line (struct session *sess)
                   server->skip_next_who = FALSE;
                else
                {
-                  struct session *who_sess;
+                  session_t *who_sess;
                   who_sess = find_session_from_channel (word[4]);
                   if (who_sess)
                   {
@@ -1095,7 +1095,7 @@ process_line (struct session *sess)
                }
                if (n == 375 || n == 372 || n == 376 || n == 422)
                {
-                  EMIT_SIGNAL (XP_TE_MOTD, server->front_session, text, NULL,
+                  EMIT_SIGNAL (XP_TE_MOTD, server->session, text, NULL,
                                NULL, NULL, 0);
                   return;
                }
@@ -1114,7 +1114,7 @@ process_line (struct session *sess)
                              NULL, 0);
                } else
                {
-                  EMIT_SIGNAL (XP_TE_SERVTEXT, server->front_session, text, NULL,
+                  EMIT_SIGNAL (XP_TE_SERVTEXT, server->session, text, NULL,
                        NULL, NULL, 0);
                }
             }
@@ -1246,7 +1246,7 @@ process_line (struct session *sess)
                }
                if (!strcmp ("PONG", cmd))
                {
-                  got_ping_reply (server->front_session, outbuf,
+                  got_ping_reply (server->session, outbuf,
                                   find_word (pdibuf, 4) + 1,
                                   find_word (pdibuf, 3));
                   return;

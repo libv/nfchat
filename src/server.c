@@ -36,15 +36,15 @@ extern GSList *sess_list;
 extern struct xchatprefs prefs;
 
 extern void auto_reconnect (int send_quit, int err);
-extern void clear_channel (struct session *sess);
+extern void clear_channel (session_t *sess);
 extern void set_server_name (char *name);
 extern void flush_server_queue (void);
 extern int tcp_send (char *buf);
-extern void PrintText (struct session *sess, unsigned char *text);
+extern void PrintText (session_t *sess, unsigned char *text);
 extern void read_data (gint sok);
 extern char *errorstring (int err);
 extern int waitline (int sok, char *buf, int bufsize);
-extern void notc_msg (struct session *sess);
+extern void notc_msg (session_t *sess);
 
 static void
 server_cleanup (void)
@@ -57,14 +57,14 @@ server_cleanup (void)
    close (server->childwrite);
    close (server->childread);
    waitpid (server->childpid, NULL, 0);
-   fe_progressbar_end (server->front_session);
+   fe_progressbar_end (server->session);
    server->connecting = 0;
 }
 
 static void
 connected_signal (int sok)
 {
-   session *sess = server->front_session;
+   session_t *sess = server->session;
    char tbuf[128];
    char outbuf[512];
    char host[100];
@@ -135,7 +135,7 @@ connected_signal (int sok)
 }
 
 static int
-check_connecting (struct session *sess)
+check_connecting (session_t *sess)
 {
    char tbuf[256];
 
@@ -159,9 +159,9 @@ close_socket (int sok)
 }
 
 void
-disconnect_server (struct session *sess, int sendquit, int err)
+disconnect_server (session_t *sess, int sendquit, int err)
 {
-   struct session *orig_sess = sess;
+   session_t *orig_sess = sess;
    GSList *list;
 
    if (check_connecting (sess))
@@ -183,7 +183,7 @@ disconnect_server (struct session *sess, int sendquit, int err)
    list = sess_list;
    while (list)                 /* print "Disconnected" to each window using this server */
    {
-      sess = (struct session *) list->data;
+      sess = (session_t *) list->data;
       EMIT_SIGNAL (XP_TE_DISCON, sess, errorstring (err), NULL, NULL, NULL, 0);
       list = list->next;
    }
@@ -215,7 +215,7 @@ disconnect_server (struct session *sess, int sendquit, int err)
    list = sess_list;
    while (list)
    {
-      sess = (struct session *) list->data;
+      sess = (session_t *) list->data;
 
       if (sess->channel[0])
 	{
@@ -229,14 +229,14 @@ disconnect_server (struct session *sess, int sendquit, int err)
 }
 
 void
-connect_server (struct session *sess, char *server_str, int port, int no_login)
+connect_server (session_t *sess, char *server_str, int port, int no_login)
 {
    int sok, sw, pid, read_des[2];
 
    if (!server_str[0])
       return;
 
-   sess = server->front_session;
+   sess = server->session;
 
    if (server->connected)
       disconnect_server (sess, TRUE, -1);

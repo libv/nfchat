@@ -43,18 +43,18 @@ GtkStyle *redtab_style;
 GtkStyle *bluetab_style;
 GtkStyle *inputgad_style;
 
-extern struct session *current_tab; 
+extern session_t *current_tab; 
 extern struct xchatprefs prefs;
 extern GSList *sess_list;
 extern GtkStyle *channelwin_style;
 extern GdkFont *font_normal;
 extern gint xchat_is_quitting;
 
-extern int handle_multiline (struct session *sess, char *cmd, int history, int nocommand);
-extern int kill_session_callback (struct session *sess);
-extern gint gtk_kill_session_callback (GtkWidget *, struct session *sess);
-extern void clear_user_list (struct session *sess);
-extern void handle_inputgad (GtkWidget * igad, struct session *sess);
+extern int handle_multiline (session_t *sess, char *cmd, int history, int nocommand);
+extern int kill_session_callback (session_t *sess);
+extern gint gtk_kill_session_callback (GtkWidget *, session_t *sess);
+extern void clear_user_list (session_t *sess);
+extern void handle_inputgad (GtkWidget * igad, session_t *sess);
 int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);
 
 struct relink_data {
@@ -90,7 +90,7 @@ GdkColor colors[] =
 };
 
 void
-fe_set_title (struct session *sess)
+fe_set_title (session_t *sess)
 {
    char tbuf[200];
    if (!server->connected)
@@ -113,13 +113,13 @@ fe_set_title (struct session *sess)
 }
 
 void
-fe_set_channel (struct session *sess)
+fe_set_channel (session_t *sess)
 {
    gtk_label_set_text (GTK_LABEL (sess->gui->changad), sess->channel);
 }
 
 void
-fe_clear_channel (struct session *sess)
+fe_clear_channel (session_t *sess)
 {
    gtk_entry_set_text (GTK_ENTRY (sess->gui->topicgad), "");
    gtk_label_set_text (GTK_LABEL (sess->gui->namelistinfo), " ");
@@ -136,18 +136,18 @@ void
 fe_set_nick (char *newnick)
 {
    GSList *list = sess_list;
-   struct session *sess;
+   session_t *sess;
    strcpy (server->nick, newnick);
    while (list)
    {
-      sess = (struct session *) list->data;
+      sess = (session_t *) list->data;
       gtk_label_set_text (GTK_LABEL (sess->gui->nickgad), newnick);
       list = list->next;
    }
 }
 
 void
-focus_in (GtkWindow * win, GtkWidget * wid, struct session *sess)
+focus_in (GtkWindow * win, GtkWidget * wid, session_t *sess)
 {
    if (!sess)
    {
@@ -155,12 +155,12 @@ focus_in (GtkWindow * win, GtkWidget * wid, struct session *sess)
       {
 	gtk_widget_grab_focus (current_tab->gui->inputgad);
 	if (!prefs.use_server_tab)
-	  server->front_session = current_tab;
+	  server->session = current_tab;
       }
    } else
    {
       if (!prefs.use_server_tab)
-         server->front_session = sess;
+         server->session = sess;
       gtk_widget_grab_focus (sess->gui->inputgad);
    }
 }
@@ -193,7 +193,7 @@ show_and_unfocus (GtkWidget * wid)
 
 
 static void
-maingui_create_textlist (struct session *sess, GtkWidget *leftpane)
+maingui_create_textlist (session_t *sess, GtkWidget *leftpane)
 {
    sess->gui->textgad = gtk_xtext_new (prefs.indent_pixels);
 
@@ -225,11 +225,11 @@ maingui_create_textlist (struct session *sess, GtkWidget *leftpane)
 }
 
 static void
-gui_new_tab (session *sess)
+gui_new_tab (session_t *sess)
 {
    current_tab = sess;
    if (!prefs.use_server_tab)
-      server->front_session = sess;
+      server->session = sess;
    fe_set_title (sess);
    gtk_widget_grab_focus (sess->gui->inputgad);
 
@@ -244,7 +244,7 @@ gui_new_tab (session *sess)
 static void
 gui_new_tab_callback (GtkWidget * widget, GtkNotebookPage * nbpage, guint page)
 {
-   struct session *sess;
+   session_t *sess;
    GSList *list = sess_list;
 
    if (xchat_is_quitting)
@@ -252,7 +252,7 @@ gui_new_tab_callback (GtkWidget * widget, GtkNotebookPage * nbpage, guint page)
 
    while (list)
    {
-      sess = (struct session *) list->data;
+      sess = (session_t *) list->data;
       if (sess->gui->window == nbpage->child)
       {
          gui_new_tab (sess);
@@ -272,7 +272,7 @@ gui_mainbook_invalid (GtkWidget * w, GtkWidget * main_window)
 }
 
 static void
-gui_main_window_kill (GtkWidget * win, struct session *sess)
+gui_main_window_kill (GtkWidget * win, session_t *sess)
 {
    GSList *list;
 
@@ -282,7 +282,7 @@ gui_main_window_kill (GtkWidget * win, struct session *sess)
    list = sess_list;
    while (list)
    {
-      sess = (session *) list->data;
+      sess = (session_t *) list->data;
       if (!sess->is_tab)
       {
          xchat_is_quitting = FALSE;
@@ -327,7 +327,7 @@ maingui_set_tab_pos (int pos)
 }
 
 static void
-gui_make_tab_window (struct session *sess)
+gui_make_tab_window (session_t *sess)
 {
    GtkWidget *main_box;
  
@@ -380,14 +380,14 @@ maingui_init_styles (GtkStyle * style)
 }
 
 void
-create_window (struct session *sess)
+create_window (session_t *sess)
 {
    GtkWidget *leftpane, *rightpane;
    GtkWidget *vbox, *tbox, *bbox, *nlbox, *wid;
    int justopened = FALSE;
   
-   if (!server->front_session)
-      server->front_session = sess;
+   if (!server->session)
+      server->session = sess;
 
    if (prefs.tabchannels)
      {
@@ -604,14 +604,14 @@ maingui_new_tab (char *title, char *name, void *close_callback, void *userdata)
 }
 
 gint
-gtk_kill_session_callback (GtkWidget *win, struct session *sess)
+gtk_kill_session_callback (GtkWidget *win, session_t *sess)
 {
    kill_session_callback (sess);
    return TRUE;
 }
 
 void
-fe_session_callback (struct session *sess)
+fe_session_callback (session_t *sess)
 {
    if (sess->gui->bar)
    {
@@ -627,7 +627,7 @@ fe_session_callback (struct session *sess)
 }
 
 void
-handle_inputgad (GtkWidget * igad, struct session *sess)
+handle_inputgad (GtkWidget * igad, session_t *sess)
 {
    char *cmd = gtk_entry_get_text (GTK_ENTRY (igad));
 

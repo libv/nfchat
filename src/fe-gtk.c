@@ -38,22 +38,22 @@ extern GtkStyle *inputgad_style;
 GtkStyle *channelwin_style;
 
 extern char *xdir;
-extern struct session *current_tab;
+extern session_t *current_tab;
 extern struct xchatprefs prefs;
 extern GSList *sess_list;
 
-extern int is_session (session *sess);
+extern int is_session (session_t *sess);
 extern char *get_cpu_str (int color);
 extern void PrintTextRaw (GtkWidget * textwidget, unsigned char *text);
 extern void notify_gui_update (void);
 extern void update_all_of (char *name);
-extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, struct session *sess);
+extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, session_t *sess);
 extern void key_init (void);
-extern void create_window (struct session *);
-extern void PrintText (struct session *, char *);
-extern struct session *new_session (void);
-extern void init_userlist_xpm (struct session *sess);
-extern struct session *find_session_from_waitchannel (char *target);
+extern void create_window (session_t *);
+extern void PrintText (session_t *, char *);
+extern session_t *new_session (void);
+extern void init_userlist_xpm (session_t *sess);
+extern session_t *find_session_from_waitchannel (char *target);
 
 
 GdkFont *my_font_load (char *fontname);
@@ -122,7 +122,7 @@ static void
 init_sess (void)
 {
    char buf[512];
-   struct session *sess = sess_list->data;
+   session_t *sess = sess_list->data;
 
    if (done_intro)
       return;
@@ -166,7 +166,7 @@ fe_timeout_remove (int tag)
 }
 
 void
-fe_new_window (struct session *sess)
+fe_new_window (session_t *sess)
 {
   sess->gui = malloc (sizeof (struct session_gui));
   memset (sess->gui, 0, sizeof (struct session_gui));
@@ -253,14 +253,14 @@ my_widget_get_style (char *bg_pic)
    }
    return style;
 }
-static struct session *
+static session_t *
 find_unused_session (void)
 {
-   struct session *sess;
+   session_t *sess;
    GSList *list = sess_list;
    while (list)
    {
-      sess = (struct session *) list->data;
+      sess = (session_t *) list->data;
       if (sess->channel[0] == 0)
          return sess;
       list = list->next;
@@ -268,10 +268,10 @@ find_unused_session (void)
    return 0;
 }
 
-struct session *
+session_t *
 fe_new_window_popup (char *target)
 {
-  struct session *sess = find_session_from_waitchannel (target);
+  session_t *sess = find_session_from_waitchannel (target);
   
   if (!sess)
     {
@@ -289,31 +289,31 @@ fe_new_window_popup (char *target)
 }
 
 void
-fe_set_topic (struct session *sess, char *topic)
+fe_set_topic (session_t *sess, char *topic)
 {
    gtk_entry_set_text (GTK_ENTRY (sess->gui->topicgad), topic);
 }
 
 void
-fe_set_hilight (struct session *sess)
+fe_set_hilight (session_t *sess)
 {
    gtk_widget_set_style (sess->gui->changad, bluetab_style);
 }
 
 void
-fe_text_clear (struct session *sess)
+fe_text_clear (session_t *sess)
 {
    gtk_xtext_remove_lines ((GtkXText *)sess->gui->textgad, -1, TRUE);
 }
 
 void
-fe_close_window (struct session *sess)
+fe_close_window (session_t *sess)
 {
    gtk_widget_destroy (sess->gui->window);
 }
 
 static int
-updatedate_bar (struct session *sess)
+updatedate_bar (session_t *sess)
 {
    static int type = 0;
    static float pos = 0;
@@ -340,7 +340,7 @@ updatedate_bar (struct session *sess)
 }
 
 void
-fe_progressbar_start (struct session *sess)
+fe_progressbar_start (session_t *sess)
 {
    if (sess->gui->op_box)
    {
@@ -352,7 +352,7 @@ fe_progressbar_start (struct session *sess)
 }
 
 void
-fe_progressbar_end (struct session *sess)
+fe_progressbar_end (session_t *sess)
 {
 
    GSList *list = sess_list;
@@ -362,7 +362,7 @@ fe_progressbar_end (struct session *sess)
       while (list)       /* check all windows that use this server and  *
                           * remove the connecting graph, if it has one. */
       {
-         sess = (struct session *) list->data;
+         sess = (session_t *) list->data;
          if (sess->gui->bar)
          {
             if (GTK_IS_WIDGET (sess->gui->bar))
@@ -376,7 +376,7 @@ fe_progressbar_end (struct session *sess)
 }
 
 void
-fe_print_text (struct session *sess, char *text)
+fe_print_text (session_t *sess, char *text)
 {
    PrintTextRaw (sess->gui->textgad, text);
 
@@ -389,7 +389,7 @@ fe_print_text (struct session *sess, char *text)
 }
 
 char *
-fe_buffer_get (session *sess)
+fe_buffer_get (session_t *sess)
 {
    return gtk_xtext_get_chars (GTK_XTEXT (sess->gui->textgad));
 }

@@ -55,7 +55,7 @@ struct nbexec
    int childpid;
    int tochannel;               /* making this int keeps the struct 4-byte aligned */
    int iotag;
-   struct session *sess;
+   struct session_t *sess;
 };
 
 struct xchatprefs
@@ -102,7 +102,7 @@ struct xchatprefs
    unsigned int use_fontset;
 };
 
-struct session
+struct session_t
 {
    GSList *userlist;
    char channel[202];
@@ -134,7 +134,7 @@ struct session
    int doing_who:1;             /* /who sent on this channel */
 };
 
-typedef struct session session;
+typedef struct session_t session_t;
 
 struct server_t
 {
@@ -157,7 +157,7 @@ struct server_t
    time_t last_send;
    int bytes_sent;              /* this second only */
 
-   struct session *front_session;
+   session_t *session;
 
    int motd_skipped:1;
    int connected:1;
@@ -174,7 +174,7 @@ typedef struct server_t server_t;
 
 extern server_t *server;
 
-typedef int (*cmd_callback) (struct session * sess, char *tbuf, char *word[], char *word_eol[]);
+typedef int (*cmd_callback) (session_t * sess, char *tbuf, char *word[], char *word_eol[]);
 
 struct commands
 {
