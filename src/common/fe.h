@@ -22,7 +22,6 @@ void fe_update_channel_limit (struct session *sess);
 int fe_is_chanwindow (struct server *serv);
 void fe_add_chan_list (struct server *serv, char *chan, char *users, char *topic);
 void fe_chan_list_end (struct server *serv);
-void fe_notify_update (char *name);
 void fe_text_clear (struct session *sess);
 void fe_close_window (struct session *sess);
 void fe_progressbar_start (struct session *sess);

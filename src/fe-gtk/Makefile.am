@@ -13,7 +13,7 @@ nfchat_SOURCES =	ascii.c chanlist.c dccgui.c dialog.c \
 			editlist.c fe-gtk.c fkeys.c \
 			gtkutil.c \
 			maingui.c \
-			menu.c notifygui.c palette.c \
+			menu.c palette.c \
 			plugingui.c rawlog.c \
 			settings.c \
 			textgui.c themes.c usermenu.c urlgrab.c userlistgui.c xtext.c

@@ -380,15 +380,6 @@ fe_chan_list_end (struct server *serv)
 }
 
 void
-fe_notify_update (char *name)
-{
-   if (name)
-      update_all_of (name);
-   else
-      notify_gui_update ();
-}
-
-void
 fe_text_clear (struct session *sess)
 {
    gtk_xtext_remove_lines ((GtkXText *)sess->gui->textgad, -1, TRUE);

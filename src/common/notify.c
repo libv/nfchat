@@ -150,7 +150,7 @@ notify_markonline (struct session *sess, char *outbuf, char *word[])
                servnot->laston = time (0);
                EMIT_SIGNAL (XP_TE_NOTIFYONLINE, sess, notify->name,
                             serv->servername, NULL, NULL, 0);
-               fe_notify_update (notify->name);
+              /* fe_notify_update (notify->name); */
             }
             break;
          }
@@ -169,11 +169,11 @@ notify_markonline (struct session *sess, char *outbuf, char *word[])
          servnot->lastoff = time (0);
          EMIT_SIGNAL (XP_TE_NOTIFYOFFLINE, sess, notify->name,
                       serv->servername, NULL, NULL, 0);
-         fe_notify_update (notify->name);
+        /* fe_notify_update (notify->name); */
       }
       list = list->next;
    }
-   fe_notify_update (0);
+  /* fe_notify_update (0); */
 }
 
 int
@@ -260,7 +260,7 @@ notify_deluser (char *name)
       notify = (struct notify *) list->data;
       if (!strcasecmp (notify->name, name))
       {
-         fe_notify_update (notify->name);
+       /*  fe_notify_update (notify->name); */
          /* Remove the records for each server */
          while (notify->server_list)
          {
@@ -271,7 +271,7 @@ notify_deluser (char *name)
          notify_list = g_slist_remove (notify_list, notify);
          free (notify->name);
          free (notify);
-         fe_notify_update (0);
+        /* fe_notify_update (0); */
          return 1;
       }
       list = list->next;
@@ -290,8 +290,8 @@ notify_adduser (char *name)
       notify->server_list = 0;
       notify_list = g_slist_prepend (notify_list, notify);
       notify_checklist ();
-      fe_notify_update (notify->name);
-      fe_notify_update (0);
+     /* fe_notify_update (notify->name); */
+     /* fe_notify_update (0); */
    }
 }
 
@@ -361,5 +361,5 @@ notify_cleanup ()
       }
       list = list->next;
    }
-   fe_notify_update (0);
+  /* fe_notify_update (0); */
 }
