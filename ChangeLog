@@ -3,17 +3,18 @@ NF-chat;
 0.3.5; doin some final graphical stuff
 """"""
     a) 
-	- changed the 'insensitive' styles for topic/namelist to look like
-	  sensitive
+	- changed the 'insensitive' styles for topic/namelist to look
+	  normal (gives problems with unadapted themes - should build
+ 	  special themes with insensitive style = normal)
 	- added SIGINT to proper termination signals
 	- topic = scrollin nicely with fixed width font 
 	- makin spec file
 	- fixed transparency bug
+        - found ctcp ACTION bug, fixed 2 secs later ;)
 	
-*** Test spec file on Chris
 *** Very unlikely: prefs for colour defines of the widgets.
 *** Needs a decent gtk theme
-*** barely possible when theres NO! ircd runnin!
+*** barely possible when theres NO ircd runnin!
     still needs testing on server errors & kicks & lines - reserve for
     when an ircd is runnin
 
