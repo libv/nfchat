@@ -30,6 +30,5 @@ void fe_buttons_update (struct session *sess);
 void fe_set_channel (struct session *sess);
 void fe_set_title (struct session *sess);
 void fe_set_nick (struct server *serv, char *newnick);
-void fe_change_nick (struct server *serv, char *nick, char *newnick);
 void fe_beep (void);
 char *fe_buffer_get (session *sess);

@@ -64,7 +64,6 @@ extern struct session *find_session_from_channel (char *chan, struct server *ser
 extern int list_delentry (GSList ** list, char *name);
 extern void list_addentry (GSList ** list, char *cmd, char *name);
 extern struct DCC *find_dcc (char *nick, char *file, int type);
-extern struct session *new_dialog (struct server *serv, char *nick);
 extern struct session *find_dialog (struct server *serv, char *nick);
 extern void PrintText (struct session *sess, char *text);
 extern void connect_server (struct session *sess, char *server, int port, int quiet);
@@ -1942,13 +1941,13 @@ cmd_ping (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 int
 cmd_query (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-   char *nick = find_word (pdibuf, 2);
+   /* char *nick = find_word (pdibuf, 2);
    if (*nick)
    {
       if (!find_dialog (sess->server, nick))
          new_session (sess->server, nick);
       return TRUE;
-   }
+   } */
    return FALSE;
 }
 
@@ -2549,7 +2548,7 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
             newcmd[0] = 0;
          if (!newcmd[0])
          {
-            if (sess->is_dialog)
+           if (sess->is_dialog)
             {
                struct sockaddr_in *ip;
 
@@ -2572,7 +2571,7 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
                   }
                }
             } else
-            {
+            { 
                if (sess->server->connected)
                {
                   channel_msg (sess->server, tbuf, sess->channel, sess->server->nick, cmd, TRUE);
@@ -2582,7 +2581,7 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
                   notc_msg (sess);
                   return TRUE;
                }
-            }
+            } 
          } else
          {
             if (sess->server->connected)

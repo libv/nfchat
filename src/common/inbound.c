@@ -135,18 +135,18 @@ private_msg (struct server *serv, char *tbuf, char *from, char *ip, char *text)
 
    if (prefs.beepmsg)
 	   fe_beep ();
-   sess = find_session_from_channel (from, serv);
-   if (sess || prefs.autodialog)
+   /* sess = find_session_from_channel (from, serv);
+    if (sess || prefs.autodialog)
    {
       if (!sess)
-         sess = new_session (serv, from);  /* Create a dialog session */
+         sess = new_session (serv, from);*/  /* Create a dialog session */ /*
       channel_msg (serv, tbuf, from, from, text, FALSE);
       if (ip && ip[0])
          fe_set_topic (sess, ip);
       return;
    }
    sess = find_session_from_nick (from, serv);
-   if (!sess)
+   if (!sess) */
       sess = serv->front_session;
    EMIT_SIGNAL (XP_TE_PRIVMSG, sess, from, text, NULL, NULL, 0);
 }
@@ -178,11 +178,11 @@ channel_action (struct session *sess, char *tbuf, char *chan, char *from, char *
 
    if (is_channel (chan) || fromme)
       sess = find_session_from_channel (chan, sess->server);
-   else                         /* it's a private action! */
-      sess = find_session_from_channel (from, sess->server);
+   /* else */                        /* it's a private action! */
+     /* sess = find_session_from_channel (from, sess->server);
 
    if (!sess && !is_channel (chan) && prefs.autodialog)
-      sess = new_session (def->server, from);
+      sess = new_session (def->server, from); */
 
    if (sess)
       EMIT_SIGNAL (XP_TE_CHANACTION, sess, tbuf, text, NULL, NULL, 0);
@@ -275,7 +275,7 @@ channel_msg (struct server *serv, char *outbuf, char *chan, char *from, char *te
    else {
       if (sess && sess->is_dialog)
          EMIT_SIGNAL (XP_TE_DPRIVMSG, sess, real_outbuf, text, NULL, NULL, 0);
-      else
+      else 
          EMIT_SIGNAL (XP_TE_CHANMSG, sess, real_outbuf, text, NULL, NULL, 0);
    }
 }
@@ -326,8 +326,7 @@ user_new_nick (struct server *serv, char *outbuf, char *nick, char *newnick, int
       list = list->next;
    }
 
-   fe_change_nick (serv, nick, newnick);
-   dcc_change_nick (serv, nick, newnick);
+  dcc_change_nick (serv, nick, newnick);
 
    if (me)
       fe_set_nick (serv, newnick);
@@ -579,7 +578,7 @@ user_quit (struct server *serv, char *outbuf, char *nick, char *reason)
          else if (sess->is_dialog && !strcasecmp (sess->channel, nick))
          {
             EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, NULL, NULL, 0);
-         }
+         } 
       }
       list = list->next;
    }

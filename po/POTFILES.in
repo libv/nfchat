@@ -1,7 +1,6 @@
 src/common/cfgfiles.c
 src/common/ctcp.c
 src/common/dcc.c
-src/fe-gtk/dialog.c
 src/fe-gtk/fkeys.c
 src/fe-gtk/gtkutil.c
 src/fe-gtk/menu.c

@@ -497,6 +497,7 @@ new_server (void)
    return serv;
 }
 
+
 struct session *
 new_session (struct server *serv, char *from)
 {
@@ -507,18 +508,20 @@ new_session (struct server *serv, char *from)
 
    sess->server = serv;
    sess->logfd = -1;
-
+   
+  
    if (from)
    {
       sess->is_dialog = TRUE;
       strcpy (sess->channel, from);
-   }
+   } 
 
    sess_list = g_slist_prepend (sess_list, sess);
 
    fe_new_window (sess);
-
+   
    return sess;
+ 
 }
 
 static void

@@ -1632,7 +1632,7 @@ tab_nick_comp (GtkWidget * t, int shift)
 
    sess = find_session_from_inputgad (t);
    if (sess->is_dialog)
-      return 0;
+      return 0; 
    if (sess == NULL)
       return 0;
 

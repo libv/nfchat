@@ -1,5 +1,22 @@
 NF-chat;
 
+0.2.1; removing dialog windows
+""""""
+  - removed new_dialog from maingui.c
+ ### sess->is_dialog
+ ### prefs.treeview???           
+  - added if(!sess->iss_dialog) to fe_new_window in fe-gtk.c
+    still segfaults, maybe i should dig this out more...
+  - after some temp hacks fe_new_window in fe-gtk.c 
+    edited so that new_session isnt called with the string from set 
+    inbound.c; in private_msg, channel_action
+    outbound.c; cmd_query, (lastlog???)
+ ### lastlog function???
+  - removed fe_change_nick from fe.h & inbound.c
+  - removed extern ... *new_dialog from outbound.c
+  - deleted dialog.c edited makefile, po-file
+
+ 
 0.2.0;
 """"""
  a)  
@@ -34,11 +51,6 @@ NF-chat;
   d)
   - removed empty fe_server_callback from maingui.c
   - removed calls in common/fe.h xchat.c
-
-0.2.1;
-""""""
-
-
 
 0.1.13;
 """""""

@@ -76,7 +76,6 @@ extern int tcp_send (struct server *serv, char *buf);
 extern void menu_popup (struct session *sess, GdkEventButton * event, char *nick);
 extern void clear_user_list (struct session *sess);
 extern void handle_inputgad (GtkWidget * igad, struct session *sess);
-extern struct session *new_dialog (struct session *sess);
 int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);
 
 static void userlist_button (GtkWidget * box, char *label, char *cmd,
@@ -179,7 +178,7 @@ void
 fe_set_title (struct session *sess)
 {
    char tbuf[200];
-   if (!sess->server->connected && !sess->is_dialog)
+   if (!sess->server->connected && !sess->is_dialog) 
       strcpy (tbuf, "X-Chat [" VERSION "]");
    else
    {
@@ -533,7 +532,7 @@ maingui_word_check (GtkXText *xtext, char *word)
    }
 
    if (sess->is_dialog)
-      return WORD_DIALOG;
+      return WORD_DIALOG; 
 
    return 0;
 }
@@ -1183,7 +1182,7 @@ relink_window (GtkWidget * w, struct session *sess)
          gtk_box_reorder_child (GTK_BOX (sess->gui->tbox), sess->gui->changad, 4);
          gtk_widget_show (sess->gui->changad);
       } else
-         sess->gui->changad = NULL;
+         sess->gui->changad = NULL; 
       gtk_widget_show_all (sess->gui->window);
       gtk_xtext_refresh (GTK_XTEXT (sess->gui->textgad));
       num = gtk_notebook_page_num (GTK_NOTEBOOK (main_book), old);
@@ -1301,13 +1300,6 @@ create_window (struct session *sess)
    GtkWidget *vbox, *tbox, *bbox, *nlbox, *wid;
    int justopened = FALSE;
   
-   if (sess->is_dialog)
-   {
-      new_dialog (sess);
-      if (prefs.treeview)
-         tree_update ();
-      return;
-   }
    if (!sess->server->front_session)
       sess->server->front_session = sess;
 

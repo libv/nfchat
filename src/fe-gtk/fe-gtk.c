@@ -217,10 +217,15 @@ fe_timeout_remove (int tag)
 void
 fe_new_window (struct session *sess)
 {
-   sess->gui = malloc (sizeof (struct session_gui));
-   memset (sess->gui, 0, sizeof (struct session_gui));
-   create_window (sess);
-   init_sess ();
+   if(!sess->is_dialog) /* look mommy, no hands */
+   {
+     sess->gui = malloc (sizeof (struct session_gui));
+     memset (sess->gui, 0, sizeof (struct session_gui));
+     create_window (sess);
+     init_sess ();
+   }
+   else
+       puts ("fe asked for a dialog???");
 }
 
 void
