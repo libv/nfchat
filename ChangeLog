@@ -1,5 +1,96 @@
 NF-chat;
 
+0.1.13;
+"""""""
+
+###
+### generates a segfault when the main windows is clicked
+### in the close button
+###
+
+  - removed the following menu entries and adjacent functions
+    - X-Chat
+       - menu_newserver_tab
+ ### new_server
+ ### prefs.use_server_tab
+ ### prefs.tabchannels
+       - menu_newserver_window
+       - menu_newchannel_tab
+       - menu_newchannel_window
+       - menu_close
+ ### xchat_cleanup -> function from common
+    - Windows
+       - menu_flushbuffer
+       - menu_savebuffer
+            - close_savebuffer
+            - savebuffer_req_done
+ ### fe_text_clear --> could prolly easily be removed
+    - User Modes
+       - menu_invisible
+ ### prefs.invisible
+       - menu_wallops
+ ### prefs.wallops
+       - menu_servernotice
+ ### prefs.servernotice
+       - menu_away
+ ### prefs.away
+ ### prefs.awayreason
+ ### handle_command <---???
+       - menu_autorejoin
+ ### prefs.autorejoin
+       - menu_autoreconnect
+ ### prefs.autoreconnect 
+       - menu_autoreconnectonfail
+ ### prefs.autoreconnectonfail
+       - menu_autodialog
+ ### prefs.autodialog
+       - menu_autodccchat
+ ### prefs.autodccchat
+       - menu_autodccsend
+ ### prefs.autodccsend
+ ### prefs.dccdir
+    - Settings
+       - menu_usercommands
+ ### commands.conf
+       - menu_ctcpguiopen
+ ### ctcpreply.conf
+       - menu_ulbuttons
+ ### buttons.conf
+       - menu_ulpopup
+ ### popup.conf
+       - menu_rpopup
+ ### replace.conf
+       - menu_urlhandlers
+ ### urlhandlers.conf
+       - menu_evtpopup
+ ### remove pevent_dialog_show from textgui.c
+       - menu_keypopup
+ ### remove key_dialog_show from fkeys.c
+       - menu_themes
+ ### remove menu_themehandler from themes.c
+       - menu_reload
+ ### load_config, prolly common
+ ### default_file <--- menu.c only
+       - menu_savedefault
+ ### save_config, prolly common too
+       - menu_saveexit
+ ### prefs.autosave
+    - Scripts & plugins
+       - menu_loadperl
+          - menu_loadperl_callback
+       - menu_unloadall
+ ### command_unloadall
+       - menu_perllist
+    - Help
+       - menu_help
+ ### cmd_help
+       - menu_webpage
+ ### goto_url
+       - menu_docs
+ - removed editlist.c and edited Makefile.am
+ - removed createmenus from menu.c and maingui.c
+ - removed the mymenu struct
+
 0.1.12;
 """""""
 

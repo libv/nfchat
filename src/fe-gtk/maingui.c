@@ -42,7 +42,6 @@
 
 GtkWidget *main_window = 0;
 GtkWidget *main_book;
-GtkWidget *main_menu;
 GtkStyle *normaltab_style = 0;
 GtkStyle *redtab_style;
 GtkStyle *bluetab_style;
@@ -77,7 +76,6 @@ extern int tcp_send_len (struct server *serv, char *buf, int len);
 extern int tcp_send (struct server *serv, char *buf);
 extern void menu_popup (struct session *sess, GdkEventButton * event, char *nick);
 extern void clear_user_list (struct session *sess);
-extern GtkWidget *createmenus (struct session *sess);
 extern void handle_inputgad (GtkWidget * igad, struct session *sess);
 extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, struct session *sess);
 extern struct session *new_dialog (struct session *sess);
@@ -875,15 +873,11 @@ gui_new_tab_callback (GtkWidget * widget, GtkNotebookPage * nbpage, guint page)
       if (sess->gui->window == nbpage->child)
       {
          gui_new_tab (sess);
-         if (main_window)
-            gtk_widget_set_sensitive (main_menu, TRUE);
          return;
       }
       list = list->next;
    }
-   /* we're moved to a tab that isn't a session, the menus would crash! */
-   if (main_window)
-      gtk_widget_set_sensitive (main_menu, FALSE);
+
    current_tab = 0;
    menu_sess = 0;
 }
@@ -1276,8 +1270,7 @@ static void
 gui_make_tab_window (struct session *sess)
 {
    GtkWidget *main_box, *main_hbox = NULL, *trees;
-   GtkWidget *wid;
-
+ 
    if (!main_window)
    {
       current_tab = 0;
@@ -1298,14 +1291,6 @@ gui_make_tab_window (struct session *sess)
       gtk_container_add (GTK_CONTAINER (main_window), main_box);
 
       gtk_widget_show (main_box);
-
-      main_menu = createmenus (sess);
-      gtk_widget_show (main_menu);
-
-      wid = gtk_handle_box_new ();
-      gtk_container_add (GTK_CONTAINER (wid), main_menu);
-      gtk_box_pack_start (GTK_BOX (main_box), wid, FALSE, TRUE, 0);
-      gtk_widget_show (wid);
 
       if (prefs.treeview) {
 	 main_hbox = gtk_hpaned_new ();
@@ -1343,7 +1328,7 @@ maingui_refresh (session *sess)
 int
 relink_window (GtkWidget * w, struct session *sess)
 {
-   GtkWidget *old, *wid;
+   GtkWidget *old;
    int page, num, need = 0;
 
    if (sess->is_tab)
@@ -1370,17 +1355,7 @@ relink_window (GtkWidget * w, struct session *sess)
 
       gtk_widget_realize (sess->gui->window);
       maingui_set_icon (sess->gui->window);
-      if (!sess->is_dialog)
-      {
-         wid = gtk_handle_box_new ();
-         gtk_box_pack_start (GTK_BOX (sess->gui->vbox), wid, FALSE, FALSE, 0);
-         gtk_box_reorder_child (GTK_BOX (sess->gui->vbox), wid, 0);
-         gtk_widget_show (wid);
-
-         sess->gui->menu = createmenus (sess);
-         gtk_container_add (GTK_CONTAINER (wid), sess->gui->menu);
-         gtk_widget_show (sess->gui->menu);
-      }
+      
       fe_set_title (sess);
       gtk_signal_connect ((GtkObject *) sess->gui->window, "destroy",
                           GTK_SIGNAL_FUNC (gtk_kill_session_callback), sess);
@@ -1640,16 +1615,6 @@ create_window (struct session *sess)
       gtk_container_add ((GtkContainer *) sess->gui->window, vbox);
    gtk_widget_show (vbox);
 
-   if (!prefs.tabchannels)
-   {
-      sess->gui->menu = createmenus (sess);
-      gtk_widget_show (sess->gui->menu);
-
-      wid = gtk_handle_box_new ();
-      gtk_container_add (GTK_CONTAINER (wid), sess->gui->menu);
-      gtk_box_pack_start (GTK_BOX (vbox), wid, FALSE, TRUE, 0);
-      gtk_widget_show (wid);
-   }
    tbox = gtk_hbox_new (FALSE, 0);
    sess->gui->tbox = tbox;
    gtk_container_set_border_width (GTK_CONTAINER (tbox), 0);
