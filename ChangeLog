@@ -2,7 +2,7 @@ NF-chat;
 
 0.2.2; removing buttonbox & tree 
 """"""
- a)
+ a) removing buttonbox
   - removed button_box from struct session_gui fe-gtk.h
   - removed adjacent calls from maingui.c
         - maingui_createbuttons removed
@@ -12,8 +12,20 @@ NF-chat;
         - removed userlist_button
   - removed fe_buttons_update calls from fe.h, outbound.c
 ### userlist_button_cb
+  b) removing treeview
+   - removed from maingui.c
+        - struct tree_data, tree_row_destroy, tree_add_sess, tree_build
+          tree_new_entry, tree_populate, tree_destroy, tree_select_row
+          new_tree_view, tree_update, tree_default_style, tree_red_style
+          tree_blue_style
+### prefs.treeview
+        - removed tree calls from
+            - fe_set_channel, fe_clear_channel, focus_in, gui_make_tab_window
+              fe_session_callback, 
+   - removed from fe-gtk.c
+        - calls from fe_set_hilight, fe_print_text
 
-
+ 
 0.2.1; removing dialog windows
 """"""
   a)

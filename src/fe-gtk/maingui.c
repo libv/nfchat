@@ -77,9 +77,6 @@ extern void clear_user_list (struct session *sess);
 extern void handle_inputgad (GtkWidget * igad, struct session *sess);
 int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);
 
-static void tree_update ();
-void tree_default_style (struct session *sess);
-
 struct relink_data {
    GtkWidget *win, *hbox;
    gchar *ltitle;
@@ -157,9 +154,6 @@ void
 fe_set_channel (struct session *sess)
 {
    gtk_label_set_text (GTK_LABEL (sess->gui->changad), sess->channel);
-
-   if (prefs.treeview)
-      tree_update ();
 }
 
 void
@@ -174,8 +168,6 @@ fe_clear_channel (struct session *sess)
    if (sess->gui->op_xpm)
       gtk_widget_destroy (sess->gui->op_xpm);
    sess->gui->op_xpm = 0;
-   if (prefs.treeview)
-      tree_update ();
 }
 
 void
@@ -295,9 +287,6 @@ focus_in (GtkWindow * win, GtkWidget * wid, struct session *sess)
       else
          gtk_widget_grab_focus (sess->gui->textgad);
       menu_sess = sess;
-
-      if (prefs.treeview)
-	 tree_default_style (sess);
    }
 }
 
@@ -726,268 +715,6 @@ maingui_userlist_selected (GtkWidget *clist, gint row, gint column,
    }
 }
 
-/* Treeview code --AGL */
-
-static GList *tree_list = NULL;
-
-#define TREE_SERVER 0
-#define TREE_SESSION 1
-
-struct tree_data {
-   int type;
-   void *data;
-};
-
-static void
-tree_row_destroy (struct tree_data *td)
-{
-   g_free (td);
-}
-
-static void
-tree_add_sess (GSList **o_ret, struct server *serv)
-{
-   GSList *ret = *o_ret;
-   GSList *session;
-   struct session *sess;
-
-   session = sess_list;
-   while (session) {
-      sess = session->data;
-      if (sess->server == serv && !sess->is_server)
-	 ret = g_slist_prepend (ret, sess);
-      session = session->next;
-   }
-
-   *o_ret = ret;
-   return;
-}
-
-static GSList *
-tree_build ()
-{
-   GSList *serv;
-   GSList *ret = NULL;
-   struct server *server;
-
-   serv = serv_list;
-   while (serv) {
-      server = serv->data;
-      ret = g_slist_prepend (ret, server);
-      ret = g_slist_prepend (ret, NULL);
-      tree_add_sess (&ret, server);
-      ret = g_slist_prepend (ret, NULL);
-      serv = serv->next;
-   }
-
-   ret = g_slist_reverse (ret);
-   return ret;
-}
-
-static gpointer
-tree_new_entry (int type, void *data)
-{
-   struct tree_data *td = NULL;
-
-   td = g_new (struct tree_data, 1);
-   td->type = type;
-   td->data = data;
-
-   return td;
-}
-
-static void
-tree_populate (GtkCTree *tree, GSList *l)
-{
-   int state = 0;
-   void *data;
-   gchar *text[1];
-   GtkCTreeNode *parent = NULL, *leaf = NULL;
-   
-   gtk_clist_freeze (GTK_CLIST (tree));
-   gtk_clist_clear (GTK_CLIST(tree));
-   for (; l; l = l->next) {
-      data = l->data;
-      if (data == NULL) {
-	 if (!state) {
-	    state = 1;
-	    continue;
-	 } else {
-	    state = 0;
-	    continue;
-	 }
-      }
-      if (!state) {
-	 text[0] = ((struct server *) data)->servername;
-	 if (text[0][0]) {
-	    parent = gtk_ctree_insert_node (tree, NULL, NULL, text, 0, NULL,
-					    NULL, NULL, NULL, 0, 1);
-	    ((GtkCListRow *) ((GList *) parent)->data)->data =
-	       tree_new_entry (TREE_SERVER, data);
-	    ((GtkCListRow *) ((GList *) parent)->data)->destroy =
-	       (GtkDestroyNotify) tree_row_destroy;
-	 }
-	 continue;
-      } else {
-	 text[0] = ((struct session *) data)->channel;
-	 if (text[0][0]) {
-	    leaf = gtk_ctree_insert_node (tree, parent, NULL, text, 0, NULL,
-					  NULL, NULL, NULL, 1, 1);
-	    ((GtkCListRow *) ((GList *) leaf)->data)->data =
-	       tree_new_entry (TREE_SESSION, data);
-	    ((GtkCListRow *) ((GList *) leaf)->data)->destroy =
-	       (GtkDestroyNotify) tree_row_destroy;
-	 }
-	 continue;
-      }
-   }
-   gtk_clist_thaw (GTK_CLIST (tree));
-}
-
-static void
-tree_destroy (GtkWidget *tree)
-{
-   tree_list = g_list_remove (tree_list, tree);
-}
-
-static void
-tree_select_row (GtkWidget *tree, GList *row)
-{
-   struct tree_data *td;
-   struct session *sess = NULL;
-   struct server *serv = NULL;
-   int page;
- 
-   td = ((struct tree_data *) ((GtkCListRow *) row->data)->data);
-   if (!td)
-      return;
-   if (td->type == TREE_SESSION) {
-      sess = td->data;
-      if (sess->is_tab) {
-	 if (main_window)             /* this fixes a little refresh glitch */
-	    {
-	       page = gtk_notebook_page_num (GTK_NOTEBOOK (main_book),
-					     sess->gui->window);
-          maingui_pagetofront (page);
-	    }
-      } else {
-	 gtk_widget_hide (sess->gui->window);
-	 gtk_widget_show (sess->gui->window);
-      }
-      return;
-   } else if (td->type == TREE_SERVER) {
-      serv = td->data;
-      sess = serv->front_session;
-      if (serv->front_session) {
-	 if (serv->front_session->is_tab) {
-	    if (main_window) {
-	       page = gtk_notebook_page_num (GTK_NOTEBOOK (main_book),
-					     sess->gui->window);
-          maingui_pagetofront (page);
-	    }
-	 } else {
-	    gtk_widget_hide (sess->gui->window);
-	    gtk_widget_show (sess->gui->window);
-	 }
-      }
-      return;
-   }
-}
-
-static GtkWidget *
-new_tree_view ()
-{
-   GtkWidget *tree;
-   GSList *data;
-
-   tree = gtk_ctree_new_with_titles (1, 0, NULL);
-   gtk_clist_set_selection_mode (GTK_CLIST (tree), GTK_SELECTION_BROWSE);
-   gtk_clist_set_column_width (GTK_CLIST (tree), 0, 80);
-   gtk_signal_connect (GTK_OBJECT (tree), "destroy", tree_destroy, NULL);
-   gtk_signal_connect (GTK_OBJECT (tree), "tree_select_row", tree_select_row, 0);
-   data = tree_build ();
-   tree_populate (GTK_CTREE(tree), data);
-   tree_list = g_list_prepend (tree_list, tree);
-   g_slist_free (data);
-
-   return tree;
-}
-
-void
-tree_update ()
-{
-   GList *tree;
-   GSList *data = tree_build ();
-   
-   for (tree = tree_list; tree; tree = tree->next)
-      tree_populate (GTK_CTREE (tree->data), data);
-
-   g_slist_free (data);
-}
-
-void
-tree_default_style (struct session *sess)
-{
-   GList *tree;
-   GList *rows;
-   int row = -1;
-
-   for (tree = tree_list; tree; tree = tree->next) {
-      if (row > -1)
-	 gtk_clist_set_foreground (GTK_CLIST (tree->data), row, &colors[1]);
-      row = 0;
-      for (rows = (GTK_CLIST (tree->data)->row_list); rows; rows = rows->next) {
-	 if ( ((GtkCListRow *)rows->data)->data == sess) {
-	    gtk_clist_set_foreground (GTK_CLIST (tree->data), row, &colors[1]);
-	    continue;
-	 }
-	 row ++;
-      }
-   }
-}
-
-void
-tree_red_style (struct session *sess)
-{
-   GList *tree;
-   GList *rows;
-   int row = -1;
-
-   for (tree = tree_list; tree; tree = tree->next) {
-      if (row > -1)
-	 gtk_clist_set_foreground (GTK_CLIST (tree->data), row, &colors[4]);
-      row = 0;
-      for (rows = (GTK_CLIST (tree->data)->row_list); rows; rows = rows->next) {
-	 if ( ((GtkCListRow *)rows->data)->data == sess) {
-	    gtk_clist_set_foreground (GTK_CLIST (tree->data), row, &colors[4]);
-	    continue;
-	 }
-	 row ++;
-      }
-   }
-}
-
-void
-tree_blue_style (struct session *sess)
-{
-   GList *tree;
-   GList *rows;
-   int row = -1;
-
-   for (tree = tree_list; tree; tree = tree->next) {
-      if (row > -1)
-	 gtk_clist_set_foreground (GTK_CLIST (tree->data), row, &colors[2]);
-      row = 0;
-      for (rows = (GTK_CLIST (tree->data)->row_list); rows; rows = rows->next) {
-	 if ( ((GtkCListRow *)rows->data)->data == sess) {
-	    gtk_clist_set_foreground (GTK_CLIST (tree->data), row, &colors[2]);
-	    continue;
-	 }
-	 row ++;
-      }
-   }
-}
-
 void
 maingui_set_tab_pos (int pos)
 {
@@ -1015,7 +742,7 @@ maingui_set_tab_pos (int pos)
 static void
 gui_make_tab_window (struct session *sess)
 {
-   GtkWidget *main_box, *main_hbox = NULL, *trees;
+   GtkWidget *main_box;
  
    if (!main_window)
    {
@@ -1038,12 +765,6 @@ gui_make_tab_window (struct session *sess)
 
       gtk_widget_show (main_box);
 
-      if (prefs.treeview) {
-	 main_hbox = gtk_hpaned_new ();
-	 trees = new_tree_view ();
-	 gtk_widget_show (trees);
-	 gtk_paned_add1 (GTK_PANED (main_hbox), trees);
-      }
       main_book = gtk_notebook_new ();
 
       maingui_set_tab_pos (prefs.tabs_position);
@@ -1053,12 +774,8 @@ gui_make_tab_window (struct session *sess)
                           GTK_SIGNAL_FUNC (gui_new_tab_callback), 0);
       gtk_signal_connect ((GtkObject *) main_book, "destroy",
                           GTK_SIGNAL_FUNC (gui_mainbook_invalid), main_window);
-      if (prefs.treeview) {
-	 gtk_container_add (GTK_CONTAINER (main_box), main_hbox);
-	 gtk_paned_add2 (GTK_PANED (main_hbox), main_book);
-	 gtk_widget_show (main_hbox);
-      } else
-	 gtk_container_add (GTK_CONTAINER (main_box), main_book);
+    
+      gtk_container_add (GTK_CONTAINER (main_box), main_book);
       gtk_widget_show (main_book);
    }
 }
@@ -1427,8 +1144,6 @@ gtk_kill_session_callback (GtkWidget *win, struct session *sess)
 void
 fe_session_callback (struct session *sess)
 {
-   tree_update ();
-
    if (sess->gui->bar)
    {
       fe_progressbar_end (sess);

@@ -59,8 +59,7 @@ extern void PrintText (struct session *, char *);
 extern struct session *new_session (struct server *serv, char *from);
 extern void init_userlist_xpm (struct session *sess);
 extern struct session *find_session_from_waitchannel (char *target, struct server *serv);
-extern void tree_blue_style (struct session *);
-extern void tree_red_style (struct session *);
+
 
 GdkFont *my_font_load (char *fontname);
 
@@ -334,8 +333,6 @@ void
 fe_set_hilight (struct session *sess)
 {
    gtk_widget_set_style (sess->gui->changad, bluetab_style);
-   if (prefs.treeview)
-      tree_blue_style (sess);
 }
 
 void
@@ -418,12 +415,6 @@ void
 fe_print_text (struct session *sess, char *text)
 {
    PrintTextRaw (sess->gui->textgad, text);
-
-   if (!sess->new_data && !sess->nick_said && sess != current_tab)
-   {
-      if (prefs.treeview)
-	 tree_red_style (sess);
-   }
 
    if (!sess->new_data && sess != current_tab &&
      sess->is_tab && !sess->nick_said)
