@@ -33,8 +33,6 @@
 #include "xtext.h"
 
 extern struct xchatprefs prefs;
-
-extern unsigned char *strip_color (unsigned char *text);
 extern void check_special_chars (char *text);
 extern char **environ;
 extern void PrintText (char *text);

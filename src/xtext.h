@@ -154,9 +154,7 @@ struct _GtkXTextClass
 
 GtkWidget* gtk_xtext_new         (int indent);
 guint      gtk_xtext_get_type    (void);
-void       gtk_xtext_append_indent (GtkXText *xtext,
-                                    char *left_text, int left_len,
-                                    char *right_text, int right_len);
+void       gtk_xtext_append (GtkXText *xtext, char *left_text, int left_len, char *right_text, int right_len);
 void       gtk_xtext_set_font    (GtkXText *xtext, GdkFont *font, char *name);
 void       gtk_xtext_set_background (GtkXText *xtext, GdkPixmap *pixmap, int trans, int shaded);
 void       gtk_xtext_set_palette (GtkXText *xtext, GdkColor palette[]);

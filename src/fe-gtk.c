@@ -290,9 +290,9 @@ PrintTextLine (char *text, int len)
   if (tab && (unsigned long)tab < (unsigned long)(text + len))
     {
       leftlen = (unsigned long)tab - (unsigned long)text;
-      gtk_xtext_append_indent (GTK_XTEXT (session->gui->textgad), text, leftlen, tab+1, len - (leftlen + 1));
+      gtk_xtext_append (GTK_XTEXT (session->gui->textgad), text, leftlen, tab+1, len - (leftlen + 1));
     } else
-      gtk_xtext_append_indent (GTK_XTEXT (session->gui->textgad), 0, 0, text, len);
+      gtk_xtext_append (GTK_XTEXT (session->gui->textgad), 0, 0, text, len);
 }
 
 void

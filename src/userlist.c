@@ -110,7 +110,7 @@ fe_userlist_insert (struct user *newuser, int row)
    else
       gtk_clist_insert (GTK_CLIST (session->gui->namelistgad), row, &name);
    gtk_clist_set_row_data (GTK_CLIST (session->gui->namelistgad), row, (gpointer) newuser);
-
+   /*  gtk_clist_set_selectable (GTK_CLIST (session->gui->namelistgad), row, FALSE); */
    if (!strcmp (newuser->nick, server->nick))
    {
       if (newuser->op)
@@ -136,38 +136,14 @@ fe_userlist_insert (struct user *newuser, int row)
    return row;
 }
 
-static int
-gtkutil_clist_selection (GtkWidget * clist)
-{
-   if (GTK_CLIST (clist)->selection)
-      return (int) GTK_CLIST (clist)->selection->data;
-   else
-      return -1;
-}
-
-
 static void
 fe_userlist_move (struct user *user, int new_row)
 {
    gint old_row;
-   int sel = FALSE;
 
    old_row = gtk_clist_find_row_from_data (GTK_CLIST (session->gui->namelistgad), (gpointer) user);
-
-   if (old_row == gtkutil_clist_selection (session->gui->namelistgad))
-      sel = TRUE;
-
    gtk_clist_remove (GTK_CLIST (session->gui->namelistgad), old_row);
    new_row = fe_userlist_insert (user, new_row);
-
-   if (sel)
-      gtk_clist_select_row ((GtkCList *) session->gui->namelistgad, new_row, 0);
-}
-
-static void
-fe_userlist_clear (void)
-{
-   gtk_clist_clear (GTK_CLIST (session->gui->namelistgad));
 }
 
 static int
@@ -192,7 +168,7 @@ clear_user_list (void)
    struct user *user;
    GSList *list = session->userlist;
 
-   fe_userlist_clear ();
+   gtk_clist_clear (GTK_CLIST (session->gui->namelistgad));
    while (list)
    {
       user = (struct user *)list->data;

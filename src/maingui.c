@@ -124,7 +124,7 @@ fe_set_nick (char *newnick)
 }
 
 static void
-focus_in (GtkWindow * win, GtkWidget * wid, void *blah)
+focus_in (GtkWidget * win, GtkWidget * wid, void *blah)
 {
   gtk_widget_grab_focus (session->gui->inputgad);
 }
@@ -177,54 +177,39 @@ maingui_create_textlist (GtkWidget *leftpane)
    show_and_unfocus (session->gui->vscrollbar);
 }
 
-static void
-maingui_userlist_selected (GtkWidget *clist, gint row, gint column,
-                           GdkEventButton *even)
+/* static void
+maingui_userlist_selected (GtkWidget *clist, gint row, gint column, GdkEventButton *even)
 {
-   gtk_clist_unselect_all (GTK_CLIST (clist));
-}
+  gtk_clist_unselect_all (GTK_CLIST (clist));
+   gtk_widget_grab_focus (session->gui->inputgad);
+} */
 
 static GtkWidget *
-gtkutil_clist_new (int columns, char *titles[],
-          GtkWidget * box, int policy,
-                   void *select_callback, gpointer select_userdata,
-              void *unselect_callback,
-           gpointer unselect_userdata,
-                   int selection_mode)
+gtkutil_clist_new (GtkWidget * box, int policy)
 {
    GtkWidget *clist, *win;
 
    win = gtk_scrolled_window_new (0, 0);
    gtk_container_add (GTK_CONTAINER (box), win);
-   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (win),
-                 GTK_POLICY_AUTOMATIC,
-                              policy);
+   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (win), GTK_POLICY_AUTOMATIC, policy);
    gtk_widget_show (win);
 
-   if (titles)
-      clist = gtk_clist_new_with_titles (columns, titles);
-   else
-      clist = gtk_clist_new (columns);
-   if (selection_mode)
-      gtk_clist_set_selection_mode (GTK_CLIST (clist), selection_mode);
+   clist = gtk_clist_new (1);
    
    gtk_clist_column_titles_passive (GTK_CLIST (clist));
    gtk_container_add (GTK_CONTAINER (win), clist);
-
-   if (select_callback)
-   {
-      gtk_signal_connect (GTK_OBJECT (clist), "select_row",
-                          GTK_SIGNAL_FUNC (select_callback), select_userdata);
-   }
-
-   if (unselect_callback)
-   {
-      gtk_signal_connect (GTK_OBJECT (clist), "unselect_row",
-                          GTK_SIGNAL_FUNC (unselect_callback), unselect_userdata);
-   }
+   /* gtk_signal_connect (GTK_OBJECT (clist), "select_row", GTK_SIGNAL_FUNC (maingui_userlist_selected), session);*/
    gtk_widget_show (clist);
 
    return clist;
+}
+
+/* called when inputgad looses focus, to return focus to it */ 
+void
+input_return_focus (GtkWidget * wid, GdkEventFocus *blah, void *blah2)
+{
+  fprintf(stderr, "passed return focus\n");
+  gtk_widget_grab_focus ((GtkWidget *) session->gui->window);
 }
 
 void
@@ -264,6 +249,8 @@ create_window (void)
    session->gui->topicgad = gtk_entry_new ();
    gtk_entry_set_editable (GTK_ENTRY (session->gui->topicgad), FALSE);
    gtk_container_add (GTK_CONTAINER (tbox), session->gui->topicgad);
+   gtk_widget_set_sensitive ((GtkWidget *) session->gui->topicgad, FALSE);
+   gtk_signal_connect ((GtkObject *) session->gui->topicgad, "focus_in_event", GTK_SIGNAL_FUNC (focus_in), session);
    gtk_widget_show (session->gui->topicgad);
    
    leftpane = gtk_hbox_new (FALSE, 0);
@@ -294,8 +281,8 @@ create_window (void)
    maingui_create_textlist (leftpane);
    session->gui->leftpane = leftpane;
 
-   session->gui->namelistgad = gtkutil_clist_new (1, 0, nlbox, GTK_POLICY_AUTOMATIC, maingui_userlist_selected, session, 0, 0, GTK_SELECTION_MULTIPLE);
-   
+   session->gui->namelistgad = gtkutil_clist_new (nlbox, GTK_POLICY_AUTOMATIC);
+   gtk_widget_set_sensitive ((GtkWidget *) session->gui->namelistgad, FALSE);
    gtk_clist_set_column_width (GTK_CLIST (session->gui->namelistgad), 0, 10);
    gtk_widget_set_usize (session->gui->namelistgad->parent, 115, 0);
  
@@ -315,7 +302,8 @@ create_window (void)
    session->gui->inputgad = gtk_entry_new_with_max_length (2048);
    gtk_container_add (GTK_CONTAINER (bbox), session->gui->inputgad);
    gtk_signal_connect (GTK_OBJECT (session->gui->inputgad), "activate", GTK_SIGNAL_FUNC (handle_inputgad), session);
-   gtk_signal_connect (GTK_OBJECT (session->gui->inputgad), "key_press_event", GTK_SIGNAL_FUNC (key_handle_key_press), session);
+   gtk_signal_connect (GTK_OBJECT (session->gui->inputgad), "key-press-event", GTK_SIGNAL_FUNC (key_handle_key_press), session);
+   gtk_signal_connect (GTK_OBJECT (session->gui->inputgad), "focus-out-event", GTK_SIGNAL_FUNC (input_return_focus), session);
    gtk_widget_set_style (session->gui->inputgad, inputgad_style);
    gtk_widget_show (session->gui->inputgad);
    if (justopened)

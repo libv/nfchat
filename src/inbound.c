@@ -32,7 +32,6 @@
 #include "userlist.h"
 
 extern int tcp_send (char *buf);
-extern unsigned char *strip_color (unsigned char *text);
 extern void PrintText(char *text);
 extern void change_nick (char *oldnick, char *newnick);
 extern void process_data_init (unsigned char *buf, char *cmd, char *word[], char *word_eol[]);
@@ -42,6 +41,16 @@ extern void fe_clear_channel (void);
 extern void fe_set_channel (void);
 extern void fe_set_title (void);
 extern void fe_set_nick (char *newnick);
+/* userlist.c */
+extern void clear_user_list (void);
+extern struct user *find_name (char *name);
+extern void voice_name (char *name);
+extern void devoice_name (char *name);
+extern void ul_op_name (char *name);
+extern void deop_name (char *name);
+extern int add_name (char *name);
+extern int sub_name (char *name);
+
 
 #define find_word_to_end(a, b) word_eol[b]
 #define find_word(a, b) word[b]
@@ -289,6 +298,53 @@ names_list (char *tbuf, char *names)
       }
       names++;
    }
+}
+
+static unsigned char *
+strip_color (unsigned char *text)
+{
+   int nc = 0;
+   int i = 0;
+   int col = 0;
+   int len = strlen (text);
+   unsigned char *new_str = malloc (len + 2);
+
+   while (len > 0)
+   {
+      if ((col && isdigit (*text) && nc < 2) ||
+          (col && *text == ',' && nc < 3))
+      {
+         nc++;
+         if (*text == ',')
+            nc = 0;
+      } else
+      {
+         if (col)
+            col = 0;
+         switch (*text)
+         {
+         case '\003':/*ATTR_COLOR:*/
+            col = 1;
+            nc = 0;
+            break;
+         case '\007':/*ATTR_BEEP:*/
+         case '\017':/*ATTR_RESET:*/
+         case '\026':/*ATTR_REVERSE:*/
+         case '\002':/*ATTR_BOLD:*/
+         case '\037':/*ATTR_UNDERLINE:*/
+            break;
+         default:
+            new_str[i] = *text;
+            i++;
+         }
+      }
+      text++;
+      len--;
+   }
+
+   new_str[i] = 0;
+
+   return new_str;
 }
 
 static void

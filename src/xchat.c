@@ -55,7 +55,6 @@ extern void signal_setup (void);
 extern int close_socket (int sok);
 extern void connect_server (char *server, int port, int quiet);
 extern void disconnect_server (int sendquit, int err);
-extern unsigned char *strip_color (unsigned char *text);
 extern void load_text_events (void);
 void auto_reconnect (int send_quit, int err);
 void init_commands (void);
