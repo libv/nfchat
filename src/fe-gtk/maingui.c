@@ -185,25 +185,19 @@ show_and_unfocus (GtkWidget * wid)
 static void
 maingui_create_textlist (struct session *sess, GtkWidget *leftpane)
 {
-   sess->gui->textgad = gtk_xtext_new (prefs.indent_pixels*prefs.indent_nicks,
-                                       prefs.show_separator);
+   sess->gui->textgad = gtk_xtext_new (prefs.indent_pixels);
 
    gtk_object_set_user_data (GTK_OBJECT (sess->gui->textgad), sess);
 
    ((GtkXText*)sess->gui->textgad)->double_buffer = prefs.double_buffer;
    ((GtkXText*)sess->gui->textgad)->wordwrap = prefs.wordwrap;
    ((GtkXText*)sess->gui->textgad)->max_auto_indent = prefs.max_auto_indent;
-   ((GtkXText*)sess->gui->textgad)->auto_indent = prefs.auto_indent;
-   ((GtkXText*)sess->gui->textgad)->thinline = prefs.thin_separator;
    ((GtkXText*)sess->gui->textgad)->max_lines = prefs.max_lines;
    ((GtkXText*)sess->gui->textgad)->error_function = gtkutil_simpledialog;
   
    ((GtkXText*)sess->gui->textgad)->tint_red = prefs.tint_red;
    ((GtkXText*)sess->gui->textgad)->tint_green = prefs.tint_green;
    ((GtkXText*)sess->gui->textgad)->tint_blue = prefs.tint_blue;
-
-  /* if (prefs.timestamp && prefs.indent_nicks)
-      ((GtkXText*)sess->gui->textgad)->time_stamp = TRUE; */
 
    gtk_xtext_set_palette (GTK_XTEXT (sess->gui->textgad), colors);
    gtk_xtext_set_font (GTK_XTEXT (sess->gui->textgad), font_normal, 0);
@@ -502,10 +496,9 @@ create_window (struct session *sess)
                        GTK_SIGNAL_FUNC (handle_inputgad), sess);
    gtk_signal_connect (GTK_OBJECT (sess->gui->inputgad), "key_press_event",
                        GTK_SIGNAL_FUNC (key_handle_key_press), sess);
-   if (prefs.style_inputbox)
-      gtk_widget_set_style (sess->gui->inputgad, inputgad_style);
+   gtk_widget_set_style (sess->gui->inputgad, inputgad_style);
    gtk_widget_show (sess->gui->inputgad);
-   if (prefs.newtabstofront || justopened)
+   if (justopened)
       gtk_widget_grab_focus (sess->gui->inputgad);
 
    gtk_widget_show (sess->gui->window);

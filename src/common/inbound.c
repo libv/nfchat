@@ -77,20 +77,6 @@ void channel_msg (struct server *serv, char *outbuf, char *chan, char *from, cha
 /* also light/dark gray (14/15) */
 /* 5,7,8 are all shades of yellow which happen to look dman near the same */
 
-static int rcolors[] =
-{3, 4, 6, 8, 9, 10, 11, 12, 13};
-
-static int
-color_of (char *name)
-{
-   int i = 0, sum = 0;
-
-   while (name[i])
-      sum += name[i++];
-   sum %= sizeof (rcolors) / sizeof (int);
-   return rcolors[sum];
-}
-
 void
 clear_channel (struct session *sess)
 {
@@ -106,9 +92,6 @@ private_msg (struct server *serv, char *tbuf, char *from, char *ip, char *text)
 
    if (EMIT_SIGNAL (XP_PRIVMSG, serv, from, ip, text, NULL, 0) == 1)
       return;
-
-   if (prefs.beepmsg)
-	   fe_beep ();
 
    sess = serv->front_session;
    EMIT_SIGNAL (XP_TE_PRIVMSG, sess, from, text, NULL, NULL, 0);
@@ -126,19 +109,10 @@ channel_action (struct session *sess, char *tbuf, char *chan, char *from, char *
       return;
 
    if (fromme)
-   {
-      if (prefs.colorednicks)
-         sprintf (tbuf, "\0032%s\003 ", from);
-      else
-         strcpy (tbuf, from);
-   } else
-   {
-      if (prefs.colorednicks)
-         sprintf (tbuf, "\003%d%s\003 ", color_of (from), from);
-      else
-         strcpy (tbuf, from);
-   }
-
+     strcpy (tbuf, from);
+   else
+     strcpy (tbuf, from);
+   
    if (is_channel (chan) || fromme)
       sess = find_session_from_channel (chan, sess->server);
 
@@ -197,12 +171,8 @@ channel_msg (struct server *serv, char *outbuf, char *chan, char *from, char *te
       return;
 
    if (fromme)
-   {
-      if (prefs.colorednicks)
-         sprintf (outbuf, "\0032%s\017", from);
-      else
-         strcpy (outbuf, from);
-   } else
+     strcpy (outbuf, from);
+   else
    {
 
       if (SearchNick (text, serv->nick) || SearchNick (text, prefs.bluestring))
@@ -217,15 +187,10 @@ channel_msg (struct server *serv, char *outbuf, char *chan, char *from, char *te
             fe_set_hilight (sess);
          }
       }
-      if (prefs.colorednicks)
-         sprintf (outbuf, "\003%d%s\017", color_of (from), from);
+      if (highlight)
+	sprintf (outbuf, "\002\003%d%s\002\017", prefs.bt_color, from);
       else
-      {
-         if (highlight)
-            sprintf (outbuf, "\002\003%d%s\002\017", prefs.bt_color, from);
-         else
-            strcpy (outbuf, from);
-      }
+	strcpy (outbuf, from);
    }
 
    if (fromme)
@@ -291,22 +256,16 @@ user_new_nick (struct server *serv, char *outbuf, char *nick, char *newnick, int
 static void
 you_joined (struct server *serv, char *outbuf, char *chan, char *nick, char *ip)
 {
-   struct session *sess = fe_new_window_popup (chan, serv);
-   if (sess)
-   {
+  struct session *sess = fe_new_window_popup (chan, serv);
+  if (sess)
+    {
       sess->waitchannel[0] = 0;
       sess->end_of_names = FALSE;
       sprintf (outbuf, "MODE %s\r\n", chan);
       tcp_send (sess->server, outbuf);
       clear_user_list (sess);
       EMIT_SIGNAL (XP_TE_UJOIN, sess, nick, chan, ip, NULL, 0);
-      if (!prefs.nouserhost)
-      {
-         sprintf (outbuf, "WHO %s\r\n", sess->channel);
-         tcp_send (serv, outbuf);
-         sess->doing_who = TRUE;
-      }
-   }
+    }
 }
 
 static void
@@ -593,13 +552,7 @@ handle_away (struct server *serv, char *outbuf, char *nick, char *msg)
    struct session *sess = NULL;
 
    if (away && !strcmp (msg, away->message))  /* Seen the msg before? */
-   {
-      if (prefs.show_away_once && !serv->inside_whois)
-         return;
-   } else
-   {
       save_away_message (serv, nick, msg);
-   }
 
    if (!serv->inside_whois)
       sess = find_session_from_nick (nick, serv);
@@ -770,8 +723,7 @@ channel_modes (struct server *serv, char *outbuf, char *word[], char *nick, int 
             modes++;            /* not a channel mode, eg +i */
          sign = modes[0];
          modes++;
-         if (prefs.raw_modes && !displacement)
-            displacement = 1;
+
          while (1)
          {
             if (sign == '+')
@@ -911,36 +863,10 @@ next_nick (struct session *sess, char *outbuf, char *nick)
 static void
 set_default_modes (server *serv, char *outbuf)
 {
-   int mode = FALSE;
-
-   if (prefs.wallops)
-   {
-      sprintf (outbuf, "MODE %s +w", serv->nick);
-      mode = TRUE;
-   }
-   if (prefs.servernotice)
-   {
-      if (mode)
-         strcat (outbuf, "s");
-      else {
-         sprintf (outbuf, "MODE %s +s", serv->nick);
-         mode = TRUE;
-      }
-   }
-   if (prefs.invisible)
-   {
-      if (mode)
-         strcat (outbuf, "i");
-      else {
-         sprintf (outbuf, "MODE %s +i", serv->nick);
-         mode = TRUE;
-      }
-   }
-   if (mode)
-   {
-      strcat (outbuf, "\r\n");
-      tcp_send (serv, outbuf);
-   }
+  if (!prefs.invisible)
+    return;
+  sprintf (outbuf, "MODE %s +i\r\n", serv->nick);
+  tcp_send (serv, outbuf);  
 }
 
 /* process_line() */
@@ -1018,10 +944,12 @@ process_line (struct session *sess, struct server *serv, char *buf)
                handle_away (serv, outbuf, find_word (pdibuf, 4),
                             find_word_to_end (buf, 5) + 1);
                break;
-	       /*case 303: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	    case 303:
+	      /*
                word[4]++;
                notify_markonline (sess, outbuf, word);
-               break; */
+	      */
+	      break;
             case 312:
                EMIT_SIGNAL (XP_TE_WHOIS3, sess, word[4],
                             word_eol[5], NULL, NULL, 0);
@@ -1163,12 +1091,6 @@ process_line (struct session *sess, struct server *serv, char *buf)
                break;
             case 376:
             case 422:          /* end of motd */
-               if (!serv->end_of_motd && prefs.ip_from_server)
-               {
-                  serv->skip_next_who = TRUE;
-                  sprintf (outbuf, "WHO %s\r\n", serv->nick);
-                  tcp_send (serv, outbuf);
-               }
                serv->end_of_motd = TRUE;
                set_default_modes (serv, outbuf);
                check_willjoin_channels (serv, outbuf);
@@ -1297,26 +1219,8 @@ process_line (struct session *sess, struct server *serv, char *buf)
                }
                if (!strcmp ("MODE", cmd))
                {
-                  if (prefs.raw_modes)
-                  {
-                     int l;
-
-                     /* Strip all spaces at the end off --AGL */
-                     l = strlen (word_eol[3]);
-                     memcpy (outbuf, word_eol[3], l + 1);
-                     for (l--; l > 0; l--)
-                     {
-                        if (outbuf[l] == ' ')
-                           outbuf[l] = 0;
-                        else
-                           break;
-                     }
-
-                     EMIT_SIGNAL (XP_TE_RAWMODES, sess, nick, outbuf, NULL,
-                             NULL, 0);
-                  }
-                  channel_modes (serv, outbuf, word, nick, 0);
-                  return;
+		 channel_modes (serv, outbuf, word, nick, 0);
+		 return;
                }
                if (!strcmp ("NICK", cmd))
                {

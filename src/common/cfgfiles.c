@@ -269,49 +269,18 @@ static struct prefs vars[] = {
 {"background_pic",      PREFS_OFFSET(background),        TYPE_STR},
 {"bluestring",          PREFS_OFFSET(bluestring),        TYPE_STR},
 {"hostname",            PREFS_OFFSET(hostname),          TYPE_STR},
-
 {"autoreconnect",       PREFS_OFFINT(autoreconnect),     TYPE_BOOL},
 {"autoreconnectonfail", PREFS_OFFINT(autoreconnectonfail),TYPE_BOOL},
 {"invisible",           PREFS_OFFINT(invisible),         TYPE_BOOL},
-{"servernotice",        PREFS_OFFINT(servernotice),      TYPE_BOOL},
-{"wallops",             PREFS_OFFINT(wallops),           TYPE_BOOL},
 {"skipmotd",            PREFS_OFFINT(skipmotd),          TYPE_BOOL},
 {"autorejoin",          PREFS_OFFINT(autorejoin),        TYPE_BOOL},
-{"colorednicks",        PREFS_OFFINT(colorednicks),      TYPE_BOOL},
-{"nochanmodebuttons",   PREFS_OFFINT(nochanmodebuttons), TYPE_BOOL},
 {"nickcompletion",      PREFS_OFFINT(nickcompletion),    TYPE_BOOL},
 {"tabchannels",         PREFS_OFFINT(tabchannels),       TYPE_BOOL},
-{"nopaned",             PREFS_OFFINT(nopaned),           TYPE_BOOL},
 {"transparent",         PREFS_OFFINT(transparent),       TYPE_BOOL},
 {"tint",                PREFS_OFFINT(tint),              TYPE_BOOL},
-{"dialog_transparent",  PREFS_OFFINT(dialog_transparent),TYPE_BOOL},
-{"dialog_tint",         PREFS_OFFINT(dialog_tint),       TYPE_BOOL},
-{"stripcolor",          PREFS_OFFINT(stripcolor),        TYPE_BOOL},
-{"timestamp",           PREFS_OFFINT(timestamp),         TYPE_BOOL},
-{"skipserverlist",      PREFS_OFFINT(skipserverlist),    TYPE_BOOL},
-{"filterbeep",          PREFS_OFFINT(filterbeep),        TYPE_BOOL},
-{"beep_msg",            PREFS_OFFINT(beepmsg),           TYPE_BOOL},
-{"priv_msg_tabs",       PREFS_OFFINT(privmsgtab),        TYPE_BOOL},
-{"newtabs_to_front",    PREFS_OFFINT(newtabstofront),    TYPE_BOOL},
-{"hide_version",        PREFS_OFFINT(hidever),           TYPE_BOOL},
-{"raw_modes",           PREFS_OFFINT(raw_modes),         TYPE_BOOL},
-{"show_away_once",      PREFS_OFFINT(show_away_once),    TYPE_BOOL},
-{"show_away_message",   PREFS_OFFINT(show_away_message), TYPE_BOOL},
-{"nouserhost",          PREFS_OFFINT(nouserhost),        TYPE_BOOL},
-{"ip_from_server",      PREFS_OFFINT(ip_from_server),    TYPE_BOOL},
 {"use_server_tab",      PREFS_OFFINT(use_server_tab),    TYPE_BOOL},
-{"style_inputbox",      PREFS_OFFINT(style_inputbox),    TYPE_BOOL},
-{"windows_as_tabs",     PREFS_OFFINT(windows_as_tabs),   TYPE_BOOL},
 {"use_fontset",         PREFS_OFFINT(use_fontset),       TYPE_BOOL},
-{"indent_nicks",        PREFS_OFFINT(indent_nicks),      TYPE_BOOL},
-{"show_separator",      PREFS_OFFINT(show_separator),    TYPE_BOOL},
-{"thin_separator",      PREFS_OFFINT(thin_separator),    TYPE_BOOL},
-{"dialog_indent_nicks", PREFS_OFFINT(dialog_indent_nicks),TYPE_BOOL},
-{"dialog_show_separator",PREFS_OFFINT(dialog_show_separator),TYPE_BOOL},
-{"treeview",            PREFS_OFFINT (treeview),         TYPE_BOOL},
-{"auto_indent",         PREFS_OFFINT(auto_indent),       TYPE_BOOL},
-{"wordwrap",            PREFS_OFFINT(wordwrap),          TYPE_BOOL},
-{"dialog_wordwrap",     PREFS_OFFINT(dialog_wordwrap),   TYPE_BOOL},
+
 {"mail_check",          PREFS_OFFINT(mail_check),        TYPE_BOOL},
 {"double_buffer",       PREFS_OFFINT(double_buffer),     TYPE_BOOL},
 {"mainwindow_left",     PREFS_OFFINT(mainwindow_left),   TYPE_INT},
@@ -330,7 +299,6 @@ static struct prefs vars[] = {
 {"dialog_tint_green",   PREFS_OFFINT(dialog_tint_green), TYPE_INT},
 {"dialog_tint_blue",    PREFS_OFFINT(dialog_tint_blue),  TYPE_INT},
 {"indent_pixels",       PREFS_OFFINT(indent_pixels),     TYPE_INT},
-{"dialog_indent_pixels",PREFS_OFFINT(dialog_indent_pixels),TYPE_INT},
 {"max_auto_indent",     PREFS_OFFINT (max_auto_indent),  TYPE_INT},
 {"tabs_position",       PREFS_OFFINT (tabs_position),    TYPE_INT},
 {0, 0, 0},
@@ -378,11 +346,8 @@ load_config (void)
 
    memset (&prefs, 0, sizeof (struct xchatprefs));
    /* Just for ppl upgrading --AGL */
-   prefs.auto_indent = 1;
    prefs.max_auto_indent = 112;
    prefs.mail_check = 1;
-   prefs.show_separator = 1;
-   prefs.dialog_show_separator = 1;
    prefs.double_buffer = 1;
 
    check_prefs_dir ();
@@ -419,21 +384,13 @@ load_config (void)
    } else
    {
       /* put in default values, anything left out is automatically zero */
-      prefs.show_away_once = 1;
-      prefs.show_away_message = 1;
       prefs.indent_pixels = 80;
-      prefs.dialog_indent_pixels = 80;
-      prefs.indent_nicks = 1;
-      prefs.dialog_indent_nicks = 1;
-      prefs.thin_separator = 1;
       prefs.autorejoin = 1;
       prefs.autoreconnect = 1;
       prefs.recon_delay = 2;
       prefs.tabchannels = 1;
       prefs.use_server_tab = 1;
-      prefs.privmsgtab = 1;
       prefs.nickcompletion = 1;
-      prefs.style_inputbox = 1;
       prefs.nu_color = 4;
       prefs.bt_color = 8;
       prefs.max_lines = 300;
@@ -463,8 +420,6 @@ load_config (void)
       prefs.mainwindow_width = 116;
    if (prefs.indent_pixels < 1)
       prefs.indent_pixels = 80;
-   if (prefs.dialog_indent_pixels < 1)
-      prefs.dialog_indent_pixels = 80;
 }
 
 

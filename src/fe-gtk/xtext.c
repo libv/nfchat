@@ -119,7 +119,6 @@ gtk_xtext_init (GtkXText *xtext)
    xtext->bold = FALSE;
    xtext->underline = FALSE;
    xtext->reverse = FALSE;
-   xtext->time_stamp = FALSE;
    xtext->font = NULL;
    xtext->xfont = NULL;
    xtext->error_function = NULL;
@@ -203,13 +202,12 @@ gtk_xtext_adjustment_changed (GtkAdjustment *adj, GtkXText *xtext)
 }
 
 GtkWidget*
-gtk_xtext_new (int indent, int separator)
+gtk_xtext_new (int indent)
 {
    GtkXText *xtext;
 
    xtext = gtk_type_new (gtk_xtext_get_type ());
    xtext->indent = indent;
-   xtext->separator = separator;
    xtext->wordwrap = FALSE;
    xtext->double_buffer = TRUE;
 
@@ -368,8 +366,7 @@ gtk_xtext_realize (GtkWidget *widget)
    if (!xtext->double_buffer)
       xtext->draw_buf = xtext->drawable;
 
-   if (xtext->auto_indent)
-      xtext->indent = 1;
+   xtext->indent = 1;
 }
 
 static void 
@@ -1034,16 +1031,15 @@ gtk_xtext_button_press (GtkWidget      *widget,
    }
 
    /* check if it was a separator-bar click */
-   if (xtext->separator && xtext->indent)
-   {
-      line_x = xtext->indent - ((xtext->space_width + 1) / 2);
-      if (line_x == x || line_x == x+1 || line_x == x-1)
-      {
-         xtext->moving_separator = TRUE;
-         gtk_xtext_render_page (xtext, xtext->adj->value);
-         return FALSE;
-      }
-   }
+
+   line_x = xtext->indent - ((xtext->space_width + 1) / 2);
+   if (line_x == x || line_x == x+1 || line_x == x-1)
+     {
+       xtext->moving_separator = TRUE;
+       gtk_xtext_render_page (xtext, xtext->adj->value);
+       return FALSE;
+     }
+   
 
    xtext->button_down = TRUE;
 
@@ -1411,23 +1407,11 @@ gtk_xtext_render_str (GtkXText *xtext, int y, textentry *ent, char *str, int len
 #endif
 
    if (!xtext->double_buffer)
-   {
-      /* draw background to the left of the text */
-      if (str == ent->str && indent && xtext->time_stamp)
-      {
-         /* don't overwrite the timestamp */
-         if (indent > xtext->stamp_width)
-            XFillRectangle (xtext->display, xtext->draw_buf, xtext->xbgc,
-                            xtext->stamp_width, y - xtext->font->ascent,
-                            indent-xtext->stamp_width, xtext->fontsize);
-      } else
-      {
-         /* fill the indent area with background gc */
-         XFillRectangle (xtext->display, xtext->draw_buf, xtext->xbgc,
-                         0, y - xtext->font->ascent, indent, xtext->fontsize);
-      }
-   }
-
+     /* draw background to the left of the text */
+     /* fill the indent area with background gc */
+     XFillRectangle (xtext->display, xtext->draw_buf, xtext->xbgc,
+		     0, y - xtext->font->ascent, indent, xtext->fontsize);
+  
    while (i < len)
    {
 
@@ -1828,7 +1812,6 @@ gtk_xtext_load_trans (GtkXText *xtext)
 static int
 gtk_xtext_render_line (GtkXText *xtext, textentry *ent, char *str, int len, int line, int lines_max, int subline, int indent, int str_width)
 {
-   char *time_str;
    int y;
    int width;
    int orig_len;
@@ -1841,16 +1824,6 @@ gtk_xtext_render_line (GtkXText *xtext, textentry *ent, char *str, int len, int 
 
    gdk_window_get_size (GTK_WIDGET (xtext)->window, &width, 0);
    width -= MARGIN;
-
-   if (xtext->time_stamp)
-   {
-      time_str = ctime (&ent->stamp) + 10;
-      time_str[0] = '[';
-      time_str[9] = ']';
-      time_str[10] = 0;
-      y = (xtext->fontsize * line) + xtext->font->ascent;
-      gtk_xtext_render_str (xtext, y, ent, time_str, 10, width, 2, line);
-   }
 
 startrl:
 
@@ -1939,17 +1912,16 @@ gtk_xtext_set_palette (GtkXText *xtext, GdkColor palette[])
 static void
 gtk_xtext_fix_indent (GtkXText *xtext)
 {
-   int j;
-
-   if (xtext->indent)   /* make indent a multiple of the space width */
-   {
-      j = 0;
-      while (j < xtext->indent)
-      {
-         j += xtext->space_width;
-      }
-      xtext->indent = j;
-   }
+  int j;
+  
+  /* make indent a multiple of the space width */
+  
+  j = 0;
+  while (j < xtext->indent)
+    {
+      j += xtext->space_width;
+    }
+  xtext->indent = j;
 }
 
 static void
@@ -2031,7 +2003,7 @@ gtk_xtext_set_font (GtkXText *xtext, GdkFont *font, char *name)
    xtext->xfont = (XFontStruct *)((GdkFontPrivate*)xtext->font)->xfont;
 
    gtk_xtext_fix_indent (xtext);
-
+   
    if (GTK_WIDGET_REALIZED (xtext))
    {
       if (xtext->fonttype != FONT_SET)
@@ -2039,8 +2011,6 @@ gtk_xtext_set_font (GtkXText *xtext, GdkFont *font, char *name)
 
       gtk_xtext_recalc_widths (xtext, TRUE);
    }
-
-   xtext->stamp_width = gtk_xtext_text_width (xtext, "[88:88:88]", 10) + MARGIN;
 }
 
 void
@@ -2246,53 +2216,29 @@ gtk_xtext_draw_sep (GtkXText *xtext, int y)
    }
 
    /* draw the separator line */
-   if (xtext->separator && xtext->indent)
-   {
-      light = GTK_WIDGET (xtext)->style->light_gc[0];
-      dark = GTK_WIDGET (xtext)->style->dark_gc[0];
-
-      if (light == 0 || dark == 0)
-         return;
-
-      /* this should never happen, but i've seen Backtraces where it has! */
-      if (((GdkGCPrivate *)light)->xgc == 0 || ((GdkGCPrivate *)dark)->xgc == 0)
-         return;
-
-      x = xtext->indent - ((xtext->space_width + 1) / 2);
-      if (x < 1)
-         return;
-
-      if (xtext->thinline)
-      {
-         if (xtext->moving_separator)
-            XDrawLine (xtext->display, xtext->draw_buf,
-                       ((GdkGCPrivate *)light)->xgc,
-                       x, y, x, height);
-         else
-            XDrawLine (xtext->display, xtext->draw_buf,
-                       ((GdkGCPrivate *)dark)->xgc,
-                       x, y, x, height);
-      } else
-      {
-         if (xtext->moving_separator)
-         {
-            XDrawLine (xtext->display, xtext->draw_buf,
-                       ((GdkGCPrivate *)light)->xgc,
-                       x - 1, y, x - 1, height);
-            XDrawLine (xtext->display, xtext->draw_buf,
-                       ((GdkGCPrivate *)dark)->xgc,
-                       x, y, x, height);
-         } else
-         {
-            XDrawLine (xtext->display, xtext->draw_buf,
-                       ((GdkGCPrivate *)dark)->xgc,
-                       x - 1, y, x - 1, height);
-            XDrawLine (xtext->display, xtext->draw_buf,
-                       ((GdkGCPrivate *)light)->xgc,
-                       x, y, x, height);
-         }
-      }
-   }
+   
+   light = GTK_WIDGET (xtext)->style->light_gc[0];
+   dark = GTK_WIDGET (xtext)->style->dark_gc[0];
+   
+   if (light == 0 || dark == 0)
+     return;
+   
+   /* this should never happen, but i've seen Backtraces where it has! */
+   if (((GdkGCPrivate *)light)->xgc == 0 || ((GdkGCPrivate *)dark)->xgc == 0)
+     return;
+   
+   x = xtext->indent - ((xtext->space_width + 1) / 2);
+   if (x < 1)
+     return;
+   
+   if (xtext->moving_separator)
+     XDrawLine (xtext->display, xtext->draw_buf,
+		((GdkGCPrivate *)light)->xgc,
+		x, y, x, height);
+   else
+     XDrawLine (xtext->display, xtext->draw_buf,
+		((GdkGCPrivate *)dark)->xgc,
+		x, y, x, height);
 }
 
 /* render 2 ents (or an inclusive range) */
@@ -2620,7 +2566,6 @@ gtk_xtext_render_page_timeout (GtkXText *xtext)
 static void
 gtk_xtext_append_entry (GtkXText *xtext, textentry *ent)
 {
-   ent->stamp = time (0);
    ent->str_width = gtk_xtext_text_width (xtext, ent->str, ent->str_len);
    ent->mark_start = -1;
    ent->mark_end = -1;
@@ -2685,17 +2630,11 @@ gtk_xtext_append_indent (GtkXText *xtext,
    ent->str_len = left_len + 1 + right_len;
    ent->indent = space - xtext->space_width;
 
-   if (xtext->time_stamp)
-      space = xtext->stamp_width;
-   else
-      space = 0;
-
    /* do we need to auto adjust the separator position? */
-   if (xtext->auto_indent && ent->indent < MARGIN + space)
+   if (ent->indent < MARGIN)
    {
       xtext->indent -= ent->indent;
       xtext->indent += MARGIN;
-      xtext->indent += space;
       if (xtext->indent > xtext->max_auto_indent)
          xtext->indent = xtext->max_auto_indent;
       gtk_xtext_fix_indent (xtext);

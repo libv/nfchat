@@ -526,11 +526,8 @@ check_special_chars (char *cmd) /* check for %X */
                   buf[i] = '\017';
                   break;
                case 'T':
-                  if (prefs.indent_nicks)
-                     buf[i] = '\t';
-                  else
-                     buf[i] = ' ';
-                  break;
+		 buf[i] = '\t';
+		 break;
                case '%':
                   buf[i] = '%';
                   break;

@@ -78,7 +78,6 @@ extern void list_loadconf (char *, GSList **, char *);
 
 extern unsigned char *strip_color (unsigned char *text);
 extern void load_text_events ();
-extern void pevent_dialog_save (char *fn);
 
 /* themes-common */
 
@@ -324,7 +323,6 @@ read_data (struct server *serv, int sok)
 {
    int err, i, len;
    char lbuf[2050];
-   char *temp;
 
    while (1)
    {
@@ -361,16 +359,7 @@ read_data (struct server *serv, int sok)
 
             case '\n':
                serv->linebuf[serv->pos] = 0;
-
-               if (prefs.stripcolor)
-               {
-                  temp = strip_color (serv->linebuf);
-                  process_line (serv->front_session, serv, temp);
-                  free (temp);
-               } else
-               {
-                  process_line (serv->front_session, serv, serv->linebuf);
-               }
+	       process_line (serv->front_session, serv, serv->linebuf);
                serv->pos = 0;
                break;
 
@@ -765,8 +754,6 @@ void
 xchat_cleanup (void)
 {
    xchat_is_quitting = TRUE;
-
-   /*   pevent_dialog_save (NULL); */
    
    free_sessions ();
    fe_exit ();

@@ -132,7 +132,7 @@ handle_ctcp (struct session *sess, char *outbuf, char *to, char *nick, char *msg
    char *po;
    session *chansess;
 
-   if (!strncasecmp (msg, "VERSION", 7) && !prefs.hidever)
+   if (!strncasecmp (msg, "VERSION", 7))
    {
       sprintf (outbuf,
                "NOTICE %s :\001VERSION xc! "VERSION" %s: http://xchat.org\001\r\n",

@@ -82,8 +82,62 @@ NF-chat;
 	- removed autosave from cfgfiles.c, xchat.h
 	  added save_config to load_config
 	  removed autosave/save_config from xchat_cleanup(xchat.c)
-
-
+    d) removin pevents.conf
+	- edited load_text_events to no longer use pevent_load
+	  it loads defaults.
+	- removed pevent_load, pevent_find, pevent_trigger_load
+	  pevent_dialog_save
+       continuin the work on the prefs
+	- servernotice/wallops from cfgfiles.c/xchat.h
+	  edited set_default_modes(outbound.c)
+	- removed colorednicks from inbound.c(5x), cfgfiles.c, xchat.h
+	- removed nochanmodebuttons cfgfiles.c, xchat.h
+*** tabchannels should be removed for a single client.
+	- removed nopaned from cfgfiles.c, xchat.h
+	- removed dialog_transparent, dialog_tint from cfgfiles.c, xchat.h
+	- removed stripcolor from xchat.c/h, cfgfiles.c
+	- removed timestamp from xchat.h, cfgfiles.c
+	  edited PrintTextLine (textgui.c)
+	- removed time_stamp stuff from fe
+	  removin all in xtext.c/h
+	- removed skipserverlist from xchat.h, cfgfiles.c
+	- removed filterbeep from xchat.h, cfgfiles.c
+	  made sure client never beeps in 'PrintTextRaw' textgui.c
+	- removed beepmsg from inbound.c, cfgfiles.c, xchat.h
+	- removed priv_msg_tabs from cfgfiles.c, xchat.h
+	- removed newtabstofront from maingui.c, cfgfiles.c, xchat.h
+	- removed hidever from ctcp.c, cfgfiles.c, xchat.h
+	- removed raw_modes from inbound.c, cfgfiles.c, xchat.h
+	- removed show_away_once, show_away_message fr cfgfiles.c, xchat.h
+	  edited handle_away from inbound.c
+	- removed nouserhost you_joined(inbound.c), cfgfiles.c, xchat.c
+	- removed ip_from_server from inbound.c, xchat.h, cfgfiles.c
+	- style_inputbox from maingui.c, cfgfiles.c
+	- removed windows_as_tabs from cfgfiles.c, xchat.h
+	- removed indent_nicks from maingui_create_textlist (maingui.c)
+	  & indent from PrintTextLine (textgui.c)
+*** gtk_xtext_append??? <-- think this becomes obsolete
+*** move gtk_xtext_append_indent to it
+	  removed from xchat.h, cfgfiles.c, text.c, outbound.c
+	- removed show_separator xchat.h, cfgfiles.c
+	  removed from maingui_create_textlist (maingui.c)
+	  and edited gtk_xtext_new (xtext.c/h) accordingly
+	  removed xtext->separator
+	- removed thin_separator from xchat.h, cfgfiles.c
+	  removed from maingui.c
+	  removed ->thinline from maingui.c, xtext.ch
+	- removed dialog_indent_nick/indent_pixels/show_separator  from
+	  cfgfiles.c, xchat.h
+	  dialog_indent_nick from text.c
+*** is_dialog????
+	- removed treeview from xchat.h, cfgfiles.c
+	- removed auto_indent from xchat.h, cfgfiles.c
+	  removed from maingui.c, xtext.c
+	  xtext->indent = always true
+*** gtk_xtext_button_release = one of the functions used to move the
+*** separator with the mouse, check this out asap. gtk_xtext_button_press
+	- removed wordwrap (always true) from cfgfiles.c, xchat.h
+	- removed dialog wordwrap from cfgfiles.c, xchat.h
 0.3.1; 
 """"""
     a) - deleted python.c

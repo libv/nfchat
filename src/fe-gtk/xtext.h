@@ -41,7 +41,6 @@ typedef struct textentry
    struct textentry *next;
    char *str;
    int str_width;
-   time_t stamp;
    short str_len;
    short mark_start;
    short mark_end;
@@ -98,7 +97,6 @@ struct _GtkXText
    int fonttype;
    guint16 fontwidth[256];  /* each char's width, only for FONT_1BYTE type */
    int space_width;     /* width (pixels) of the space " " character */
-   int stamp_width;     /* width of "[88:88:88]" */
 
    int indent;          /* position of separator (pixels) from left */
    int max_auto_indent;
@@ -146,11 +144,9 @@ struct _GtkXText
    unsigned int double_buffer:1;
    unsigned int auto_indent:1;
    unsigned int moving_separator:1;
-   unsigned int time_stamp:1;
    unsigned int scrollbar_down:1;
    unsigned int word_or_line_select:1;
    unsigned int color_paste:1;
-   unsigned int thinline:1;
    unsigned int parsing_backcolor:1;
    unsigned int parsing_color:1;
    unsigned int backcolor:1;
@@ -159,7 +155,6 @@ struct _GtkXText
    unsigned int underline:1;
    unsigned int reverse:1;
    unsigned int transparent:1;
-   unsigned int separator:1;
    unsigned int shaded:1;
    unsigned int wordwrap:1;
    unsigned int dont_render:1;
@@ -172,7 +167,7 @@ struct _GtkXTextClass
    void (* word_click) (GtkXText *xtext, char *word, GdkEventButton *event);
 };
 
-GtkWidget* gtk_xtext_new         (int indent, int separator);
+GtkWidget* gtk_xtext_new         (int indent);
 guint      gtk_xtext_get_type    (void);
 void       gtk_xtext_append      (GtkXText *xtext, char *text, int len);
 void       gtk_xtext_append_indent (GtkXText *xtext,

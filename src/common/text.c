@@ -815,129 +815,6 @@ pevent_make_pntevts ()
    }
 }
 
-/* Loading happens at 2 levels:
-   1) File is read into blocks
-   2) Pe block is parsed and loaded
-
-   --AGL */
-
-/* Better hope you pass good args.. --AGL */
-
-void
-pevent_trigger_load (int *i_penum, char **i_text)
-{
-   int penum = *i_penum, len;
-   char *text = *i_text;
-   
-   if (penum == -1)
-      goto cleanup_exit;
-   if (text == NULL)
-      goto cleanup_exit;
-
-   len = strlen (text) + 1;
-   if (pntevts_text[penum])
-      free (pntevts_text[penum]);
-   pntevts_text[penum] = malloc (len);
-   memcpy (pntevts_text[penum], text, len);
-  
- cleanup_exit:
-   if (text)
-      free (text);
-   *i_text = NULL;
-   *i_penum = 0;
-}
-
-static int
-pevent_find (char *name, int *i_i)
-{
-   int i = *i_i, j;
-   
-   j = i + 1;
-   while (1) {
-      if (j == NUM_XP)
-	 j = 0;
-      if (j == i)
-	 return -1;
-      if (!text_event (j)) {
-	 j++;
-	 continue;
-      }
-      if (strcmp (te[j].name, name) == 0) {
-	 *i_i = j;
-	 return j;
-      }
-      j++;
-   }
-}
-
-int
-pevent_load (char *filename)
-{
-   /* AGL, I've changed this file and pevent_save, could you please take a look at
-    *      the changes and possibly modify them to suit you
-    *      //David H
-    */
-   char *buf, *ibuf;
-   int fd, i = 0, pnt = 0;
-   struct stat st;
-   char *text = NULL;
-   int penum = 0;
-   char *ofs;
-
-   buf = malloc (1000);
-
-   if (filename == NULL)
-      /* No name given, use load_themeconfig to find file */
-      fd = load_themeconfig (THEME_CONF_EVENTS);
-   else {
-      strncpy (buf, filename, 1000);
-      fd = open (buf, O_RDONLY);
-   }
-
-   free (buf);
-   if (fd < 0)
-      return 1;
-   if (fstat (fd, &st) != 0)
-      return 1;
-   ibuf = malloc (st.st_size);
-   read (fd, ibuf, st.st_size);
-   close (fd);
-
-   while (buf_get_line (ibuf, &buf, &pnt, st.st_size)) {
-      if (buf[0] == '#')
-	 continue;
-      if (strlen (buf) == 0)
-	 continue;
-
-      ofs = strchr (buf, '=');
-      if (!ofs)
-	 continue;
-      *ofs = 0;
-      ofs++;
-      if (*ofs == 0)
-	 continue;
-
-      if (strcmp (buf, "event_name") == 0) {
-	 if (penum)
-	    pevent_trigger_load (&penum, &text);
-	 penum = pevent_find (ofs, &i);
-	 continue;
-      } else if (strcmp (buf, "event_text") == 0) {
-	 if (text)
-	    free (text);
-	 text = strdup (ofs);
-	 continue;
-      }
-
-      continue;
-   }
-
-   pevent_trigger_load (&penum, &text);
-   free (ibuf);
-   return 0;
-}      
-	 
-      
 void
 pevent_check_all_loaded ()
 {
@@ -950,13 +827,11 @@ pevent_check_all_loaded ()
       if (pntevts_text[i] == NULL)
       {
 
-printf("%s\n", te[i].name);
+	printf("%s\n", te[i].name);
 
-         /*snprintf(out, sizeof(out), "The data for event %s failed to load. Reverting to defaults.\nThis may be because a new version of XChat is loading an old config file.\n\nCheck all print event texts are correct", evtnames[i]);
-	   gtkutil_simpledialog(out);*/
-         len = strlen (te[i].def) + 1;
-         pntevts_text[i] = malloc (len);
-         memcpy (pntevts_text[i], te[i].def, len);
+	len = strlen (te[i].def) + 1;
+	pntevts_text[i] = malloc (len);
+	memcpy (pntevts_text[i], te[i].def, len);
       }
    }
 }
@@ -972,13 +847,12 @@ load_text_events ()
    pntevts = malloc (sizeof (char *) * (NUM_XP));
    memset (pntevts, 0, sizeof (char *) * (NUM_XP));
 
-   if (pevent_load (NULL))
-      pevent_load_defaults ();
+   pevent_load_defaults ();
    pevent_check_all_loaded ();
    pevent_make_pntevts ();
 }
 
-void
+static void
 display_event (char *i, struct session *sess, int numargs, char **args)
 {
    int len, oi, ii, *ar;
@@ -1010,7 +884,7 @@ display_event (char *i, struct session *sess, int numargs, char **args)
          a = i[ii++];
          if (a > numargs)
          {
-            fprintf (stderr, "XChat DEBUG: display_event: arg > numargs (%d %d %s)\n", a, numargs, i);
+            fprintf (stderr, "NFChat DEBUG: display_event: arg > numargs (%d %d %s)\n", a, numargs, i);
 	     break;
          }
          ar = (int *) args[(int) a];
@@ -1029,17 +903,10 @@ display_event (char *i, struct session *sess, int numargs, char **args)
          done_all = TRUE;
          continue;
       case 3:
-	 if (sess->is_dialog) {
-	    if (prefs.dialog_indent_nicks)
-	       o[oi++] = '\t';
-	    else
-	       o[oi++] = ' ';
-	 } else {
-	    if (prefs.indent_nicks)
-	       o[oi++] = '\t';
-	    else
-	       o[oi++] = ' ';
-	 }
+	 if (sess->is_dialog)
+	   o[oi++] = ' ';
+	 else 
+	   o[oi++] = '\t';
 	 break;
       }
    }
@@ -1226,7 +1093,7 @@ pevt_build_string (char *input, char **output, int *max_arg)
    return 0;
 }
 
-int
+static int
 textsignal_handler (struct session *sess, void *b, void *c,
              void *d, void *e, char f)
 {
@@ -1277,47 +1144,6 @@ printevent_setup ()
       sigroots[evt] = (struct xp_signal *)g_slist_prepend ((void *)sigroots[evt], sig);
    }
 }
-
-void
-pevent_dialog_save (char *fn)
-{
-   int fd, i;
-   char buf[1024];
-   
-   if (!fn)
-      /* If no fn was given, use save_themeconfig to determine where to save */
-      fd = save_themeconfig (THEME_CONF_EVENTS);
-   else {
-      snprintf (buf, 510, "%s", fn);
-      fd = open (buf, O_CREAT | O_TRUNC | O_WRONLY, 0x180);
-   }
-   if (fd < 0)
-   {
-     /*
-       fe_message ("Error opening config file\n", FALSE); 
-       If we get here when X-Chat is closing the fe-message causes a nice & hard crash
-       so we have to use perror which doesn't rely on GTK
-     */
-
-      perror ("Error opening config file\n");
-      return;
-   }
-
-   for (i = 0; i < NUM_XP; i++) {
-      if (!text_event (i))
-	 continue;
-      write (fd, buf, snprintf (buf, sizeof (buf),
-				"event_name=%s\n", te[i].name));
-      write (fd, buf, snprintf (buf, sizeof (buf),
-				"event_text=%s\n", pntevts_text[i]));
-      write (fd, "\n", 1);
-   }
-
-   close (fd);
-}
-
-
-
 
 
 

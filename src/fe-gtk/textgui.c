@@ -28,41 +28,26 @@ extern int timecat (char *buf);
 static void
 PrintTextLine (GtkWidget *textwidget, unsigned char *text, int len)
 {
-   char *tab, *new_text;
-   int leftlen, indent = prefs.indent_nicks;
-   session *sess;
-
-   if (len == -1)
-      len = strlen (text);
-
-   if (len == 0)
-      len = 1;
-
-   sess = gtk_object_get_user_data (GTK_OBJECT (textwidget));
-   
-   if (!indent)
-   {
-      if (prefs.timestamp)
-      {
-         new_text = malloc (len + 12);
-         *new_text = 0;
-         timecat (new_text);
-         memcpy (new_text + 11, text, len);
-         gtk_xtext_append (GTK_XTEXT (textwidget), new_text, len + 11);
-         free (new_text);
-      } else
-         gtk_xtext_append (GTK_XTEXT (textwidget), text, len);
-      return;
-   }
-
-   tab = strchr (text, '\t');
-   if (tab && (unsigned long)tab < (unsigned long)(text + len))
-   {
+  char *tab;
+  int leftlen;
+  session *sess;
+  
+  if (len == -1)
+    len = strlen (text);
+  
+  if (len == 0)
+    len = 1;
+  
+  sess = gtk_object_get_user_data (GTK_OBJECT (textwidget));
+  
+  tab = strchr (text, '\t');
+  if (tab && (unsigned long)tab < (unsigned long)(text + len))
+    {
       leftlen = (unsigned long)tab - (unsigned long)text;
       gtk_xtext_append_indent (GTK_XTEXT (textwidget),
-                              text, leftlen,
-                              tab+1, len - (leftlen + 1));
-   } else
+			       text, leftlen,
+			       tab+1, len - (leftlen + 1));
+    } else
       gtk_xtext_append_indent (GTK_XTEXT (textwidget), 0, 0, text, len);
 }
 
@@ -70,9 +55,6 @@ void
 PrintTextRaw (GtkWidget * textwidget, unsigned char *text)
 {
    char *cr;
-
-   if (!prefs.filterbeep && strchr (text, 7))
-      gdk_beep ();
 
    cr = strchr (text, '\n');
    if (cr)
