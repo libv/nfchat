@@ -318,8 +318,6 @@ static struct prefs vars[] = {
 {"logging",             PREFS_OFFINT(logging),           TYPE_BOOL},
 {"newtabs_to_front",    PREFS_OFFINT(newtabstofront),    TYPE_BOOL},
 {"hide_version",        PREFS_OFFINT(hidever),           TYPE_BOOL},
-{"panelize_hide",       PREFS_OFFINT(panelize_hide),     TYPE_BOOL},
-{"panel_vbox",          PREFS_OFFINT(panel_vbox),        TYPE_BOOL},
 {"raw_modes",           PREFS_OFFINT(raw_modes),         TYPE_BOOL},
 {"show_away_once",      PREFS_OFFINT(show_away_once),    TYPE_BOOL},
 {"show_away_message",   PREFS_OFFINT(show_away_message), TYPE_BOOL},

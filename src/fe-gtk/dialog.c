@@ -56,8 +56,6 @@ extern int maingui_pagetofront (int page);
 extern void show_and_unfocus (GtkWidget * wid);
 extern void term_change_pos (GtkWidget * widget);
 extern void add_tip (GtkWidget * wid, char *text);
-extern void maingui_panelize (GtkWidget * button, struct session *sess);
-extern void maingui_unpanelize (GtkWidget * button, struct session *sess);
 extern int textgad_get_focus_cb (GtkWidget * wid, GdkEventKey * event, struct session *sess);
 extern int tcp_send_len (struct server *serv, char *buf, int len);
 extern int tcp_send (struct server *serv, char *buf);
@@ -238,13 +236,6 @@ open_dialog_window (struct session *sess)
 #endif
    add_tip (wid, "Link/DeLink this tab");
    gtk_widget_show (wid);
-
-#ifdef USE_PANEL
-   wid = gtkutil_button (sess->gui->window, GNOME_STOCK_BUTTON_DOWN,
-        0, maingui_panelize, sess, 0);
-   gtk_box_pack_start (GTK_BOX (hbox), wid, 0, 0, 0);
-   add_tip (wid, "Panelize");
-#endif
 
 #ifdef USE_GNOME
    wid = gtkutil_button (sess->gui->window, GNOME_STOCK_PIXMAP_BACK,

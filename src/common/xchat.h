@@ -1,11 +1,11 @@
 #include "../../config.h"
 
 #ifndef VERSION               /* for broken autoconf */
-#define VERSION "1.4.2"
+#define VERSION "0.0.1"
 #endif
 
 #ifndef PACKAGE
-#define PACKAGE "xchat"
+#define PACKAGE "NF-chat"
 #endif
 
 #ifndef PREFIX
@@ -116,7 +116,6 @@ struct xchatprefs
    unsigned long dcc_ip;
 
    unsigned int use_trans;
-   unsigned int nopanel;
    unsigned int autosave;
    unsigned int autodialog;
    unsigned int autosave_url;
@@ -157,8 +156,6 @@ struct xchatprefs
    unsigned int hilitenotify;
    unsigned int hidever;
    unsigned int ip_from_server;
-   unsigned int panelize_hide;
-   unsigned int panel_vbox;
    unsigned int raw_modes;
    unsigned int no_server_logs;
    unsigned int show_away_once;

@@ -430,9 +430,6 @@ settings_ok_clicked (GtkWidget * wid, struct session *sess)
    if (prefs.nu_color != sess->setup->prefs.nu_color)
       noapply = TRUE;
 
-   if (prefs.panel_vbox != sess->setup->prefs.panel_vbox)
-      noapply = TRUE;
-
    if (prefs.auto_indent != sess->setup->prefs.auto_indent)
       noapply = TRUE;
 
@@ -553,8 +550,7 @@ settings_ok_clicked (GtkWidget * wid, struct session *sess)
                " - Userlist Buttons\n"
          " - Disable Paned Userlist\n"
               " - Notify User color\n"
-    " - Layout for a vertical panel\n"
-                    " - Auto Indent");
+                      " - Auto Indent");
 }
 
 static void
@@ -1061,27 +1057,6 @@ settings_page_interface_dialogwindow (struct session *sess, GtkWidget * vbox)
                                 sess);
 }
 
-#ifdef USE_PANEL
-static void
-settings_page_interface_panel (struct session *sess, GtkWidget * vbox)
-{
-   GtkWidget *wid;
-   GtkWidget *tog;
-
-   wid = settings_create_group (vbox, _ ("General"));
-   tog = settings_create_toggle (_ ("Hide Session on Panelize"), wid,
-                                 prefs.panelize_hide, settings_ptoggle_check,
-                                 &(sess->setup->prefs.panelize_hide));
-   add_tip (tog, _ ("Hide X-Chat when window moved to the panel"));
-
-   wid = settings_create_group (vbox, _ ("Panel Applet"));
-   tog = settings_create_toggle (_ ("Layout For a Vertical Panel"), wid,
-                                 prefs.panel_vbox, settings_ptoggle_check,
-    &(sess->setup->prefs.panel_vbox));
-   add_tip (tog, _ ("Layout the X-Chat panel applet for a vertical panel"));
-}
-#endif
-
 static void
 settings_page_irc (struct session *sess, GtkWidget * vbox)
 {
@@ -1535,13 +1510,6 @@ settings_opengui (struct session *sess)
           ctree, _ ("Dialog Windows"),
    last_top, &last_child, page_index++,
                                 settings_page_interface_dialogwindow, sess);
-
-#ifdef USE_PANEL
-   vbox = settings_create_page (book, _ ("Panel Settings"),
-                   ctree, _ ("Panel"),
-   last_top, &last_child, page_index++,
-                                settings_page_interface_panel, sess);
-#endif
 
    vbox = settings_create_page (book, _ ("IRC Settings"),
                      ctree, _ ("IRC"),

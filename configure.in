@@ -56,9 +56,6 @@ AC_ARG_ENABLE(perl,
 [  --disable-perl          disable use of perl scripting],
         perl=$enableval, perl=yes)
 
-python=no
-panel=no
-
 AC_ARG_ENABLE(plugin,
 [  --disable-plugin        disable plugin support],
         plugin=$enableval, plugin=yes)
@@ -131,7 +128,6 @@ if test "$gtkfe" = yes; then
 else
   gnome=no
   imlib=no
-  panel=no
   LIBS="$LIBS $GLIB_LIBS"
   CFLAGS="$CFLAGS $GLIB_CFLAGS"
 fi
@@ -224,76 +220,16 @@ if test "$perl" = yes; then
   fi
 fi
 
-
-dnl *********************************************************************
-dnl ** PYTHON ***********************************************************
-dnl *********************************************************************
-
-if test "$glibreplace" = no; then
-  if test "$python" = yes; then
-    AC_PATH_PROG(pythonpath, python)
-    if test "_$pythonpath" = _ ; then
-      python=no
-    else
-      AC_MSG_CHECKING(for Python compile flags)
- 	   PY_PREFIX=`$pythonpath -c 'import sys ; print sys.prefix'`
- 	   PY_EXEC_PREFIX=`$pythonpath -c 'import sys ; print sys.exec_prefix'`
- 	   changequote(<<, >>)dnl
- 	   PY_VERSION=`$pythonpath -c 'import sys ; print sys.version[0:3]'`
- 	   changequote([, ])dnl
- 	   if test -f $PY_PREFIX/include/python$PY_VERSION/Python.h; then
-        PY_LIBS="-lpython$PY_VERSION"
-        PY_LIB_LOC="-L$PY_EXEC_PREFIX/lib/python$PY_VERSION/config"
-        PY_CFLAGS="-I$PY_PREFIX/include/python$PY_VERSION"
-        CFLAGS="$CFLAGS $PY_CFLAGS"
-        LIBS="$LIBS $PY_LIB_LOC $PY_LIBS"
-        AC_DEFINE(USE_PYTHON)
-        AC_MSG_RESULT(ok)
-        AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread")
-      else
-        python=no
-        AC_MSG_RESULT([Can't find Python.h])
-      fi
-    fi
-  fi
-else
-  python=no
-fi
-
-
-dnl *********************************************************************
-dnl ** GNOME PANEL ******************************************************
-dnl *********************************************************************
-
-if test "$panel" = yes; then
-  if test "$gnome" = yes; then
-    oldLIBS=$LIBS
-    LIBS="$LIBS `$gnomepath applets --libs`"
-    AC_CHECK_LIB(panel_applet, applet_widget_init, have_panel=yes)
-    LIBS=$oldLIBS
-    if test "$have_panel" = yes; then
-      AC_DEFINE(USE_PANEL)
-      GUI_LIBS="$GUI_LIBS `$gnomepath applets --libs`"
-    else
-      panel=no
-    fi
-  else
-    panel=no
-  fi
-fi
-
-
 dnl *********************************************************************
 dnl ** CONDITIONALS *****************************************************
 dnl *********************************************************************
 
 AM_CONDITIONAL(USE_GNOME, test "x$gnome" = "xyes")
+
 AM_CONDITIONAL(USE_MYGLIB, test "x$glibreplace" = "xyes")
-AM_CONDITIONAL(DO_TEXT, test "x$textfe" = "xyes")
 AM_CONDITIONAL(DO_GTK, test "x$gtkfe" = "xyes")
 AM_CONDITIONAL(DO_PERL, test "x$perl" = "xyes")
-AM_CONDITIONAL(DO_PYTHON, test "x$python" = "xyes")
-AM_CONDITIONAL(DO_PANEL, test "x$panel" = "xyes")
+
 
 
 dnl *********************************************************************
@@ -382,15 +318,6 @@ AC_CHECK_FUNC(gethostbyname, ,
 AC_CHECK_FUNC(gethostname, ,
   AC_CHECK_LIB(nsl, gethostname, LIBS="$LIBS -lnsl"))
 
-dnl python is usually linked against -lm on solaris
-if test "$system" = "SunOS"; then
-  if test "$python" = "yes"; then
-    if test -z "`echo "$LIBS" | grep "\-lm " 2> /dev/null`" ; then
-      LIBS="$LIBS -lm"
-    fi
-  fi
-fi
-
 dnl necessary for IRIX
 AC_CHECK_HEADERS(strings.h)
 
@@ -410,7 +337,7 @@ po/Makefile.in
 
 
 echo
-echo \-\*\- X-Chat $VERSION \-\*\-
+echo \-\*\- NF-Chat $VERSION \-\*\-
 echo
 
 if test "$gtkfe" = "yes"; then
@@ -419,15 +346,11 @@ else
   echo Building GTK FrontEnd ........... : no \!\!\!\!\!\!
 fi
 
-echo Building Text FrontEnd .......... : $textfe
-
 if test "$gnome" = "yes"; then
   echo Building with Gnome ............. : $gnome \($GNOME_VER\)
 else
   echo Building with Gnome ............. : no
 fi
-
-echo Building with Gnome Panel Support : $panel
 
 if test "$imlib" = "yes"; then
   echo Building with ImLib ............. : yes \(`imlib-config --version`\)
@@ -437,12 +360,6 @@ fi
 
 echo Building with Glib replacement .. : $glibreplace
 echo Building with Perl .............. : $perl
-
-if test "$python" = "yes"; then
-  echo Building with Python ............ : yes \($PY_VERSION\)
-else
-  echo Building with Python ............ : no
-fi
 
 echo Building with Plugin Support .... : $plugin
 echo Building with SOCKS5 ............ : $socks
@@ -457,9 +374,5 @@ if test "$gtkfe" = no; then
   echo
 fi
 
-if test _"$gmakepath" = _; then
-  echo configure complete, now type \'make\'
-else
-  echo configure complete, now type \'gmake\'
-fi
+echo configure complete, now type \'make\'
 echo

@@ -34,17 +34,10 @@
 #include "fe-gtk.h"
 #include "menu.h"
 #include "gtkutil.h"
-#include "panel.h"
 #ifdef USE_IMLIB
 #include <gdk_imlib.h>
 #endif
 #include <gdk/gdkkeysyms.h>
-#ifdef USE_PANEL
-#include <applet-widget.h>
-extern int nopanel;
-extern GtkWidget *panel_applet, *panel_box,
-         *panel_popup;
-#endif
 #include "xtext.h"
 
 GtkWidget *main_window = 0;
@@ -92,7 +85,6 @@ extern GtkWidget *createmenus (struct session *sess);
 extern void handle_inputgad (GtkWidget * igad, struct session *sess);
 extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, struct session *sess);
 extern struct session *new_dialog (struct session *sess);
-extern void create_panel_widget ();
 int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);
 
 static void userlist_button (GtkWidget * box, char *label, char *cmd,
@@ -240,10 +232,7 @@ fe_set_channel (struct session *sess)
    if (!sess->is_tab && sess->is_dialog)
       return;
    gtk_label_set_text (GTK_LABEL (sess->gui->changad), sess->channel);
-#ifdef USE_PANEL
-   if (sess->gui->panel_button)
-      gtk_label_set_text (GTK_LABEL (GTK_BIN (sess->gui->panel_button)->child), sess->channel);
-#endif
+
    if (prefs.treeview)
       tree_update ();
 }
@@ -254,10 +243,7 @@ fe_clear_channel (struct session *sess)
    gtk_entry_set_text (GTK_ENTRY (sess->gui->topicgad), "");
    gtk_label_set_text (GTK_LABEL (sess->gui->namelistinfo), " ");
    gtk_label_set_text (GTK_LABEL (sess->gui->changad), "<none>");
-#ifdef USE_PANEL
-   if (sess->gui->panel_button)
-      gtk_label_set_text (GTK_LABEL (GTK_BIN (sess->gui->panel_button)->child), "<none>");
-#endif
+
    clear_user_list (sess);
    if (sess->gui->flag_wid[0])
    {
@@ -391,10 +377,7 @@ focus_in (GtkWindow * win, GtkWidget * wid, struct session *sess)
       else
          gtk_widget_grab_focus (sess->gui->textgad);
       menu_sess = sess;
-#ifdef USE_PANEL
-      if (sess->gui->panel_button)
-         gtk_widget_set_style (GTK_BIN (sess->gui->panel_button)->child, normaltab_style);
-#endif
+
       if (prefs.treeview)
 	 tree_default_style (sess);
    }
@@ -872,10 +855,6 @@ gui_new_tab (session *sess)
    if (!sess->is_shell)
       gtk_widget_grab_focus (sess->gui->inputgad);
 
-#ifdef USE_PANEL
-   if (sess->gui->panel_button)
-      gtk_widget_set_style (GTK_BIN (sess->gui->panel_button)->child, normaltab_style);
-#endif
    if (sess->new_data || sess->nick_said)
    {
       sess->nick_said = FALSE;
@@ -1787,16 +1766,6 @@ create_window (struct session *sess)
    add_tip (wid, "Link/DeLink this tab");
 #endif
 
-#ifdef USE_PANEL
-   if (!nopanel)
-   {
-      wid = gtkutil_button (sess->gui->window, GNOME_STOCK_BUTTON_DOWN,
-        0, maingui_panelize, sess, 0);
-      gtk_box_pack_start (GTK_BOX (tbox), wid, 0, 0, 0);
-      add_tip (wid, "Panelize");
-   }
-#endif
-
 #ifdef USE_GNOME
    wid = gtkutil_button (sess->gui->window, GNOME_STOCK_PIXMAP_BACK,
                          0, maingui_moveleft, 0, 0);
@@ -2247,11 +2216,6 @@ void
 fe_session_callback (struct session *sess)
 {
    tree_update ();
-
-#ifdef USE_PANEL
-   if (sess->gui->panel_button)
-      gtk_widget_destroy (sess->gui->panel_button);
-#endif
 
    if (sess->gui->bar)
    {

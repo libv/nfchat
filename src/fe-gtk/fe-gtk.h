@@ -126,7 +126,4 @@ struct session_gui
    GtkWidget *limit_entry;      /* +l */
    GtkWidget *key_entry;        /* +k */
    GtkWidget *delink_button;
-#ifdef USE_PANEL
-   GtkWidget *panel_button;
-#endif
 };

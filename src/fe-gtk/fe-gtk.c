@@ -27,10 +27,6 @@
 #ifdef USE_IMLIB
 #include <gdk_imlib.h>
 #endif
-#ifdef USE_PANEL
-#include <applet-widget.h>
-extern int nopanel;
-#endif
 
 static int autoconnect = 0;
 
@@ -82,9 +78,6 @@ fe_args (int argc, char *argv[])
    {
       {"connect", 'c', POPT_ARG_NONE, 0, 0, "Auto connect", 0},
       {"cfgdir", 'd', POPT_ARG_STRING, 0, 0, "Config dir", 0},
-#ifdef USE_PANEL
-      {"no-panel", 'n', POPT_ARG_NONE, 0, 0, "Don't use GNOME Panel", 0},
-#endif
       POPT_AUTOHELP
       {0, '\0', 0, 0}
    };
@@ -92,12 +85,6 @@ fe_args (int argc, char *argv[])
 
    if (argc > 1)
    {
-#ifdef USE_PANEL
-      if (!strcasecmp (argv[1], "-n") || !strcasecmp (argv[1], "--no-panel"))
-      {
-         nopanel = TRUE;
-      }
-#endif
       if (!strcasecmp (argv[1], "-v") || !strcasecmp (argv[1], "--version"))
       {
          puts ("X-Chat " VERSION "");
@@ -144,17 +131,10 @@ fe_args (int argc, char *argv[])
 
    gtk_set_locale ();
 
-#ifdef USE_PANEL
-   if (nopanel)
-      gnome_init_with_popt_table (argv[0], VERSION, argc, argv, options, 0, 0);
-   else
-      applet_widget_init (argv[0], VERSION, argc, argv, options, 0, 0);
-#else
 #ifdef USE_GNOME
    gnome_init_with_popt_table (argv[0], VERSION, argc, argv, options, 0, 0);
 #else
    gtk_init (&argc, &argv);
-#endif
 #endif
 
 #ifndef USE_GNOME
@@ -228,9 +208,6 @@ init_sess (void)
 #ifdef USE_GNOME
    strcat (buf, "Gnome ");
 #endif
-#ifdef USE_PANEL
-   strcat (buf, "Panel ");
-#endif
 #ifdef USE_PERL
    strcat (buf, "Perl ");
 #endif
@@ -253,14 +230,7 @@ init_sess (void)
 void
 fe_main (void)
 {
-#ifdef USE_PANEL
-   if (nopanel)
-      gtk_main ();
-   else
-      applet_widget_gtk_main ();
-#else
    gtk_main ();
-#endif
 }
 
 void
@@ -411,10 +381,6 @@ fe_set_topic (struct session *sess, char *topic)
 void
 fe_set_hilight (struct session *sess)
 {
-#ifdef USE_PANEL
-   if (sess->gui->panel_button)
-      gtk_widget_set_style (GTK_BIN (sess->gui->panel_button)->child, bluetab_style);
-#endif
    gtk_widget_set_style (sess->gui->changad, bluetab_style);
    if (prefs.treeview)
       tree_blue_style (sess);
@@ -540,11 +506,6 @@ fe_print_text (struct session *sess, char *text)
 
    if (!sess->new_data && !sess->nick_said && sess != current_tab)
    {
-#ifdef USE_PANEL
-   
-      if (sess->gui->panel_button)
-         gtk_widget_set_style (GTK_BIN (sess->gui->panel_button)->child, redtab_style);
-#endif
       if (prefs.treeview)
 	 tree_red_style (sess);
    }
