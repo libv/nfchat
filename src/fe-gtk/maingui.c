@@ -32,7 +32,6 @@
 #include "../common/fe.h"
 #include "../pixmaps/xchat_mini.xpm"
 #include "fe-gtk.h"
-#include "menu.h"
 #include "gtkutil.h"
 #ifdef USE_IMLIB
 #include <gdk_imlib.h>
@@ -57,22 +56,16 @@ extern GtkStyle *channelwin_style;
 extern GdkFont *font_normal;
 extern gint xchat_is_quitting;
 
-extern void nick_command_parse (session *sess, char *cmd, char *nick, char *allnick);
-extern void goto_url (void *unused, char *url);
 extern int key_action_insert (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2, struct session *sess);
 extern int handle_multiline (struct session *sess, char *cmd, int history, int nocommand);
 extern int kill_session_callback (struct session *sess);
 extern gint gtk_kill_session_callback (GtkWidget *, struct session *sess);
 extern void palette_alloc (GtkWidget * widget);
-/* extern void menu_urlmenu (struct session *sess, GdkEventButton * event, char *url);
-extern void menu_hostmenu (struct session *sess, GdkEventButton * event, char *url);
-extern void menu_chanmenu (struct session *sess, GdkEventButton * event, char *url); */
 extern void userlist_dnd_drop (GtkWidget *, GdkDragContext *, gint, gint, GtkSelectionData *, guint, guint32, struct session *);
 extern int userlist_dnd_motion (GtkWidget *, GdkDragContext *, gint, gint, guint);
 extern int userlist_dnd_leave (GtkWidget *, GdkDragContext *, guint time);
 extern int tcp_send_len (struct server *serv, char *buf, int len);
 extern int tcp_send (struct server *serv, char *buf);
-extern void menu_popup (struct session *sess, GdkEventButton * event, char *nick);
 extern void clear_user_list (struct session *sess);
 extern void handle_inputgad (GtkWidget * igad, struct session *sess);
 int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);

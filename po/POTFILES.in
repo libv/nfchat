@@ -3,5 +3,4 @@ src/common/ctcp.c
 src/common/dcc.c
 src/fe-gtk/fkeys.c
 src/fe-gtk/gtkutil.c
-src/fe-gtk/menu.c
 src/common/xchat.c

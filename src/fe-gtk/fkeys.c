@@ -28,7 +28,7 @@
 #include "../common/userlist.h"
 #include "fe-gtk.h"
 #include "gtkutil.h"
-#include "menu.h"
+/* #include "menu.h" */
 #include "xtext.h"
 
 extern GSList *fkey_list;
@@ -1254,11 +1254,8 @@ void
 replace_handle (GtkWidget * t)
 {
    char *text, *postfix_pnt;
-   struct popup *pop;
-   GSList *list = replace_list;
    char word[140];
    char postfix[140];
-   char outbuf[4096];
    int c, len, xlen;
 
    text = gtk_entry_get_text (GTK_ENTRY (t));
@@ -1296,23 +1293,7 @@ replace_handle (GtkWidget * t)
          return;
       strcpy (postfix, postfix_pnt);
    }
-   while (list)
-   {
-      pop = (struct popup *) list->data;
-      if (strcmp (pop->name, word) == 0)
-      {
-         memcpy (outbuf, text, xlen);
-         outbuf[xlen] = 0;
-         if (postfix_pnt == NULL)
-            snprintf (word, sizeof (word), "%s", pop->cmd);
-         else
-            snprintf (word, sizeof (word), "%s%s", pop->cmd, postfix);
-         strcat (outbuf, word);
-         gtk_entry_set_text (GTK_ENTRY (t), outbuf);
-         return;
-      }
-      list = list->next;
-   }
+
 }
 
 struct session *
@@ -1450,8 +1431,6 @@ void
 tab_comp_cmd (GtkWidget * t)
 {
    char *text, *last = NULL, *cmd, *postfix = NULL;
-   GSList *list = command_list;
-   struct popup *pop;
    int len, i, slen;
    struct session *sess;
    char buf[2048];
@@ -1474,41 +1453,6 @@ tab_comp_cmd (GtkWidget * t)
          len = strlen (text);
          break;
       }
-   }
-
-   while (list)
-   {
-      pop = (struct popup *) list->data;
-      slen = strlen (pop->name);
-      if (len > slen)
-      {
-         list = list->next;
-         continue;
-      }
-      if (strncasecmp (pop->name, text, len) == 0)
-      {
-         if (last == NULL)
-         {
-            last = pop->name;
-            snprintf (lcmd, sizeof (lcmd), "%s", last);
-         } else if (last > (char *) 1)
-         {
-            snprintf (buf, sizeof (buf), "%s %s ", last, pop->name);
-            PrintText (sess, buf);
-            /*PrintText (sess, last);
-            PrintText (sess, "\t");
-            PrintText (sess, pop->name);
-            PrintText (sess, "\t");*/
-            last = (void *) 1;
-            tab_comp_find_common (lcmd, pop->name);
-         } else if (last == (void *) 1)
-         {
-            PrintText (sess, pop->name);
-            /*PrintText (sess, "\t");*/
-            tab_comp_find_common (lcmd, pop->name);
-         }
-      }
-      list = list->next;
    }
 
    i = 0;
