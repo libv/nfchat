@@ -115,7 +115,8 @@ fe_main (void)
 void
 fe_exit (void)
 {
-   gtk_main_quit ();
+  gtk_main_quit ();
+  free(session->gui);
 }
 
 int
@@ -152,7 +153,7 @@ fe_new_window (void)
 void
 fe_input_remove (int tag)
 {
-   gdk_input_remove (tag);
+  gdk_input_remove (tag);
 }
 
 int

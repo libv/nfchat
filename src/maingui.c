@@ -44,7 +44,7 @@ extern GtkStyle *channelwin_style;
 extern GdkFont *font_normal;
 extern gint xchat_is_quitting;
 
-extern int handle_multiline (char *cmd, int history, int nocommand);
+extern int handle_multiline (char *cmd, int history);
 extern int kill_session_callback (void);
 extern gint gtk_kill_session_callback (GtkWidget *, void *blah);
 extern void clear_user_list (void);
@@ -309,7 +309,7 @@ handle_inputgad (GtkWidget * igad, void *blah)
    if (cmd[0] == 0)
       return;
 
-   handle_multiline (cmd, TRUE, FALSE);
+   handle_multiline (cmd, TRUE);
 
    gtk_entry_set_text (GTK_ENTRY (igad), "");
 }

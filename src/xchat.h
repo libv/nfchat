@@ -90,6 +90,7 @@ struct xchatprefs
   unsigned int transparent;
   unsigned int tint;
   unsigned int use_fontset;
+  unsigned int allow_nick;
 };
 
 struct session_t
@@ -101,21 +102,12 @@ struct session_t
    char willjoinchannel[202];   /* /join done for this channel */
    char channelkey[64];         /* XXX correct max length? */
    int limit;			  /* channel user limit */
-
    char lastnick[64];           /* last nick you /msg'ed */
-
    struct history history;
-
    int ops;                     /* num. of ops in channel */
    int total;                   /* num. of users in channel */
-
    char *quitreason;
-
-   struct setup *setup;
    struct session_gui *gui;	     /* initialized by fe_new_window */
-
-   int new_data:1;              /* new data avail? (red tab) */
-   int nick_said:1;             /* your nick mentioned? (green tab) */
    int end_of_names:1;
    int doing_who:1;             /* /who sent on this channel */
 };
@@ -161,14 +153,16 @@ extern session_t *session;
 
 typedef int (*cmd_callback) (char *tbuf, char *word[], char *word_eol[]);
 
-struct commands
+typedef struct commands_t
 {
    char *name;
    cmd_callback callback;
    char needserver;
    char needchannel;
    char *help;
-};
+} commands_t;
+
+extern commands_t **cmds;
 
 struct away_msg
 {

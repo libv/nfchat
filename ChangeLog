@@ -2,6 +2,67 @@ NF-chat;
 
 0.3.4; final cleanups
 """"""
+    a) various cleanups - tryin to fix that large bug
+	- removed send_quit_or_part, moved live code to
+	  kill_session_callback
+	- bug fixed - cleaned up the freein of session/gui
+#########################################################################
+### BUG - Bad config files seem to trigger a segfault upon exit.      ###
+###       Since it didnt reoccur after fresh configfiles, its kinda   ###
+###       impossible to track it decently.                            ###
+###		STAY ON UR TOES					      ###
+#########################################################################
+    	- cleanin up the debug shite
+	- removed new_data, nick_said, *setup  from session struct
+	- removed cmd_debug, cmd_join, cmd_part, cmd_quit, cmd_reconnect
+	  cmd_server from outbound.c
+	- edited handle_command to not send unknown commands
+	- edited notc, notj
+	- added allow_nick to prefs
+	- wrote init_commands; enables /nick when prefs allow it
+	- added init_commands to ...
+	bugger, have to use alloced pointer for cmds
+	- made cmds double pointer to commands_t
+	- added init, add_command...
+	- added the new cmds to xchat.h
+	- removed odl definition from fkeys.c
+	- adapted alot of code in outbound.c
+	- removed nocommand from handle_command, handle_multiline 
+    b)
+
+### make sure it dusnt send unknown commands to the server4
+### make sure it uses the conf file specified port
+### move send_quit_or_part to send_quit
+### make sure the editbox always has focus	
+### add the generic modes again
+### make it rejoin the set channel on a prefs specified time interval
+### clean up debug stuff
+### clean up *tbuf
+### is_channel, is_server
+### userlist dusnt need all that inf, nickname should suffise
+### *ip
+### remove key_action_page_switch
+### main_window
+### ctcpreply.conf
+### clean up fe
+### struct user
+### clean up fkeys.c
+### clean up signals
+### find another method to check whether the server is still connected
+    in timeout_auto_reconnect
+*** gtk_xtext_append??? <-- think this becomes obsolete
+    move gtk_xtext_append_indent to it
+*** gtk_xtext_button_release = one of the functions used to move the
+    separator with the mouse, check this out asap. gtk_xtext_button_press
+### should remove keybindings file
+### make scrolling topic
+### cmd_help
+*** add some extra prefs & code for my_widget_get_style(maingui.c)
+*** for/background - base colours!!!! -> seems to only affect inputbox
+*** remember to check for fprintf uniformication
+*** clean up ctcp.c
+*** make it send a quit to the server upon kill.
+### Add decent file headers
 
 0.3.3;
 """"""
@@ -32,8 +93,6 @@ NF-chat;
 	  - tcp_send_queue, tcp_send_len (moved to static)
 	  - tcp_send in ctcp.c, inbound.c, outbound.c, server.c, xchat.c 
 	  - removing is_server
-### find another method to check whether the server is still connected
-    in timeout_auto_reconnect
 	  - find_session_from_channel in ctcp.c, inbound.c, xchat.c
 	  - find_session_from_nick in inbound.c, xchat.c
 	  - find_session_from_waitchannel in fe-gtk.c, xchat.c
@@ -248,20 +307,6 @@ NF-chat;
 	- made it autoconnect, autojoin
 	- moving to 3.4 -> last cleanups
 
-### clean up debug stuff
-### clean up *tbuf
-### is_channel, is_server
-### userlist dusnt need all that inf, nickname should suffise
-### *ip
-### remove key_action_page_switch
-### main_window
-### ctcpreply.conf
-### clean up fe
-### struct user
-### clean up fkeys.c
-### clean up signals
-### remove commands server, reconnect, quit, part, join, debug
-
 0.3.2;
 """"""
      a) cleanin out all the unneccessary commands from outbound.c
@@ -291,8 +336,6 @@ NF-chat;
 	   - edited my_font_load to no longer fprintf(stderr
 	   - removed unused dialog_font_normal from fe_init(fe_gtk.c)
 	     xchatprefs(xchat.h); prefs var & load_config(cfgfiles.c)
-*** add some extra prefs & code for my_widget_get_style(maingui.c)
-*** for/background - base colours!!!! -> seems to only affect inputbox
 	   - removed gtkutil_simpledialog from
              my_widget_get_style(maingui.c)
   	   - movin my_widget_get_style to fe-gtk.c
@@ -307,13 +350,11 @@ NF-chat;
              & pevent_dialog_save
 	     removin pevt_ctcpsnd_help.
 	     removin play_wave & call from text_signal_handler
-*** remember to check for fprintf uniformication
 	got as far as xchat_init's load_text_events	   
 
     c) cleanin out the dead prefs.
 	- awayreason (cfgfiles.c, xchat.h)
 	- sounddir (cfgfiles.c, ctcp.c(whole sound part), xchat.h) 
-*** clean up ctcp.c
 	- soundcmd (cfgfiles.c, xchat.h)
 	- doubleclickuser (cfgfiles.c, xchat.h)
 	- edited bluestring to highlight on "netforce" as standard
@@ -348,7 +389,6 @@ NF-chat;
 	  edited set_default_modes(outbound.c)
 	- removed colorednicks from inbound.c(5x), cfgfiles.c, xchat.h
 	- removed nochanmodebuttons cfgfiles.c, xchat.h
-*** tabchannels should be removed for a single client.
 	- removed nopaned from cfgfiles.c, xchat.h
 	- removed dialog_transparent, dialog_tint from cfgfiles.c, xchat.h
 	- removed stripcolor from xchat.c/h, cfgfiles.c
@@ -372,8 +412,6 @@ NF-chat;
 	- removed windows_as_tabs from cfgfiles.c, xchat.h
 	- removed indent_nicks from maingui_create_textlist (maingui.c)
 	  & indent from PrintTextLine (textgui.c)
-*** gtk_xtext_append??? <-- think this becomes obsolete
-*** move gtk_xtext_append_indent to it
 	  removed from xchat.h, cfgfiles.c, text.c, outbound.c
 	- removed show_separator xchat.h, cfgfiles.c
 	  removed from maingui_create_textlist (maingui.c)
@@ -389,8 +427,6 @@ NF-chat;
 	- removed auto_indent from xchat.h, cfgfiles.c
 	  removed from maingui.c, xtext.c
 	  xtext->indent = always true
-*** gtk_xtext_button_release = one of the functions used to move the
-*** separator with the mouse, check this out asap. gtk_xtext_button_press
 	- removed wordwrap (always true) from cfgfiles.c, xchat.h
 	  edited maingui.c, removed ->wordwrap from xtext.c/h
 	- removed dialog_wordwrap from cfgfiles.c, xchat.h
@@ -399,7 +435,6 @@ NF-chat;
 	- removed mail_check from from cfgfiles.c xchat.h
 	  removed xchat_misc_checks, xchat_mail_check, mail_items
 	  from xchat.c, removed pevt_newmail_help & edited te
-*** remove XP_TE_NEWMAIL
 	- removed double_buffer from cfgfiles.c, xchat.h
 	  removin all code inside USE_MITSHM, whatever that is
 	  it isnt used on a lin. removed tmp_pix from xchat.h
@@ -437,7 +472,6 @@ NF-chat;
 	- deleted themes-common.c
 	- edited Makefile.am, text.c, xchat.c
 	- moving to 3.3
-### should remove keybindings file.
 
 0.3.1; 
 """"""
@@ -686,7 +720,6 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
 0.2.4;
 """"""
    - made topic uneditable
-### should make it scrolling around
    - removed handle_topicgad from maingui.c
    - removed ul_button_rel from maingui.c and from create_window
    - removed adjacent find_selected_nick from maingui.c
@@ -817,24 +850,20 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
   - removed the following menu entries and adjacent functions
     - X-Chat
        - menu_newserver_tab
- ### new_server
        - menu_newserver_window
        - menu_newchannel_tab
        - menu_newchannel_window
        - menu_close
- ### xchat_cleanup -> function from common
     - Windows
        - menu_flushbuffer
        - menu_savebuffer
             - close_savebuffer
             - savebuffer_req_done
- ### fe_text_clear --> could prolly easily be removed
     - User Modes
        - menu_invisible
        - menu_wallops
        - menu_servernotice
        - menu_away
- ### handle_command <---???
        - menu_autorejoin
        - menu_autoreconnect
        - menu_autoreconnectonfail
@@ -852,20 +881,15 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
        - menu_keypopup
        - menu_themes
        - menu_reload
- ### default_file <--- menu.c only
- ### load_config, prolly common
        - menu_savedefault
- ### save_config, prolly common too
        - menu_saveexit
     - Scripts & plugins
        - menu_loadperl
           - menu_loadperl_callback
        - menu_unloadall
- ### command_unloadall
        - menu_perllist
     - Help
        - menu_help
- ### cmd_help
        - menu_webpage
        - menu_docs
  - removed editlist.c and edited Makefile.am
@@ -910,9 +934,6 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
   - removed palette_save from menu.c, fe-gtk.c
   - removed fe_cleanup from fe-gtk.c, common/fe.h, 
     (contained only palette_save at this point)
- ### two functions left, not sure if they r to be removed,
- ### maybe they should be kept for later, in which case they
- ### should be merged with the files who require them
 
 0.1.8;
 """"""

@@ -248,6 +248,7 @@ static struct prefs vars[] = {
 {"tint_blue",           PREFS_OFFINT(tint_blue),            TYPE_INT},
 {"indent_pixels",       PREFS_OFFINT(indent_pixels),        TYPE_INT},
 {"max_auto_indent",     PREFS_OFFINT (max_auto_indent),     TYPE_INT},
+{"allow_nick",          PREFS_OFFINT (allow_nick),          TYPE_INT},
 {0, 0, 0},
 };
 

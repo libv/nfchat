@@ -417,8 +417,6 @@ handle_away (char *outbuf, char *nick, char *msg)
 static void
 channel_mode (char *outbuf, char *nick, char sign, char mode, char *extra, int quiet)
 {
-  fprintf(stderr, "chanmode outbuf = %s, nick = %s, sign = %c, mode = %c, extra = %s\n", outbuf, nick, sign, mode, extra);
-  
   switch (sign)
     {
     case '+':
@@ -530,7 +528,7 @@ static void
 channel_modes (char *outbuf, char *word[], char *nick, int displacement)
 {
   char *modes = find_word (pdibuf, 4 + displacement);
-  fprintf(stderr, "chanmode outbuf = %s, nick = %s, modes = %s\n", outbuf, nick, modes);
+
   if (*modes)
     {
       int i = 5 + displacement;
@@ -595,7 +593,6 @@ channel_modes (char *outbuf, char *word[], char *nick, int displacement)
 static void
 check_willjoin_channels (char *tbuf)
 {
-  fprintf(stderr, "passed willjoinchannels\n");
   if (session->willjoinchannel[0] != 0)
     {
       strcpy (session->waitchannel, session->willjoinchannel);
@@ -650,19 +647,15 @@ process_line (void)
   char *word[32];
   char *word_eol[32], *buf;
   int n;
-  /*  fprintf(stderr, "channel: %s\n", session->channel);
-      fprintf(stderr, "waitchannel: %s\n", session->waitchannel);
-      fprintf(stderr, "willjoinchannel: %s\n", session->willjoinchannel);*/
+
   buf = server->linebuf;
   process_data_init (pdibuf, buf + 1, word, word_eol);
 
-  /*  fprintf(stderr, "processline: word: %s\n", find_word_to_end(word,2)); */
   if (fire_signal (XP_INBOUND, server, buf, NULL, NULL, 0) == 1)
     return;
   
   if (*buf != ':')
     {
-      /* fprintf (stderr, "here?"); */
       if (!strncmp (buf, "NOTICE ", 7))
 	buf += 7;
       if (!strncmp (buf, "PING ", 5))
@@ -679,18 +672,14 @@ process_line (void)
       fire_signal (XP_TE_SERVERGENMESSAGE, buf, NULL, NULL, NULL, 0);
     } else
       {
-	/*fprintf(stderr, "or here?"); */
 	buf++;
 	
 	n = atoi (find_word (pdibuf, 2));
-	/* fprintf(stderr, "n = %d\n", n); */
 	if (n)
 	  {
 	    char *text = find_word_to_end (buf, 3);
-	    /* fprintf(stderr, "what about this then?"); */
 	    if (*text)
 	      {
-		/* fprintf(stderr, "and what about this point?"); */
 		if (!strncasecmp (server->nick, text, strlen (server->nick)))
 		  text += strlen (server->nick) + 1;
 		if (*text == ':')
@@ -755,11 +744,6 @@ process_line (void)
 		    channel_date (outbuf, word[5]);
 		    break;
 		  case 332:
-		    /* if (session->channel[0] == 0)
-		      {
-			strcpy (session->channel, word[4]);
-			fprintf(stderr, "blah");
-			} */
 		    topic (text);
 		    break;
 		  case 333:
@@ -831,7 +815,6 @@ process_line (void)
 		    break;
 		    
 		  default:
-		    /*fprintf(stderr, "got to default");*/
 		  def:
 		    if (prefs.skipmotd && !server->motd_skipped)
 		      {
@@ -858,7 +841,6 @@ process_line (void)
 			if (*chan == ':')
 			  chan++;
 		      }
-		    /*fprintf(stderr, "is this triggered?");*/
 		    fire_signal (XP_TE_SERVTEXT, text, NULL, NULL, NULL, 0);
 		  }
 	      }
@@ -868,7 +850,6 @@ process_line (void)
 	      char nick[64], ip[128];
 	      char *po2, *po = strchr (buf, '!');
 	      
-	      /* fprintf(stderr, "Do i make it to this point\n");*/
 	      if (po)
 		{
 		  po2 = strchr (buf, ' ');
@@ -913,7 +894,6 @@ process_line (void)
 			}
 		      if (!strcmp ("MODE", cmd))
 			{
-			  /*  fprintf(stderr, "I got here !!!");*/
 			  channel_modes (outbuf, word, nick, 0);
 			  return;
 			}

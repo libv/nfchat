@@ -29,7 +29,7 @@
 #include "signals.h"
 #include "util.h"
 
-extern int handle_command (char *cmd, int history, int nocommand);
+extern int handle_command (char *cmd, int history);
 extern int tcp_send (char *buf);
 extern void channel_action (char *tbuf, char *from, char *text, int fromme);
 
@@ -81,7 +81,7 @@ ctcp_reply (char *tbuf, char *nick, char *word[], char *word_eol[], char *conf)
       case 0:
        jump:
          tbuf[j] = 0;
-         handle_command (tbuf, 0, 0);
+         handle_command (tbuf, 0);
          return;
       default:
          tbuf[j] = conf[i];

@@ -42,36 +42,19 @@ GSList *away_list = 0;
 
 int xchat_is_quitting = 0;
 
-/* extern GSList *ctcp_list; */
-
 struct xchatprefs prefs;
 
 void xchat_cleanup (void);
-
-/* inbound.c */
-
-extern void process_line ();
-
-/* plugin.c */
-
-extern void signal_setup ();
-
-/* server.c */
-
+extern void process_line (void);
+extern void signal_setup (void);
 extern int close_socket (int sok);
 extern void connect_server (char *server, int port, int quiet);
 extern void disconnect_server (int sendquit, int err);
-
-/* editlist.c */
-
 extern void list_loadconf (char *, GSList **, char *);
-
-/* text.c */
-
 extern unsigned char *strip_color (unsigned char *text);
-extern void load_text_events ();
-
+extern void load_text_events (void);
 void auto_reconnect (int send_quit, int err);
+void init_commands (void);
 
 /* anything above SEND_MAX bytes in 1 second is
    queued and sent QUEUE_TIMEOUT milliseconds later */
@@ -255,8 +238,6 @@ flush_server_queue (void)
 void
 init_session (void)
 {
-  if (session)
-     fprintf(stderr, "What? Dont call new_session twice!\n");
   session = malloc (sizeof (session_t));
   memset (session, 0, sizeof (session_t));
   
@@ -277,72 +258,54 @@ init_server (void)
 static void
 kill_server_callback (void)
 {
-   if (server->connected)
-   {
+  if (server->connected)
+    {
       if (server->iotag != -1)
-         fe_input_remove (server->iotag);
+	fe_input_remove (server->iotag);
       if (fe_timeout_add (5000, close_socket, (void *)server->sok) == -1)
-         close (server->sok);
-   }
-   if (server->connecting)
-   {
+	close (server->sok);
+    }
+  if (server->connecting)
+    { 
       kill (server->childpid, SIGKILL);
       waitpid (server->childpid, NULL, 0/*WNOHANG*/);
       if (server->iotag != -1)
-         fe_input_remove (server->iotag);
+	fe_input_remove (server->iotag);
       close (server->childread);
       close (server->childwrite);
       close (server->sok);
-   }
-   flush_server_queue ();
-   free (server);
-}
-
-static void
-send_quit_or_part (void)
-{
-  int willquit = TRUE;
-  char tbuf[256];
-  
-  if (xchat_is_quitting)
-    willquit = TRUE;
-  
-  if (server->connected)
-    {
-      if (willquit)
-	{
-	  if (!server->sent_quit)
-	    {
-	      flush_server_queue ();
-	      snprintf (tbuf, sizeof tbuf, "QUIT :%s\r\n", session->quitreason);
-	      tcp_send (tbuf);
-	      server->sent_quit = TRUE;
-	    }
-	} else if (session->channel[0])
-	  {
-	    snprintf (tbuf, sizeof tbuf, "PART %s\r\n", session->channel);
-	    tcp_send (tbuf); 
-	  }
     }
+  flush_server_queue ();
+  free (server);
 }
 
 void
 kill_session_callback (void)
 {
-   if (!session->quitreason)
-      session->quitreason = prefs.quitreason;
+  char tbuf[256];
 
-   fe_session_callback ();
+  xchat_is_quitting = TRUE;
 
-   send_quit_or_part ();
-
-   history_free (&session->history);
+  if (!session->quitreason)
+    session->quitreason = prefs.quitreason;
   
-   free (session);
+  fe_session_callback ();
 
-   xchat_cleanup ();
+  if (server->connected && !server->sent_quit)
+    {
+      flush_server_queue ();
+      snprintf (tbuf, sizeof tbuf, "QUIT :%s\r\n", session->quitreason);
+      tcp_send (tbuf);
+      server->sent_quit = TRUE;
+    }
+  
+  history_free (&session->history);
+  
+  fe_exit ();
 
-   kill_server_callback ();
+  free (session);
+  
+  kill_server_callback ();
 }
 
 struct away_msg *
@@ -399,7 +362,8 @@ xchat_init (void)
   signal_setup ();
   load_text_events ();
   list_loadconf ("ctcpreply.conf", &ctcp_list, defaultconf_ctcp);
-  
+
+  init_commands ();
   init_server ();
   init_session ();
 
@@ -422,10 +386,10 @@ xchat_init (void)
 void
 xchat_cleanup (void)
 {
-   xchat_is_quitting = TRUE;
-   
-   free (session);
-   fe_exit ();
+  xchat_is_quitting = TRUE;
+  
+  /* free (session); */
+  fe_exit ();
 }
 
 int
