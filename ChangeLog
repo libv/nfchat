@@ -1,12 +1,19 @@
 NF-chat;
 
+0.2.0;
+""""""
+ a)  
+  - deleted ascii.c (ascii_click; ascii_open)
+  - removed whole toolbox from create_window
+  - removed confmode from
+    fe-gtk.c, fe-gtk.h, common/fe.h & inbound.c
+  - removed maingui_toolbox, maingui_code,
+    maingui_cp, toolbox_color, toolbox_button
+  - removed toolbox and confmode from struct session_gui in fe-gtk.h
+  - edited the logo
+
 0.1.13;
 """""""
-
-###
-### generates a segfault when the main windows is clicked
-### in the close button
-###
 
   - removed the following menu entries and adjacent functions
     - X-Chat

@@ -484,8 +484,7 @@ user_joined (struct server *serv, char *outbuf, char *chan, char *user, char *ip
 
    if (sess)
    {
-      if (!fe_is_confmode(sess))
-         EMIT_SIGNAL (XP_TE_JOIN, sess, user, chan, ip, NULL, 0);
+      EMIT_SIGNAL (XP_TE_JOIN, sess, user, chan, ip, NULL, 0);
       add_name (sess, user, ip);
    }
 }
@@ -507,13 +506,11 @@ user_parted (struct server *serv, char *chan, char *user, char *ip, char *reason
    struct session *sess = find_session_from_channel (chan, serv);
    if (sess)
    {
-      if (!fe_is_confmode(sess))
-      {
-         if (*reason)
-            EMIT_SIGNAL (XP_TE_PARTREASON, sess, user, ip, chan, reason, 0);
-         else
-            EMIT_SIGNAL (XP_TE_PART, sess, user, ip, chan, NULL, 0);
-      }
+      if (*reason)
+         EMIT_SIGNAL (XP_TE_PARTREASON, sess, user, ip, chan, reason, 0);
+      else
+         EMIT_SIGNAL (XP_TE_PART, sess, user, ip, chan, NULL, 0);
+      
       sub_name (sess, user);
    }
 }
@@ -580,10 +577,9 @@ user_quit (struct server *serv, char *outbuf, char *nick, char *reason)
       if (sess->server == serv)
       {
          if (sub_name (sess, nick))
-         {
-            if (!fe_is_confmode (sess))
-               EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, NULL, NULL, 0);
-         } else if (sess->is_dialog && !strcasecmp (sess->channel, nick))
+            EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, NULL, NULL, 0);
+
+         else if (sess->is_dialog && !strcasecmp (sess->channel, nick))
          {
             EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, NULL, NULL, 0);
          }

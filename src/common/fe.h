@@ -37,5 +37,4 @@ void fe_set_nonchannel (struct session *sess, int state);
 void fe_set_nick (struct server *serv, char *newnick);
 void fe_change_nick (struct server *serv, char *nick, char *newnick);
 void fe_beep (void);
-int fe_is_confmode (struct session *);
 char *fe_buffer_get (session *sess);

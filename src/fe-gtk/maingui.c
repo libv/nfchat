@@ -60,7 +60,6 @@ extern gint xchat_is_quitting;
 extern void nick_command_parse (session *sess, char *cmd, char *nick, char *allnick);
 extern void userlist_button_cb (GtkWidget *button, char *cmd);
 extern void goto_url (void *unused, char *url);
-extern void ascii_open(void);
 extern int key_action_insert (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2, struct session *sess);
 extern int handle_multiline (struct session *sess, char *cmd, int history, int nocommand);
 extern int kill_session_callback (struct session *sess);
@@ -1378,8 +1377,6 @@ relink_window (GtkWidget * w, struct session *sess)
          sess->gui->changad = NULL;
       gtk_widget_show_all (sess->gui->window);
       gtk_xtext_refresh (GTK_XTEXT (sess->gui->textgad));
-      if (sess->gui->toolbox)
-         gtk_widget_hide (sess->gui->toolbox);
       num = gtk_notebook_page_num (GTK_NOTEBOOK (main_book), old);
       gtk_notebook_remove_page (GTK_NOTEBOOK (main_book), num);
       if (prefs.mainwindow_left || prefs.mainwindow_top)
@@ -1430,8 +1427,6 @@ relink_window (GtkWidget * w, struct session *sess)
       gtk_widget_show_all (sess->gui->window);
       if (need)
          gtk_widget_show_all (main_window);
-      if (sess->gui->toolbox)
-         gtk_widget_hide (sess->gui->toolbox);
       page = gtk_notebook_page_num (GTK_NOTEBOOK (main_book), sess->gui->window);
       maingui_pagetofront (page);
       gtk_idle_add ((GtkFunction) maingui_refresh, (gpointer) sess);
@@ -1496,71 +1491,13 @@ maingui_moveright (GtkWidget *wid)
    }
 }
 
-static void
-maingui_toolbox (GtkWidget *button, GtkWidget *box)
-{
-   if (GTK_WIDGET_VISIBLE (box))
-   {
-      gtk_label_set_text (GTK_LABEL(GTK_BIN(button)->child), "<");
-      gtk_widget_hide (box);
-      add_tip (button, "Open Toolbox");
-   } else
-   {
-      gtk_label_set_text (GTK_LABEL(GTK_BIN(button)->child), ">");
-      gtk_widget_show (box);
-      add_tip (button, "Close Toolbox");
-   }
-}
-
-static void
-maingui_code (GtkWidget *button, char *code)
-{
-   if (menu_sess)
-      key_action_insert (menu_sess->gui->inputgad, 0, code, 0, menu_sess);
-}
-
-static GtkWidget *
-toolbox_button (char *label, char *code, GtkWidget *box, char *tip)
-{
-   GtkWidget *wid;
-
-   wid = gtk_button_new_with_label (label);
-   gtk_box_pack_end (GTK_BOX (box), wid, 0, 0, 0);
-   if (code)
-      gtk_signal_connect (GTK_OBJECT(wid), "clicked",
-                          GTK_SIGNAL_FUNC(maingui_code), code); 
-   gtk_widget_show (wid);
-   if (tip)
-      add_tip (wid, tip);
-
-   return wid;
-}
-
-static void
-maingui_cp (GtkWidget *button, session *sess)
-{
-   GTK_XTEXT (sess->gui->textgad)->color_paste = GTK_TOGGLE_BUTTON (button)->active;
-}
-
-static void
-toolbox_color (GtkWidget *button, int color_no)
-{
-   char buf[8];
-
-   sprintf(buf, "%%C%d", color_no);
-
-   if (menu_sess)
-      key_action_insert (menu_sess->gui->inputgad, 0, buf, 0, menu_sess);
-}
-
 void
 create_window (struct session *sess)
 {
    GtkWidget *leftpane, *rightpane;
-   GtkWidget *vbox, *tbox, *bbox, *nlbox, *wid, *toolbox;
-   GtkStyle *style;
-   int i, justopened = FALSE;
-
+   GtkWidget *vbox, *tbox, *bbox, *nlbox, *wid;
+   int justopened = FALSE;
+  
    if (sess->is_dialog)
    {
       new_dialog (sess);
@@ -1788,56 +1725,6 @@ create_window (struct session *sess)
    gtk_widget_show (sess->gui->inputgad);
    if (prefs.newtabstofront || justopened)
       gtk_widget_grab_focus (sess->gui->inputgad);
-
-   sess->gui->toolbox = toolbox = gtk_hbox_new (0, 0);
-   gtk_box_pack_start (GTK_BOX(bbox), toolbox, 0, 0, 0);
-
-   sess->gui->confbutton = wid = gtk_toggle_button_new_with_label ("Conf");
-   gtk_box_pack_end (GTK_BOX (toolbox), wid, 0, 0, 0);
-   gtk_widget_show (wid);
-   add_tip (wid, "Conference mode (no join/part msgs)");
-
-   wid = gtk_toggle_button_new_with_label ("CP");
-   gtk_signal_connect (GTK_OBJECT (wid), "toggled",
-                       GTK_SIGNAL_FUNC (maingui_cp), sess);
-   gtk_box_pack_end (GTK_BOX (toolbox), wid, 0, 0, 0);
-   gtk_widget_show (wid);
-   add_tip (wid, "Color Paste");
-
-   wid = toolbox_button ("Ascii", 0, toolbox, "Open ASCII Chart");
-   gtk_signal_connect (GTK_OBJECT(wid), "clicked",
-                       GTK_SIGNAL_FUNC(ascii_open), 0);
-
-   for (i=15; i; i--)
-   {
-      style = gtk_style_new ();
-      style->bg[0] = colors[i];
-      wid = toolbox_button ("  ", 0, toolbox, 0);
-      gtk_widget_set_style (wid, style);
-      gtk_signal_connect (GTK_OBJECT(wid), "clicked",
-                          GTK_SIGNAL_FUNC(toolbox_color), (gpointer)i);
-      gtk_style_unref (style);
-   }
-
-   wid = toolbox_button ("", "%U", toolbox, "Underline");
-   gtk_label_parse_uline (GTK_LABEL(GTK_BIN(wid)->child), "_U");
-
-   wid = toolbox_button ("B", "%B", toolbox, "Bold");
-   style = gtk_style_new ();
-   /*gdk_font_unref (style->font);
-   style->font = font_bold;
-   gdk_font_ref (font_bold);*/
-   gtk_widget_set_style (GTK_BIN(wid)->child, style);
-   gtk_style_unref (style);
-
-   toolbox_button ("A", "%O", toolbox, "Plain Text");
-
-   wid = gtk_button_new_with_label ("<");
-   gtk_signal_connect (GTK_OBJECT(wid), "clicked",
-                       GTK_SIGNAL_FUNC(maingui_toolbox), toolbox);
-   gtk_box_pack_start (GTK_BOX (bbox), wid, 0, 0, 1);
-   gtk_widget_show (wid);
-   add_tip (wid, "Open Toolbox");
 
    gtk_widget_show (sess->gui->window);
 
