@@ -81,7 +81,6 @@ struct session_gui
    GtkWidget *op_xpm;
    GtkWidget *userlistbox;
    GtkWidget *nl_box;
-   GtkWidget *bar;
+   GtkWidget *bar;				/* progressbar */
    GtkWidget *leftpane;
-   GtkWidget *delink_button;
 };

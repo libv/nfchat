@@ -655,26 +655,6 @@ gui_main_window_kill (GtkWidget * win, struct session *sess)
    current_tab = 0;
 }
 
-void
-userlist_hide (GtkWidget * igad, struct session *sess)
-{
-   if (sess->userlisthidden)
-   {
-      if (igad)
-         gtk_label_set (GTK_LABEL (GTK_BIN (igad)->child), ">");
-     
-      gtk_widget_show (sess->gui->userlistbox);
-      sess->userlisthidden = FALSE;
-   } else
-   {
-      if (igad)
-         gtk_label_set (GTK_LABEL (GTK_BIN (igad)->child), "<");
-     
-      sess->userlisthidden = TRUE;
-      gtk_widget_hide (sess->gui->userlistbox);
-   }
-}
-
 static void
 maingui_userlist_selected (GtkWidget *clist, gint row, gint column,
                            GdkEventButton *even)

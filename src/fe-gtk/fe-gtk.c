@@ -46,7 +46,6 @@ extern GSList *sess_list;
 
 extern int is_session (session *sess);
 extern char *get_cpu_str (int color);
-extern void userlist_hide (GtkWidget * igad, struct session *sess);
 extern void PrintTextRaw (GtkWidget * textwidget, unsigned char *text);
 extern void notify_gui_update (void);
 extern void update_all_of (char *name);
@@ -428,12 +427,6 @@ void
 fe_beep (void)
 {
    gdk_beep ();
-}
-
-void
-fe_userlist_hide (struct session *sess)
-{
-   userlist_hide (0, sess);
 }
 
 char *

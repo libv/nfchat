@@ -492,7 +492,7 @@ new_server (void)
    {
       serv->front_session = new_session (serv, 0);
       serv->front_session->is_server = TRUE;
-      fe_userlist_hide (serv->front_session);
+    /* fe_userlist_hide (serv->front_session); */
    }
    return serv;
 }

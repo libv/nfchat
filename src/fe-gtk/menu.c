@@ -43,7 +43,6 @@ extern void my_system (char *cmd);
 extern void show_and_unfocus (GtkWidget * wid);
 extern char *default_file (void);
 extern void connect_server (struct session *sess, char *server, int port, int quiet);
-extern void userlist_hide (GtkWidget * igad, struct session *sess);
 extern GdkFont *my_font_load (char *fontname);
 extern int tcp_send_len (struct server *serv, char *buf, int len);
 extern int tcp_send (struct server *serv, char *buf);

@@ -34,7 +34,11 @@ NF-chat;
      - removed sess->gui->paned calls from maingui.c in
          userlist_hide, 
      - prefs.nopaned calls from create_window
- 
+   e) removing hidden userlist
+### sess->userlisthidden
+     - removed userlist_hide/fe_userlist_hide from maingui.c,
+          menu.c, fe-gtk.c, fe.h, xchat.h
+
 0.2.1; removing dialog windows
 """"""
   a)

@@ -23,7 +23,7 @@ void fe_userlist_remove (struct session *sess, struct user *user);
 void fe_userlist_move (struct session *sess, struct user *user, int new_row);
 void fe_userlist_numbers (struct session *sess);
 void fe_userlist_clear (struct session *sess);
-void fe_userlist_hide (struct session *sess);
+/* void fe_userlist_hide (struct session *sess); */
 void fe_clear_channel (struct session *sess);
 void fe_session_callback (struct session *sess);
 /* void fe_buttons_update (struct session *sess); */
