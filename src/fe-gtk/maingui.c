@@ -76,13 +76,12 @@ extern int tcp_send (struct server *serv, char *buf);
 extern void menu_popup (struct session *sess, GdkEventButton * event, char *nick);
 extern void clear_user_list (struct session *sess);
 extern void handle_inputgad (GtkWidget * igad, struct session *sess);
-extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, struct session *sess);
 extern struct session *new_dialog (struct session *sess);
 int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);
 
 static void userlist_button (GtkWidget * box, char *label, char *cmd,
                       struct session *sess, int a, int b, int c, int d);
-static void my_gtk_toggle_state (GtkWidget * wid, int state, char which, struct session *sess);
+
 static void tree_update ();
 void tree_default_style (struct session *sess);
 
@@ -118,9 +117,6 @@ GdkColor colors[] =
    {0, 0, 0, 0},                /* 19 background (black) */
 };
 
-static char chan_flags[] = {'t', 'n', 's', 'i', 'p', 'm', 'l', 'k'};
-
-
 static void
 maingui_set_icon (GtkWidget *win)
 {
@@ -137,23 +133,6 @@ maingui_set_icon (GtkWidget *win)
 #endif
    }
    gtkutil_set_icon (win->window, xchat_icon, xchat_bmp);
-}
-
-void
-fe_set_nonchannel (struct session *sess, int state)
-{
-   int i;
-
-   if (sess->gui->flag_wid[0])
-   {
-      for (i = 0; i < 8; i++)
-      {
-         gtk_widget_set_sensitive (sess->gui->flag_wid[i], state);
-      }
-      gtk_widget_set_sensitive (sess->gui->limit_entry, state);
-      gtk_widget_set_sensitive (sess->gui->key_entry, state);
-   }
-   gtk_entry_set_editable ((GtkEntry *) sess->gui->topicgad, state);
 }
 
 static void
@@ -238,14 +217,7 @@ fe_clear_channel (struct session *sess)
    gtk_label_set_text (GTK_LABEL (sess->gui->changad), "<none>");
 
    clear_user_list (sess);
-   if (sess->gui->flag_wid[0])
-   {
-      int i;
-      for (i = 0; i < 8; i++)
-         my_gtk_toggle_state (sess->gui->flag_wid[i], FALSE, chan_flags[i], sess);
-      my_gtk_entry_set_text (sess->gui->limit_entry, "", sess);
-      my_gtk_entry_set_text (sess->gui->key_entry, "", sess);
-   }
+
    if (sess->gui->op_xpm)
       gtk_widget_destroy (sess->gui->op_xpm);
    sess->gui->op_xpm = 0;
@@ -376,174 +348,11 @@ focus_in (GtkWindow * win, GtkWidget * wid, struct session *sess)
    }
 }
 
-static int
-check_is_number (char *t)
-{
-   int len = strlen (t), c;
-
-   for (c = 0; c < len; c++)
-   {
-      if (t[c] < '0' || t[c] > '9')
-         return FALSE;
-   }
-   return TRUE;
-}
-
-static void
-change_channel_flag (GtkWidget * wid, struct session *sess, char flag)
-{
-   if (sess->server->connected && sess->channel[0])
-   {
-      char outbuf[512];
-      if (GTK_TOGGLE_BUTTON (wid)->active)
-         sprintf (outbuf, "MODE %s +%c\r\n", sess->channel, flag);
-      else
-         sprintf (outbuf, "MODE %s -%c\r\n", sess->channel, flag);
-      tcp_send (sess->server, outbuf);
-      sprintf (outbuf, "MODE %s\r\n", sess->channel);
-      tcp_send (sess->server, outbuf);
-      sess->ignore_mode = TRUE;
-      sess->ignore_date = TRUE;
-   }
-}
-
-static void
-flagt_hit (GtkWidget * wid, struct session *sess)
-{
-   change_channel_flag (wid, sess, 't');
-}
-
-static void
-flagn_hit (GtkWidget * wid, struct session *sess)
-{
-   change_channel_flag (wid, sess, 'n');
-}
-
-static void
-flags_hit (GtkWidget * wid, struct session *sess)
-{
-   change_channel_flag (wid, sess, 's');
-}
-
-static void
-flagi_hit (GtkWidget * wid, struct session *sess)
-{
-   change_channel_flag (wid, sess, 'i');
-}
-
-static void
-flagp_hit (GtkWidget * wid, struct session *sess)
-{
-   change_channel_flag (wid, sess, 'p');
-}
-
-static void
-flagm_hit (GtkWidget * wid, struct session *sess)
-{
-   change_channel_flag (wid, sess, 'm');
-}
-
-static void
-flagl_hit (GtkWidget * wid, struct session *sess)
-{
-   if (GTK_TOGGLE_BUTTON (wid)->active)
-   {
-      if (sess->server->connected && sess->channel[0])
-      {
-         char outbuf[512];
-         if (check_is_number (gtk_entry_get_text (GTK_ENTRY (sess->gui->limit_entry))) == FALSE)
-         {
-            gtkutil_simpledialog ("User limit must be a number!\n");
-            gtk_entry_set_text (GTK_ENTRY (sess->gui->limit_entry), "");
-            gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (wid), FALSE);
-            return;
-         }
-         sprintf (outbuf, "MODE %s +l %d\r\n", sess->channel, atoi (gtk_entry_get_text (GTK_ENTRY (sess->gui->limit_entry))));
-         tcp_send (sess->server, outbuf);
-         sprintf (outbuf, "MODE %s\r\n", sess->channel);
-         tcp_send (sess->server, outbuf);
-      }
-   } else
-      change_channel_flag (wid, sess, 'l');
-}
-
-static void
-flagk_hit (GtkWidget * wid, struct session *sess)
-{
-   char outbuf[512];
-
-   if (GTK_TOGGLE_BUTTON (wid)->active)
-   {
-      if (sess->server->connected && sess->channel[0])
-      {
-         snprintf (outbuf, 512, "MODE %s +k %s\r\n", sess->channel, gtk_entry_get_text (GTK_ENTRY (sess->gui->key_entry)));
-         tcp_send (sess->server, outbuf);
-         snprintf (outbuf, 512, "MODE %s\r\n", sess->channel);
-         tcp_send (sess->server, outbuf);
-      }
-   } else
-   {
-      if (sess->server->connected && sess->channel[0])
-      {
-         snprintf (outbuf, 512, "MODE %s -k %s\r\n", sess->channel, gtk_entry_get_text (GTK_ENTRY (sess->gui->key_entry)));
-         tcp_send (sess->server, outbuf);
-         snprintf (outbuf, 512, "MODE %s\r\n", sess->channel);
-         tcp_send (sess->server, outbuf);
-      }
-   }
-}
-
-static void
-key_entry (GtkWidget * igad, struct session *sess)
-{
-   if (sess->server->connected && sess->channel[0])
-   {
-      char outbuf[512];
-      sprintf (outbuf, "MODE %s +k %s\r\n", sess->channel, gtk_entry_get_text (GTK_ENTRY (igad)));
-      tcp_send (sess->server, outbuf);
-      sprintf (outbuf, "MODE %s\r\n", sess->channel);
-      tcp_send (sess->server, outbuf);
-   }
-}
-
-static void
-limit_entry (GtkWidget * igad, struct session *sess)
-{
-   char outbuf[512];
-   if (sess->server->connected && sess->channel[0])
-   {
-      if (check_is_number (gtk_entry_get_text (GTK_ENTRY (igad))) == FALSE)
-      {
-         gtk_entry_set_text (GTK_ENTRY (igad), "");
-         gtkutil_simpledialog ("User limit must be a number!\n");
-         gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (sess->gui->flag_l), FALSE);
-         return;
-      }
-      sprintf (outbuf, "MODE %s +l %d\r\n", sess->channel, atoi (gtk_entry_get_text (GTK_ENTRY (igad))));
-      tcp_send (sess->server, outbuf);
-      sprintf (outbuf, "MODE %s\r\n", sess->channel);
-      tcp_send (sess->server, outbuf);
-   }
-}
-
 void
 show_and_unfocus (GtkWidget * wid)
 {
    GTK_WIDGET_UNSET_FLAGS (wid, GTK_CAN_FOCUS);
    gtk_widget_show (wid);
-}
-
-static void
-add_flag_wid (GtkWidget ** wid, char *tip, GtkWidget * box, char *face,
-    void *callback, gpointer userdata)
-{
-   *wid = gtk_toggle_button_new_with_label (face);
-   gtk_widget_set_usize (*wid, 18, -1);
-   add_tip (*wid, tip);
-   gtk_box_pack_end (GTK_BOX (box), *wid, 0, 0, 0);
-   gtk_signal_connect (GTK_OBJECT (*wid), "toggled",
-                       GTK_SIGNAL_FUNC (callback), userdata);
-   show_and_unfocus (*wid);
 }
 
 static void
@@ -1603,41 +1412,6 @@ create_window (struct session *sess)
    show_and_unfocus (wid);
    add_tip (wid, "Hide/Show Userlist");
 
-   if (!prefs.nochanmodebuttons)
-   {
-      sess->gui->key_entry = gtk_entry_new_with_max_length (16);
-      gtk_widget_set_usize (sess->gui->key_entry, 30, -1);
-      gtk_box_pack_end (GTK_BOX (tbox), sess->gui->key_entry, 0, 0, 0);
-      gtk_signal_connect (GTK_OBJECT (sess->gui->key_entry), "activate",
-                          GTK_SIGNAL_FUNC (key_entry), (gpointer) sess);
-      gtk_widget_show (sess->gui->key_entry);
-
-      add_flag_wid (&(sess->gui->flag_k), "Keyword", tbox, "K", flagk_hit, sess);
-
-      sess->gui->limit_entry = gtk_entry_new_with_max_length (10);
-      gtk_widget_set_usize (sess->gui->limit_entry, 30, -1);
-      gtk_box_pack_end (GTK_BOX (tbox), sess->gui->limit_entry, 0, 0, 0);
-      gtk_signal_connect (GTK_OBJECT (sess->gui->limit_entry), "activate",
-                          GTK_SIGNAL_FUNC (limit_entry), (gpointer) sess);
-      gtk_widget_show (sess->gui->limit_entry);
-
-      add_flag_wid (&(sess->gui->flag_l), "User Limit", tbox, "L", flagl_hit, sess);
-
-      add_flag_wid (&(sess->gui->flag_m), "Moderated", tbox, "M", flagm_hit, sess);
-
-      add_flag_wid (&(sess->gui->flag_p), "Private", tbox, "P", flagp_hit, sess);
-
-      add_flag_wid (&(sess->gui->flag_i), "Invite Only", tbox, "I", flagi_hit, sess);
-
-      add_flag_wid (&(sess->gui->flag_s), "Secret", tbox, "S", flags_hit, sess);
-
-      add_flag_wid (&(sess->gui->flag_n), "No outside messages", tbox, "N", flagn_hit, sess);
-
-      add_flag_wid (&(sess->gui->flag_t), "Topic Protection", tbox, "T", flagt_hit, sess);
-
-   } else
-      sess->gui->flag_wid[0] = 0;
-
    leftpane = gtk_hbox_new (FALSE, 0);
    gtk_widget_show (leftpane);
 
@@ -1765,7 +1539,6 @@ create_window (struct session *sess)
                 prefs.mainwindow_top);
    }
 
-   fe_set_nonchannel (sess, FALSE);
 }
 
 void
@@ -1938,92 +1711,6 @@ fe_session_callback (struct session *sess)
 void
 fe_server_callback (struct server *serv)
 {
-   /*if (serv->gui->rawlog_window)
-   {*/
-      /* we don't want the "destroy" callback to be called */
-      /*gtk_signal_disconnect_by_data (GTK_OBJECT (serv->gui->rawlog_window), serv);
-      gtk_widget_destroy (serv->gui->rawlog_window);
-   }*/
-}
-
-void
-my_gtk_entry_set_text (GtkWidget * wid, char *text, struct session *sess)
-{
-   void *callback;
-   if (sess->gui->flag_wid[0] == 0)
-      return;
-   if (wid == sess->gui->limit_entry)
-      callback = (void *) limit_entry;
-   else
-      callback = (void *) key_entry;
-   gtk_signal_disconnect_by_data (GTK_OBJECT (wid), sess);
-   gtk_entry_set_text (GTK_ENTRY (wid), text);
-   gtk_signal_connect (GTK_OBJECT (wid), "activate",
-    GTK_SIGNAL_FUNC (callback), sess);
-}
-
-static void
-my_gtk_toggle_state (GtkWidget * wid, int state, char which, struct session *sess)
-{
-   void *callback;
-   switch (which)
-   {
-   case 'k':
-      callback = flagk_hit;
-      break;
-   case 'l':
-      callback = flagl_hit;
-      break;
-   case 'm':
-      callback = flagm_hit;
-      break;
-   case 'p':
-      callback = flagp_hit;
-      break;
-   case 'i':
-      callback = flagi_hit;
-      break;
-   case 's':
-      callback = flags_hit;
-      break;
-   case 'n':
-      callback = flagn_hit;
-      break;
-   case 't':
-      callback = flagt_hit;
-      break;
-   default:
-      gtk_toggle_button_set_active ((GtkToggleButton *) wid, state);
-      return;
-   }
-   gtk_signal_disconnect_by_data (GTK_OBJECT (wid), sess);
-   gtk_toggle_button_set_active ((GtkToggleButton *) wid, state);
-   if (callback)
-      gtk_signal_connect (GTK_OBJECT (wid), "toggled",
-                          GTK_SIGNAL_FUNC (callback), sess);
-}
-
-void
-fe_update_mode_buttons (struct session *sess, char mode, char sign)
-{
-   int state, i;
-
-   if (sign == '+')
-      state = TRUE;
-   else
-      state = FALSE;
-
-   if (sess->gui->flag_wid[0])
-   {
-      for (i = 0; i < 8; i++)
-      {
-         if (chan_flags[i] == mode)
-         {
-            if (GTK_TOGGLE_BUTTON (sess->gui->flag_wid[i])->active != state)
-               my_gtk_toggle_state (sess->gui->flag_wid[i], state, chan_flags[i], sess);
-         }
-      }
-   }
 }
 
 void

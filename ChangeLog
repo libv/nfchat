@@ -14,6 +14,25 @@ NF-chat;
 
   b) 
   - removed *menu from session_gui in fe-gtk.h
+  c)
+  - removed flag_*, limit_entry, key_entry structure from maingui.c
+  - removed them from fe-gtk.h, fe-gtk.c common/fe.h & inbound.c
+        - fe_update_channel_limit
+        - fe_update_channel_key
+        - fe_update_mode_buttons
+  - removed from maingui.c
+	- fe_set_nonchannel
+	- change_channel_flag
+        - flag?_hit
+        - key_entry
+        - limit_entry
+        - add_flag_wid
+        - my_gtk_entry_set_text
+        - my_gtk_toggle_state
+        - static chan_flags
+  - removed fe_set_nonchannel calls from /common/inbound.c, fe.h     
+  d)
+
 0.1.13;
 """""""
 

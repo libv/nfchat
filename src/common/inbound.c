@@ -346,7 +346,6 @@ you_joined (struct server *serv, char *outbuf, char *chan, char *nick, char *ip)
       sess->ignore_mode = TRUE;
       sess->ignore_names = TRUE;
       sess->end_of_names = FALSE;
-      fe_set_nonchannel (sess, TRUE);
       sprintf (outbuf, "MODE %s\r\n", chan);
       tcp_send (sess->server, outbuf);
       clear_user_list (sess);
@@ -366,7 +365,6 @@ you_kicked (struct server *serv, char *tbuf, char *chan, char *kicker, char *rea
    struct session *sess = find_session_from_channel (chan, serv);
    if (sess)
    {
-      fe_set_nonchannel (sess, FALSE);
       EMIT_SIGNAL (XP_TE_UKICK, sess, serv->nick, chan, kicker, reason, 0);
       clear_channel (sess);
       if (prefs.autorejoin)
@@ -387,7 +385,6 @@ you_parted (struct server *serv, char *tbuf, char *chan, char *ip, char *reason)
    struct session *sess = find_session_from_channel (chan, serv);
    if (sess)
    {
-      fe_set_nonchannel (sess, FALSE);
       if (*reason)
          EMIT_SIGNAL (XP_TE_UPARTREASON, sess, serv->nick, ip, chan, reason, 0);
       else
@@ -680,8 +677,6 @@ channel_mode (struct server *serv, char *outbuf, char *chan, char *nick, char si
             if (EMIT_SIGNAL (XP_CHANSETKEY, sess, chan, nick, extra, NULL, 0) == 1)
                return;
             strncpy (sess->channelkey, extra, 60);
-            fe_update_channel_key (sess);
-            fe_update_mode_buttons (sess, mode, sign);
             if (!quiet)
                EMIT_SIGNAL (XP_TE_CHANSETKEY, sess, nick, extra, NULL, NULL, 0);
             return;
@@ -690,8 +685,6 @@ channel_mode (struct server *serv, char *outbuf, char *chan, char *nick, char si
                 == 1)
                return;
             sess->limit = atoi (extra);
-            fe_update_channel_limit (sess);
-            fe_update_mode_buttons (sess, mode, sign);
             if (!quiet)
                EMIT_SIGNAL (XP_TE_CHANSETLIMIT, sess, nick, extra, NULL,
                             NULL, 0);
@@ -737,8 +730,6 @@ channel_mode (struct server *serv, char *outbuf, char *chan, char *nick, char si
             if (EMIT_SIGNAL (XP_CHANRMKEY, sess, chan, nick, NULL, NULL, 0) == 1)
                return;
             sess->channelkey[0] = 0;
-            fe_update_channel_key (sess);
-            fe_update_mode_buttons (sess, mode, sign);
             if (!quiet)
                EMIT_SIGNAL (XP_TE_CHANRMKEY, sess, nick, NULL, NULL, NULL, 0);
             return;
@@ -746,8 +737,6 @@ channel_mode (struct server *serv, char *outbuf, char *chan, char *nick, char si
             if (EMIT_SIGNAL (XP_CHANRMLIMIT, sess, chan, nick, NULL, NULL, 0) == 1)
                return;
             sess->limit = 0;
-            fe_update_channel_limit (sess);
-            fe_update_mode_buttons (sess, mode, sign);
             if (!quiet)
                EMIT_SIGNAL (XP_TE_CHANRMLIMIT, sess, nick, NULL, NULL, NULL, 0);
             return;
@@ -802,7 +791,6 @@ channel_mode (struct server *serv, char *outbuf, char *chan, char *nick, char si
          else
             EMIT_SIGNAL (XP_TE_CHANMODEGEN, sess, nick, tbuf[0], tbuf[1], extra, 0);
       }
-      fe_update_mode_buttons (sess, mode, sign);
    } else
    {
       if (!quiet)
@@ -1175,14 +1163,6 @@ process_line (struct session *sess, struct server *serv, char *buf)
                   EMIT_SIGNAL (XP_TE_CHANMODES, sess, word[4], word_eol[5],
                                NULL, NULL, 0);
                }
-               fe_update_mode_buttons (sess, 't', '-');
-               fe_update_mode_buttons (sess, 'n', '-');
-               fe_update_mode_buttons (sess, 's', '-');
-               fe_update_mode_buttons (sess, 'i', '-');
-               fe_update_mode_buttons (sess, 'p', '-');
-               fe_update_mode_buttons (sess, 'm', '-');
-               fe_update_mode_buttons (sess, 'l', '-');
-               fe_update_mode_buttons (sess, 'k', '-');
                channel_modes (serv, outbuf, word, word[3], 1);
                break;
             case 329:

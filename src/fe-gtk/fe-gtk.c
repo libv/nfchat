@@ -334,20 +334,6 @@ fe_set_hilight (struct session *sess)
 }
 
 void
-fe_update_channel_key (struct session *sess)
-{
-   my_gtk_entry_set_text (sess->gui->key_entry, sess->channelkey, sess);
-}
-
-void
-fe_update_channel_limit (struct session *sess)
-{
-   char tmp[16];
-   sprintf (tmp, "%d", sess->limit);
-   my_gtk_entry_set_text (sess->gui->limit_entry, tmp, sess);
-}
-
-void
 fe_text_clear (struct session *sess)
 {
    gtk_xtext_remove_lines ((GtkXText *)sess->gui->textgad, -1, TRUE);
