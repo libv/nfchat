@@ -40,9 +40,6 @@ extern unsigned char *strip_color (unsigned char *text);
 extern void my_system (char *cmd);
 extern void check_special_chars (char *);
 extern int child_handler (int pid);
-#ifdef USE_PERL
-extern int perl_print (char *cmd, struct session *sess, char *b, char *c, char *d, char *e);
-#endif
 extern int load_themeconfig (int themefile);
 extern int save_themeconfig (int themefile);
 
@@ -216,7 +213,7 @@ setup_logging (struct session *sess)
 /* Consider the following a NOTES file:
 
    The main upshot of this is:
-   * Plugins and Perl scripts (when I get round to signaling perl.c) can intercept text events and do what they like
+   * Plugins can intercept text events and do what they like
    * The default text engine can be config'ed
 
    By default it should appear *exactly* the same (I'm working hard not to change the default style) but if you go into Settings->Edit Event Texts you can change the text's. The format is thus:
@@ -1423,11 +1420,6 @@ textsignal_handler (struct session *sess, void *b, void *c,
    }
    numargs = te[current_signal].num_args;
    i = 0;
-
-#ifdef USE_PERL
-   if (perl_print (te[current_signal].name, sess, b, c, d, e))
-      return TRUE;
-#endif
 
    if (te[current_signal].sound)
       play_wave (te[current_signal].sound);

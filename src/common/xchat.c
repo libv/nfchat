@@ -46,9 +46,6 @@ int xchat_is_quitting = 0;
 extern GSList *ctcp_list;
 extern GSList *command_list;
 
-#ifdef USE_PERL
-extern struct session *perl_sess;
-#endif
 struct session *current_tab;
 struct session *menu_sess = 0;
 struct xchatprefs prefs;
@@ -81,14 +78,6 @@ extern void disconnect_server (struct session *sess, int sendquit, int err);
 /* userlist.c */
 
 extern struct user *find_name (struct session *sess, char *name);
-
-#ifdef USE_PERL
-/* perl.c */
-
-void perl_init (struct session *, int);
-void perl_end (void);
-int perl_inbound (struct session *sess, struct server *serv, char *buf);
-#endif
 
 /* editlist.c */
 
@@ -557,31 +546,6 @@ exec_notify_kill (session *sess)
 }
 
 static void
-perl_notify_kill (session *sess)
-{
-#ifdef USE_PERL
-   struct session *s;
-   GSList *list = sess_list;
-
-   if (perl_sess == sess)       /* need to find a new perl_sess, this one's closing */
-   {
-      while (list)
-      {
-         s = (struct session *) list->data;
-         if (s->server == perl_sess->server && s != perl_sess)
-         {
-            perl_sess = s;
-            break;
-         }
-         list = list->next;
-      }
-      if (perl_sess == sess)
-         perl_sess = 0;
-   }
-#endif
-}
-
-static void
 send_quit_or_part (session *killsess)
 {
    int willquit = TRUE;
@@ -663,8 +627,6 @@ kill_session_callback (session *killsess)
    fe_session_callback (killsess);
 
    exec_notify_kill (killsess);
-
-   perl_notify_kill (killsess);
 
    log_notify_kill (killsess);
 
@@ -876,9 +838,6 @@ xchat_init (void)
 #ifdef USE_PLUGIN
    module_setup ();
 #endif
-#ifdef USE_PERL
-   perl_init (sess, TRUE);
-#endif
    fe_timeout_add (2000, xchat_misc_checks, 0);
 }
 
@@ -886,9 +845,6 @@ void
 xchat_cleanup (void)
 {
    xchat_is_quitting = TRUE;
-#ifdef USE_PERL
-   perl_end ();
-#endif
    if (prefs.autosave)
    {
       save_config ();

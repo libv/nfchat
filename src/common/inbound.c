@@ -58,12 +58,6 @@ extern int handle_command (char *cmd, struct session *sess, int history, int noc
 extern void process_data_init (unsigned char *buf, char *cmd, char *word[], char *word_eol[]);
 extern int command_level;
 
-#ifdef USE_PERL
-/* perl.c */
-
-int perl_inbound (struct session *sess, struct server *serv, char *buf);
-#endif
-
 /* text.c */
 
 extern void end_logging (int fd);
@@ -1005,15 +999,6 @@ process_line (struct session *sess, struct server *serv, char *buf)
 
    process_data_init (pdibuf, buf + 1, word, word_eol);
 
-#ifdef USE_PERL
-   if (*buf == ':' && is_channel (word[3]))
-   {
-      sess = find_session_from_channel (word[3], serv);
-      if (!sess)
-         sess = serv->front_session;
-   }
-#endif
-
    if (!sess)
    {
       GSList *list = sess_list;
@@ -1027,10 +1012,6 @@ process_line (struct session *sess, struct server *serv, char *buf)
       if (!sess)
          sess = (struct session *) sess_list->data;  /* HACK !!! */
    }
-#ifdef USE_PERL
-   if (perl_inbound (sess, serv, buf))
-      return;
-#endif
    if (EMIT_SIGNAL (XP_INBOUND, sess, serv, buf, NULL, NULL, 0) == 1)
       return;
 

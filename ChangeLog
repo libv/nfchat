@@ -68,6 +68,21 @@ NF-chat;
 	- removin notify_isnotify/hilitenotify from fe-gtk: 
 		userlist.c (def, fe_userlist_insert)
 	- removin prefs.nu_color (cfgfiles, fe-gtk>userlist.c)
+DECIDED: no perl or plugin will be used, this will be a lightweight client
+         everything needed will be coded in, nothing exterior.
+
+   d) cleanin up perl.c / USE_PERL
+        - edited configure.in
+        - edited src/common/Makefile.am
+        - rmdir scripts_perl
+        - deleted perl.c
+        - removin USE_PERL from
+                inbound.c(3x);outbound.c(5x);text.c(2x);xchat.c(5x)
+        - removed perl_notify_kill & call(kill_session_callback) xchat.c
+        - removed perl comment from text.c
+        - removed cmd_load/cmd_scpinfo/cmd_unloadall from outbound.c
+   e) cleanin up plugin.c / USE_PLUGIN
+
 
 0.3.0; Starting work on the actual client
 """"""

@@ -67,11 +67,6 @@ extern void channel_action (struct session *sess, char *tbuf, char *chan, char *
 extern void user_new_nick (struct server *serv, char *outbuf, char *nick, char *newnick, int quiet);
 extern void channel_msg (struct server *serv, char *outbuf, char *chan, char *from, char *text, char fromme);
 extern void disconnect_server (struct session *sess, int sendquit, int err);
-
-#ifdef USE_PERL
-extern int perl_load_file (char *script_name);
-extern int perl_command (char *cmd, struct session *sess);
-#endif
 extern int module_command (char *cmd, struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 extern int module_load (char *name, struct session *sess);
 extern int module_list (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -247,7 +242,6 @@ static int cmd_join (struct session *sess, char *tbuf, char *word[], char *word_
 static int cmd_kick (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_kickban (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_lastlog (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 int cmd_loaddll (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_mdeop (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -268,14 +262,12 @@ static int cmd_quote (struct session *sess, char *tbuf, char *word[], char *word
 static int cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 int cmd_rmdll (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_say (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-int cmd_scpinfo (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 int cmd_set (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_settab (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_servchan (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_topic (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_unban (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-int cmd_unloadall (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_wallchop (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_wallchan (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_voice (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -311,9 +303,6 @@ struct commands cmds[] =
    {"LASTLOG", cmd_lastlog, 0, 0, "/LASTLOG <string>, searches for a string in the buffer.\n"},
 #ifdef USE_PLUGIN
    {"LISTDLL", module_list, 0, 0, "/LISTDLL, Lists all currenly loaded plugins\n"},
-#endif
-   {"LOAD", cmd_load, 0, 0, "/LOAD <file>, loads a Perl script\n"},
-#ifdef USE_PLUGIN
    {"LOADDLL", cmd_loaddll, 0, 0, "/LOADDLL <file>, loads a plugin\n"},
 #endif
    {"MDEOP", cmd_mdeop, 1, 1, "/MDEOP, Mass deop's all chanops in the current channel (needs chanop)\n"},
@@ -337,18 +326,12 @@ struct commands cmds[] =
    {"RMDLL", cmd_rmdll, 0, 0, "/RMDLL <dll name>, unloads a plugin\n"},
 #endif
    {"SAY", cmd_say, 0, 0, "/SAY <text>, sends the text to the object in the current window\n"},
-#ifdef USE_PERL
-   {"SCPINFO", cmd_scpinfo, 0, 0, "/SCPINFO, Lists some information about current Perl bindings\n"},
-#endif
    {"SET", cmd_set, 0, 0, "/SET <variable> [<value>]\n"},
    {"SETTAB", cmd_settab, 0, 0, ""},
    {"SERVCHAN", cmd_servchan, 0, 0, "/SERVER <host> <host> <channel>, connects and joins a channel\n"},
    {"SERVER", cmd_server, 0, 0, "/SERVER <host> [<port>] [<password>], connects to a server, the default port is 6667\n"},
    {"TOPIC", cmd_topic, 1, 1, "/TOPIC [<topic>], sets the topic is one is given, else shows the current topic\n"},
    {"UNBAN", cmd_unban, 1, 1, "/UNBAN <mask>, removes a current ban on a mask\n"},
-#ifdef USE_PERL
-   {"UNLOADALL", cmd_unloadall, 0, 0, "/UNLOADALL, Unloads all perl scripts\n"},
-#endif
    {"WALLCHOP", cmd_wallchop, 1, 1, "/WALLCHOP <message>, sends the message to all chanops on the current channel\n"},
    {"WALLCHAN", cmd_wallchan, 1, 1, "/WALLCHAN <message>, writes the message to all channels\n"},
    {"VOICE", cmd_voice, 1, 1, "/VOICE <nick>, gives voice status to someone (needs chanop)\n"},
@@ -1455,34 +1438,6 @@ cmd_lastlog (struct session *sess, char *tbuf, char *word[], char *word_eol[])
    return FALSE;
 }
 
-int
-cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-#ifdef USE_PERL
-   char *file;
-   int i;
-
-   file = expand_homedir (word[2]);
-   i = perl_load_file (file);
-   free (file);
-   switch (i)
-   {
-   case 0:
-      return TRUE;
-   case 1:
-      PrintText (sess, "Error compiling script\n");
-      return FALSE;
-   case 2:
-      PrintText (sess, "Error Loading file\n");
-      return FALSE;
-   }
-   return FALSE;
-#else
-   PrintText (sess, "Perl scripting not available in this compilation.\n");
-   return TRUE;
-#endif
-}
-
 #ifdef USE_PLUGIN
 int
 cmd_loaddll (struct session *sess, char *tbuf, char *word[], char *word_eol[])
@@ -2180,11 +2135,6 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
 
    if (history)
       history_add (&sess->history, cmd);
-
-#ifdef USE_PERL
-   if (perl_command (cmd, sess))
-      return TRUE;
-#endif
 
    if (cmd[0] == '/' && !nocommand)
    {
