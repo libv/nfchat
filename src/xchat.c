@@ -36,8 +36,8 @@
 
 
 GSList *ctcp_list = 0;
-GSList *sess_list = 0;
 server_t *server = NULL;
+session_t *session = NULL;
 GSList *away_list = 0;
 
 int xchat_is_quitting = 0;
@@ -52,7 +52,7 @@ void xchat_cleanup (void);
 
 /* inbound.c */
 
-extern void process_line (session_t *sess);
+extern void process_line ();
 
 /* plugin.c */
 
@@ -160,73 +160,6 @@ tcp_send (char *buf)
    return tcp_send_len (buf, strlen (buf));
 }
 
-int
-is_session (session_t *sess)
-{
-   GSList *list = sess_list;
-   while (list)
-   {
-      if (list->data == sess)
-         return 1;
-      list = list->next;
-   }
-   return 0;
-}
-
-session_t *
-find_session_from_channel (char *chan)
-{
-   session_t *sess;
-   GSList *list = sess_list;
-   while (list)
-   {
-      sess = (session_t *) list->data;
-      if (!strcasecmp (chan, sess->channel))
-         return sess;
-      list = list->next;
-   }
-   return 0;
-}
-
-session_t *
-find_session_from_nick (char *nick)
-{
-   session_t *sess;
-   GSList *list = sess_list;
-
-   if (server->session)
-      if (find_name (server->session, nick))
-         return server->session;
-
-   sess = find_session_from_channel (nick);
-   if (sess)
-      return sess;
-
-   while (list)
-   {
-      sess = (session_t *) list->data;
-      if (find_name (sess, nick))
-	return sess;
-      list = list->next;
-   }
-   return 0;
-}
-
-session_t *
-find_session_from_waitchannel (char *chan)
-{
-   session_t *sess;
-   GSList *list = sess_list;
-   while (list)
-   {
-      sess = (session_t *) list->data;
-      if ((sess->channel[0] == 0) && !strcasecmp (chan, sess->waitchannel))
-	return sess;
-      list = list->next;
-   }
-   return 0;
-}
-
 static int
 timeout_auto_reconnect (void)
 {
@@ -239,28 +172,14 @@ timeout_auto_reconnect (void)
 void
 auto_reconnect (int send_quit, int err)
 {
-   session_t *s;
-   GSList *list;
-
-   if (server->session == NULL)
-      return;
-
-   list = sess_list;
-   while (list)                 /* make sure auto rejoin can work */
-   {
-      s = (session_t *) list->data;
-      if (is_channel (s->channel))
-      {
-         strcpy (s->waitchannel, s->channel);
-         strcpy (s->willjoinchannel, s->channel);
-      }
-      list = list->next;
-   }
-   disconnect_server (server->session, send_quit, err);
-
-   if (prefs.recon_delay)
-      fe_timeout_add (prefs.recon_delay * 1000, timeout_auto_reconnect, server);
-   else
+  if (server->session == NULL)
+    return;
+  
+  disconnect_server (server->session, send_quit, err);
+  
+  if (prefs.recon_delay)
+    fe_timeout_add (prefs.recon_delay * 1000, timeout_auto_reconnect, server);
+  else
       connect_server (server->session, server->hostname, server->port, FALSE);
 }
 
@@ -303,7 +222,7 @@ read_data (void *blah, int sok)
 		   
 		 case '\n':
 		   server->linebuf[server->pos] = 0;
-		   process_line (server->session);
+		   process_line ();
 		   server->pos = 0;
 		   break;
 		   
@@ -342,16 +261,20 @@ flush_server_queue (void)
 session_t *
 new_session (void)
 {
-   session_t *sess;
+  session_t *sess;
+  
+  if (session)
+    {
+      fprintf(stderr, "What? Dont call new_session twice!\n");
+      return (NULL);
+    }
 
-   sess = malloc (sizeof (session_t));
-   memset (sess, 0, sizeof (session_t));
-
-   sess_list = g_slist_prepend (sess_list, sess);
-
-   fe_new_window (sess);
-   
-   return sess;
+  sess = malloc (sizeof (session_t));
+  memset (sess, 0, sizeof (session_t));
+  
+  fe_new_window ();
+  
+  return sess;
 }
 
 static void
@@ -396,43 +319,11 @@ kill_server_callback (void)
 }
 
 static void
-exec_notify_kill (session_t *sess)
-{
-   struct nbexec *re;
-
-   if (sess->running_exec != NULL)
-   {
-      re = sess->running_exec;
-      sess->running_exec = NULL;
-      kill (re->childpid, SIGKILL);
-      fe_input_remove (re->iotag);
-      close (re->myfd);
-      close (re->childfd);
-      free (re);
-   }
-}
-
-static void
-send_quit_or_part (session_t *killsess)
+send_quit_or_part (void)
 {
    int willquit = TRUE;
    char tbuf[256];
-   GSList *list;
-   session_t *sess;
-
-   /* check if this is the last session using this server */
-   list = sess_list;
-   while (list)
-   {
-      sess = (session_t *) list->data;
-      if (sess != killsess)
-      {
-         willquit = FALSE;
-         list = 0;
-      } else
-         list = list->next;
-   }
-
+     
    if (xchat_is_quitting)
       willquit = TRUE;
 
@@ -459,69 +350,28 @@ send_quit_or_part (session_t *killsess)
 }
 
 void
-kill_session_callback (session_t *killsess)
+kill_session_callback (void)
 {
    session_t *sess;
    GSList *list;
 
-   if (!killsess->quitreason)
-      killsess->quitreason = prefs.quitreason;
+   if (!session->quitreason)
+      session->quitreason = prefs.quitreason;
 
-   if (current_tab == killsess)
+   if (current_tab == session)
       current_tab = NULL;
 
-   if (server->session == killsess)
-   {
-      /* session is closed, find a valid replacement */
-      server->session = NULL;
-      list = sess_list;
-      while (list)
-      {
-         sess = (session_t *)list->data;
-         if (sess != killsess)
-         {
-            server->session = sess;
-            break;
-         }
-         list = list->next;
-      }
-   }
+   fe_session_callback ();
 
-   sess_list = g_slist_remove (sess_list, killsess);
+   send_quit_or_part ();
 
-   fe_session_callback (killsess);
-
-   exec_notify_kill (killsess);
-
-   send_quit_or_part (killsess);
-
-   history_free (&killsess->history);
+   history_free (&session->history);
   
-   free (killsess);
+   free (session);
 
-   if (!sess_list)
-      xchat_cleanup ();       /* sess_list is empty, quit! */
+   xchat_cleanup ();
 
-   /* list = sess_list;
-      while (list)
-      return; */             /* this server is still being used! */
-    
    kill_server_callback ();
-}
-
-static void
-free_sessions (void)
-{
-   session_t *sess;
-   GSList *list = sess_list;
-
-   while (list)
-   {
-      sess = (session_t *) list->data;
-      /*send_quit_or_part (sess);*/
-      fe_close_window (sess);
-      list = sess_list;
-   }
 }
 
 struct away_msg *
@@ -568,23 +418,22 @@ save_away_message (char *nick, char *msg)
 static void
 xchat_init (void)
 {
-   session_t *sess;
-   struct sigaction act;
+  struct sigaction act;
 
-   act.sa_handler = SIG_IGN;
-   act.sa_flags = 0;
-   sigemptyset (&act.sa_mask);
-   sigaction (SIGPIPE, &act, NULL);
-
-   signal_setup ();
-   load_text_events ();
-   list_loadconf ("ctcpreply.conf", &ctcp_list, defaultconf_ctcp);
-   
-   init_server ();
-   if (prefs.use_server_tab)
-      sess = server->session;
-   else
-     sess = new_session ();
+  act.sa_handler = SIG_IGN;
+  act.sa_flags = 0;
+  sigemptyset (&act.sa_mask);
+  sigaction (SIGPIPE, &act, NULL);
+  
+  signal_setup ();
+  load_text_events ();
+  list_loadconf ("ctcpreply.conf", &ctcp_list, defaultconf_ctcp);
+  
+  init_server ();
+  if (prefs.use_server_tab)
+    session = server->session;
+  else
+    session = new_session ();
 }
 
 void
@@ -592,7 +441,7 @@ xchat_cleanup (void)
 {
    xchat_is_quitting = TRUE;
    
-   free_sessions ();
+   free (session);
    fe_exit ();
 }
 

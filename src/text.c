@@ -64,7 +64,7 @@ PrintText (session_t *sess, unsigned char *text)
       sess = (session_t *) sess_list->data;
    }
 
-   fe_print_text (sess, text);
+   fe_print_text (text);
 }
 
 /* Print Events stuff here --AGL */

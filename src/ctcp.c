@@ -29,19 +29,14 @@
 #include "signals.h"
 #include "util.h"
 
-
 extern int handle_command (char *cmd, void *sess, int history, int nocommand);
 extern int tcp_send (char *buf);
-extern void channel_action (session_t *sess, char *tbuf, char *chan, char *from, char *text, int fromme);
-extern session_t *find_session_from_channel (char *chan);
-
+extern void channel_action (char *tbuf, char *chan, char *from, char *text, int fromme);
 
 extern GSList *ctcp_list;
-extern struct xchatprefs prefs;
-
 
 static void
-ctcp_reply (void *sess, char *tbuf, char *nick, char *word[], char *word_eol[], char *conf)
+ctcp_reply (char *tbuf, char *nick, char *word[], char *word_eol[], char *conf)
 {
    int i = 0, j = 0;
 
@@ -86,7 +81,7 @@ ctcp_reply (void *sess, char *tbuf, char *nick, char *word[], char *word_eol[], 
       case 0:
        jump:
          tbuf[j] = 0;
-         handle_command (tbuf, sess, 0, 0);
+         handle_command (tbuf, session, 0, 0);
          return;
       default:
          tbuf[j] = conf[i];
@@ -97,7 +92,7 @@ ctcp_reply (void *sess, char *tbuf, char *nick, char *word[], char *word_eol[], 
 }
 
 static int
-ctcp_check (void *sess, char *tbuf, char *nick, char *word[], char *word_eol[], char *ctcp)
+ctcp_check (char *tbuf, char *nick, char *word[], char *word_eol[], char *ctcp)
 {
    int ret = 0;
    char *po;
@@ -117,7 +112,7 @@ ctcp_check (void *sess, char *tbuf, char *nick, char *word[], char *word_eol[], 
       pop = (struct popup *) list->data;
       if (!strcasecmp (ctcp, pop->name))
       {
-         ctcp_reply (sess, tbuf, nick, word, word_eol, pop->cmd);
+         ctcp_reply (tbuf, nick, word, word_eol, pop->cmd);
          ret = 1;
       }
       list = list->next;
@@ -126,26 +121,24 @@ ctcp_check (void *sess, char *tbuf, char *nick, char *word[], char *word_eol[], 
 }
 
 void
-handle_ctcp (session_t *sess, char *outbuf, char *to, char *nick, char *msg, char *word[], char *word_eol[])
+handle_ctcp (char *outbuf, char *to, char *nick, char *msg, char *word[], char *word_eol[])
 {
    char *po;
    session_t *chansess;
 
    if (!strncasecmp (msg, "VERSION", 7))
    {
-      sprintf (outbuf,
-               "NOTICE %s :\001VERSION xc! "VERSION" %s: http://xchat.org\001\r\n",
-               nick, get_cpu_str (0));
+      sprintf (outbuf, "NOTICE %s :\001VERSION NF-Chat "VERSION" %s: http://www.netforce.be\001\r\n", nick);
       tcp_send (outbuf);
    }
 
-   if (!ctcp_check ((void *) sess, outbuf, nick, word, word_eol, word[4] + 2))
+   if (!ctcp_check (outbuf, nick, word, word_eol, word[4] + 2))
      if (!strncasecmp (msg, "ACTION", 6))
        {
          po = strchr (msg + 7, '\001');
          if (po)
 	   po[0] = 0;
-         channel_action (sess, outbuf, to, nick, msg + 7, FALSE);
+         channel_action (outbuf, to, nick, msg + 7, FALSE);
          return;
        }
    
@@ -158,10 +151,9 @@ handle_ctcp (session_t *sess, char *outbuf, char *to, char *nick, char *msg, cha
       EMIT_SIGNAL (XP_TE_CTCPGEN, server->session, msg, nick, NULL, NULL, 0);
    } else
    {
-      chansess = find_session_from_channel (to);
-      if (chansess)
+      if (session)
       {
-         EMIT_SIGNAL (XP_TE_CTCPGENC, chansess, msg, nick, to, NULL, 0);
+         EMIT_SIGNAL (XP_TE_CTCPGENC, session, msg, nick, to, NULL, 0);
          return;
       }
       EMIT_SIGNAL (XP_TE_CTCPGENC, server->session, msg, nick, to, NULL, 0);

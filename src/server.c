@@ -57,7 +57,7 @@ server_cleanup (void)
    close (server->childwrite);
    close (server->childread);
    waitpid (server->childpid, NULL, 0);
-   fe_progressbar_end (server->session);
+   fe_progressbar_end ();
    server->connecting = 0;
 }
 
@@ -243,7 +243,7 @@ connect_server (session_t *sess, char *server_str, int port, int no_login)
    else
       check_connecting (sess);
 
-   fe_progressbar_start (sess);
+   fe_progressbar_start ();
 
    EMIT_SIGNAL (XP_TE_SERVERLOOKUP, sess, server_str, NULL, NULL, NULL, 0);
 

@@ -76,9 +76,81 @@ NF-chat;
 	- userlist.h, userlistgui.c, util.c/h, xtext.c/h = clean
 	- removing ->server
 	2)
-	  
+	- makin it a single channel client...
+	- merging source to session_t
+	moving all to 1 session. server->session
+	- moving all server->front_session to server->session
+	  in xchat.c , server.c, outbound.c, maingui.c, inbound.c, ctcp.c 	
+	- deleting sess_list and adding session as main session
+	- xchat.c
+	  - removing is_session from fe-gtk.c
+	  - removing find_session_from_channel from inbound.c ctcp.c
+	  - removing find_session_from_nick from inbound.c
+	  - removing find_session_from_waitchannel from fe-gtk.c
+	  - edited auto_reconnect
+	  - removed sess_list from new_session
+	  - removed exec_notify_kill from xchat.c (external execution)
+	  - removed running_exec from xchat.h
+	  - removed struct nbexec from xchat.h
+	  - edited send_quit_or_part
+	  - edited kill_session_callback & maingui.c
+	  - removed free_sessions
+	  - edited xchat_init, xchat_cleanup,
+	- cfgfiles.c/h
+	  - edited set_list
+	  - removed cmd_set & set_list
+	  - made static: default_file, check_prefs_dir, list_addentry
+            cfg_get_int_with_result, cfg_put_int, cfg_get_str
+	  - removed cfg_get_int, list_delentry, list_free
+	- ctcp.c
+	  - edited ctcp_reply, ctcp_check
+	  - edited handle_ctcp & inbound.c
+	  - removed prefs
+	- fe-gtk.c/h
+	  - removed sess_list
+	  - merged init_sess with fe_new_window
+	  - edited fe_new_session, & fe.h, xchat.c
+	  - removed find_unused_session 
+	  - removed fe_new_window_popup & fe.h 
+	    put remaining code in inbound.c
+	  - edited fe_set_topic & fe.h, inbound.c
+	  - edited fe_set_hilight & fe.h, inbound.c 
+	  - removed fe_text_clear & fe.h
+	  - removed fe_close_window & fe.h
+	  - edited updatedate_bar
+	  - edited fe_progressbar_start & fe.h, server.c
+	  - edited fe_progressbar_end & fe.h, maingui.c, server.c
+	  - edited fe_print_text & fe.h, text.c
+	  - removing fe_buffer_get
+	- fkeys.c
+	  - removed sess_list
+	  - edited key_actions
+	  - edited key_handle_key_press
+	  - cleaned the whole lot up a lil 
+	- gtkutil.c/h = clean
+	- history.c/h = clean	
+	- inbound.c
+	  - removed sess_list
+	  - editing private_msg
+	  - editing channel_action & ctcp.c, outbound.c
+	  - edited channel_msg, user_new_nick, you_joined, you_kicked
+	    you_parted, names_list, topic, user_joined, user_kicked
+	    user_parted, topic_nametime, set_server_name, user_quit
+	    got_ping_reply, notice, handle_away, channel_mode, 
+	  - removed end_of_names
+	  - edited check_willjoin_channels, next_nick
+	  - edited process_line & xchat.c
+	- maingui.c
+	  - removed sess_list
+	  - edited fe_set_title in inbound.c, fe.h
+### clean up fe
+### new_session
+### prefs.use_server_tab
+### struct user
+### clean up fkeys.c
+### struct session_gui  
 ### cleanup current_tab
-### remove fe_progressbar
+
 0.3.2;
 """"""
      a) cleanin out all the unneccessary commands from outbound.c

@@ -3,10 +3,7 @@
 #ifndef cfgfiles_h
 #define cfgfiles_h
 
-
-char *cfg_get_str (char *cfg, char *var, char *dest);
 char *get_xdir (void);
-void check_prefs_dir (void);
 void load_config (void);
 
 

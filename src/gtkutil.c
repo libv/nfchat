@@ -29,7 +29,6 @@
 #include <X11/Xatom.h>
 
 extern void path_part (char *file, char *path);
-extern GtkWidget *maingui_new_tab (char *title, char *name, void *close_callback, void *userdata);
 extern struct xchatprefs prefs;
 extern GtkWidget *main_window;
 

@@ -45,15 +45,12 @@ extern GSList *sess_list;
 extern struct xchatprefs prefs;
 extern session_t *current_tab;
 
-extern int is_session (session_t *sess);
 extern void auto_reconnect (int send_quit, int err);
 extern void do_dns (session_t *sess, char *tbuf, char *nick, char *host);
 extern int tcp_send (char *buf);
-extern int list_delentry (GSList ** list, char *name);
-extern void list_addentry (GSList ** list, char *cmd, char *name);
 extern void PrintText (session_t *sess, char *text);
 extern void connect_server (session_t *sess, char *server, int port, int quiet);
-extern void channel_action (session_t *sess, char *tbuf, char *chan, char *from, char *text, int fromme);
+extern void channel_action (char *tbuf, char *chan, char *from, char *text, int fromme);
 extern void user_new_nick (char *outbuf, char *nick, char *newnick, int quiet);
 extern void channel_msg (char *outbuf, char *chan, char *from, char *text, char fromme);
 extern void disconnect_server (session_t *sess, int sendquit, int err);
@@ -330,7 +327,7 @@ cmd_me (session_t *sess, char *tbuf, char *word[], char *word_eol[])
    char *act = find_word_to_end (cmd, 2);
    if (*act)
    {
-      channel_action (sess, tbuf, sess->channel, server->nick, act, TRUE);
+      channel_action (tbuf, sess->channel, server->nick, act, TRUE);
       sprintf (tbuf, "\001ACTION %s\001\r", act);
       sprintf (tbuf, "PRIVMSG %s :\001ACTION %s\001\r\n", sess->channel, act);
       tcp_send (tbuf);

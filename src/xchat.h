@@ -49,15 +49,6 @@
 #define	FONTNAMELEN	127
 #define	PATHLEN	255
 
-struct nbexec
-{
-   int myfd, childfd;
-   int childpid;
-   int tochannel;               /* making this int keeps the struct 4-byte aligned */
-   int iotag;
-   struct session_t *sess;
-};
-
 struct xchatprefs
 {
    char nick1[64];
@@ -122,7 +113,6 @@ struct session_t
    char *quitreason;
 
    struct setup *setup;
-   struct nbexec *running_exec;
 
    struct session_gui *gui;	     /* initialized by fe_new_window */
 
@@ -173,6 +163,7 @@ struct server_t
 typedef struct server_t server_t;
 
 extern server_t *server;
+extern session_t *session;
 
 typedef int (*cmd_callback) (session_t * sess, char *tbuf, char *word[], char *word_eol[]);
 

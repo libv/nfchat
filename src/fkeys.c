@@ -34,16 +34,433 @@ extern GtkWidget *main_window, *main_book;
 extern int waitline (int sok, char *buf, int bufsize);
 extern int handle_multiline (session_t *sess, char *cmd, int history, int nocommand);
 
-extern GSList *sess_list;
 extern struct commands cmds[1];
 
 extern void PrintText (session_t *sess, unsigned char *text);
 extern int buf_get_line (char *, char **, int *, int len);
-extern void history_up (GtkWidget * widget, struct history *his);
-extern void history_down (GtkWidget * widget, struct history *his);
-extern int tab_nick_comp (GtkWidget * t, int shift);
-extern void nick_comp_chng (GtkWidget * t, int updown);
-extern void replace_handle (GtkWidget * wid);
+
+static void
+history_up (GtkWidget * widget, struct history *his)
+{
+   if (his->pos == 0)
+      his->pos = (HISTORY_SIZE - 1);
+   else
+      his->pos--;
+   if (his->lines[his->pos])
+   {
+      gtk_entry_set_text (GTK_ENTRY (widget), his->lines[his->pos]);
+   } else
+   {
+      if (his->pos == (HISTORY_SIZE - 1))
+         his->pos = 0;
+      else
+         his->pos++;
+   }
+}
+
+static void
+history_down (GtkWidget * widget, struct history *his)
+{
+   his->pos++;
+   if (his->pos == HISTORY_SIZE)
+      his->pos = 0;
+   if (his->lines[his->pos])
+   {
+      gtk_entry_set_text (GTK_ENTRY (widget), his->lines[his->pos]);
+   } else
+   {
+      if (his->pos != 0)
+         his->pos--;
+      else
+         his->pos = (HISTORY_SIZE - 1);
+   }
+}
+
+/* In the following 'b4' is *before* the text (just say b4 and before out loud)
+   and c5 is *after* (because c5 is next after b4, get it??) --AGL */
+
+static int
+tab_nick_comp_next (GtkWidget * wid, char *b4, char *nick, char *c5, int shift)
+{
+   struct user *user = 0, *last = NULL;
+   char buf[4096];
+   GSList *list;
+
+   list = session->userlist;
+   while (list)
+   {
+      user = (struct user *)list->data;
+      if (strcmp (user->nick, nick) == 0)
+         break;
+      last = user;
+      list = list->next;
+   }
+   if (!list)
+      return 0;
+   if (shift)
+   {
+      if (last)
+         snprintf (buf, 4096, "%s %s%s", b4, last->nick, c5);
+      else
+         snprintf (buf, 4096, "%s %s%s", b4, nick, c5);
+   } else
+   {
+      if (list->next)
+         snprintf (buf, 4096, "%s %s%s", b4, ((struct user *)list->next->data)->nick, c5);
+      else
+      {
+         if (session->userlist)
+            snprintf (buf, 4096, "%s %s%s", b4, ((struct user *)session->userlist->data)->nick, c5);
+         else
+            snprintf (buf, 4096, "%s %s%s", b4, nick, c5);
+      }
+   }
+   gtk_entry_set_text (GTK_ENTRY (wid), buf);
+
+   return 1;
+}
+
+static int
+tab_nick_comp (GtkWidget * t, int shift)
+{
+   struct user *user, *best = NULL;
+   char *text;
+   int len, slen, highest = -10000, first = 0,
+       i, j;
+   char buf[16384], *b4 = NULL, *c5 = NULL;
+   GSList *list;
+
+   text = gtk_entry_get_text (GTK_ENTRY (t));
+
+   if (session == NULL)
+      return 0;
+
+   len = strlen (text);
+   if (!strchr (text, ' '))
+   {
+      if (text[0] == '/')
+      {
+         tab_comp_cmd (t);
+         return 0;
+      }
+   }
+   if (text_is_more_than_just_nick (text))
+   {
+      j = GTK_EDITABLE (t)->current_pos;
+      b4 = (char *) malloc (len + 1);
+      c5 = (char *) malloc (len + 1);
+      memcpy (c5, &text[j], len - j);
+      c5[len - j] = 0;
+      memcpy (b4, text, len + 1);
+
+      for (i = j - 1; i > -1; i--)
+      {
+         if (b4[i] == ' ')
+         {
+            b4[i] = 0;
+            break;
+         }
+         b4[i] = 0;
+      }
+      memcpy (text, &text[i + 1], (j - i) + 1);
+      text[(j - i) - 1] = 0;
+
+      if (tab_nick_comp_next (t, b4, text, c5, shift))
+      {
+         free (b4);
+         free (c5);
+         return 1;
+      }
+      first = 0;
+   } else
+      first = 1;
+
+   len = strlen (text);
+
+   if (text[0] == 0)
+      return -1;
+
+   list = session->userlist;
+   while (list)
+   {
+      user = (struct user *)list->data;
+      slen = strlen (user->nick);
+      if (len > slen)
+      {
+         list = list->next;
+         continue;
+      }
+      if (strncasecmp (user->nick, text, len) == 0)
+      {
+         if (user->weight > highest)
+         {
+            best = user;
+            highest = user->weight;
+         }
+      }
+      list = list->next;
+   }
+   if (best == NULL)
+      return 0;
+
+   if (first)
+      snprintf (buf, sizeof (buf), "%s: ", best->nick);
+   else
+   {
+      snprintf (buf, sizeof (buf), "%s %s%s", b4, best->nick, c5);
+      GTK_EDITABLE (t)->current_pos = strlen (b4) + strlen (best->nick);
+      free (b4);
+      free (c5);
+   }
+   gtk_entry_set_text (GTK_ENTRY (t), buf);
+   return 0;
+}
+
+/* -------- */
+
+
+#define STATE_SHIFT     GDK_SHIFT_MASK
+#define	STATE_ALT	GDK_MOD1_MASK
+#define STATE_CTRL	GDK_CONTROL_MASK
+
+static void
+replace_handle (GtkWidget * t)
+{
+   char *text, *postfix_pnt;
+   char word[140];
+   char postfix[140];
+   int c, len, xlen;
+
+   text = gtk_entry_get_text (GTK_ENTRY (t));
+
+   len = strlen (text);
+   for (c = len - 1; c > 0; c--)
+   {
+      if (text[c] == ' ')
+         break;
+   }
+   if (text[c] == ' ')
+      c++;
+   xlen = c;
+   if (len - c >= (sizeof (word) - 12))
+      return;
+   memcpy (word, &text[c], len - c);
+   word[len - c] = 0;
+   len = strlen (word);
+   if (word[0] == '\'' && word[len] == '\'')
+      return;
+   postfix_pnt = NULL;
+   for (c = 0; c < len; c++)
+   {
+      if (word[c] == '\'')
+      {
+         postfix_pnt = &word[c + 1];
+         word[c] = 0;
+         break;
+      }
+   }
+
+   if (postfix_pnt != NULL)
+   {
+      if (strlen (postfix_pnt) > sizeof (postfix) - 12)
+         return;
+      strcpy (postfix, postfix_pnt);
+   }
+
+}
+
+static int
+text_is_more_than_just_nick (char *tx)
+{
+   int c, len = strlen (tx);
+
+   for (c = 0; c < len; c++)
+   {
+      if (tx[c] == ' ' || tx[c] == ':' || tx[c] == '.' || tx[c] == '?')
+         return 1;
+   }
+   return 0;
+}
+
+static int
+nick_comp_get_nick (char *tx, char *n)
+{
+   int c, len = strlen (tx);
+
+   for (c = 0; c < len; c++)
+   {
+      if (tx[c] == ':')
+      {
+         n[c] = 0;
+         return 0;
+      }
+      if (tx[c] == ' ' || tx[c] == '.' || tx[c] == 0)
+         return -1;
+      n[c] = tx[c];
+   }
+   return -1;
+}
+
+static void
+nick_comp_chng (GtkWidget * t, int updown)
+{
+   struct user *user, *last = NULL;
+   char *text, nick[64];
+   int len, slen;
+   GSList *list;
+
+   if (session == NULL)
+      return;
+
+   text = gtk_entry_get_text (GTK_ENTRY (t));
+
+   if (nick_comp_get_nick (text, nick) == -1)
+      return;
+   len = strlen (nick);
+
+   list = session->userlist;
+   while (list)
+   {
+      user = (struct user *) list->data;
+      slen = strlen (user->nick);
+      if (len != slen)
+      {
+         last = user;
+         list = list->next;
+         continue;
+      }
+      if (strncasecmp (user->nick, nick, len) == 0)
+      {
+         if (updown == 0)
+         {
+            if (list->next == NULL)
+               return;
+            user->weight--;
+            ((struct user *)list->next->data)->weight++;
+            snprintf (nick, sizeof (nick), "%s: ", ((struct user *)list->next->data)->nick);
+         } else
+         {
+            if (last == NULL)
+               return;
+            user->weight--;
+            last->weight++;
+            snprintf (nick, sizeof (nick), "%s: ", last->nick);
+         }
+         gtk_entry_set_text (GTK_ENTRY (t), nick);
+         return;
+      }
+      last = user;
+      list = list->next;
+   }
+}
+
+static void
+tab_comp_find_common (char *a, char *b)
+{
+   int c;
+   int alen = strlen (a), blen = strlen (b),
+       len;
+
+   if (blen > alen)
+      len = alen;
+   else
+      len = blen;
+   for (c = 0; c < len; c++)
+   {
+      if (a[c] != b[c])
+      {
+         a[c] = 0;
+         return;
+      }
+   }
+   a[c] = 0;
+}
+
+static void
+tab_comp_cmd (GtkWidget * t)
+{
+   char *text, *last = NULL, *cmd, *postfix = NULL;
+   int len, i, slen;
+   char buf[2048];
+   char lcmd[2048];
+
+   text = gtk_entry_get_text (GTK_ENTRY (t));
+
+   text++;
+   len = strlen (text);
+   if (len == 0)
+      return;
+   for (i = 0; i < len; i++)
+   {
+      if (text[i] == ' ')
+      {
+         postfix = &text[i + 1];
+         text[i] = 0;
+         len = strlen (text);
+         break;
+      }
+   }
+
+   i = 0;
+   while (cmds[i].name != NULL)
+   {
+      cmd = cmds[i].name;
+      slen = strlen (cmd);
+      if (len > slen)
+      {
+         i++;
+         continue;
+      }
+      if (strncasecmp (cmd, text, len) == 0)
+      {
+         if (last == NULL)
+         {
+            last = cmd;
+            snprintf (lcmd, sizeof (lcmd), "%s", last);
+         } else if (last > (char *) 1)
+         {
+            snprintf (buf, sizeof (buf), "%s %s ", last, cmd);
+            PrintText (session, buf);
+            /*PrintText (sess, last);
+            PrintText (sess, "\t");
+            PrintText (sess, cmd);
+            PrintText (sess, "\t");*/
+            last = (void *) 1;
+            tab_comp_find_common (lcmd, cmd);
+         } else if (last == (void *) 1)
+         {
+            PrintText (session, cmd);
+            /*PrintText (sess, cmd);
+            PrintText (sess, "\t");*/
+            tab_comp_find_common (lcmd, cmd);
+         }
+      }
+      i++;
+   }
+
+   if (last == NULL)
+      return;
+   if (last == (void *) 1)
+      PrintText (session, "\n");
+
+   if (last > (char *) 1)
+   {
+      if (strlen (last) > (sizeof (buf) - 1))
+         return;
+      if (postfix == NULL)
+         snprintf (buf, sizeof (buf), "/%s ", last);
+      else
+         snprintf (buf, sizeof (buf), "/%s %s", last, postfix);
+      gtk_entry_set_text (GTK_ENTRY (t), buf);
+      return;
+   } else if (strlen (lcmd) > (sizeof (buf) - 1))
+      return;
+   if (postfix == NULL)
+      snprintf (buf, sizeof (buf), "/%s", lcmd);
+   else
+      snprintf (buf, sizeof (buf), "/%s %s", lcmd, postfix);
+   gtk_entry_set_text (GTK_ENTRY (t), buf);
+}
 
 /***************** Key Binding Code ******************/
 
@@ -78,8 +495,7 @@ struct key_binding
 
 struct key_action
 {
-   int (*handler) (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
-               session_t * sess);
+   int (*handler) (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2);
    char *name;
    char *help;
 };
@@ -87,26 +503,16 @@ struct key_action
 int key_load_kbs ();
 void key_load_defaults ();
 
-static int key_action_handle_command (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, session_t *sess);
-static int key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1,
-char *d2, session_t *sess);
-int key_action_insert (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, session_t *sess);
-static int key_action_scroll_page (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, session_t *sess);
-static int key_action_set_buffer (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, session_t *sess);
-static int key_action_history_up (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, session_t *sess);
-static int key_action_history_down (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, session_t *sess);
-static int key_action_tab_comp (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, session_t *sess);
-static int key_action_comp_chng (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, session_t *sess);
-static int key_action_replace (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, session_t *sess);
+static int key_action_handle_command (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2);
+static int key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2);
+static int key_action_insert (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2);
+static int key_action_scroll_page (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2);
+static int key_action_set_buffer (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2);
+static int key_action_history_up (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2);
+static int key_action_history_down (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2);
+static int key_action_tab_comp (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2);
+static int key_action_comp_chng (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2);
+static int key_action_replace (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2);
 
 static struct key_binding *keys_root = NULL;
 
@@ -172,7 +578,7 @@ key_init ()
  */
 
 int
-key_handle_key_press (GtkWidget * wid, GdkEventKey * evt, session_t *sess)
+key_handle_key_press (GtkWidget * wid, GdkEventKey * evt, void *blah)
 {
    struct key_binding *kb, *last = NULL;
    int keyval = evt->keyval;
@@ -196,7 +602,7 @@ key_handle_key_press (GtkWidget * wid, GdkEventKey * evt, session_t *sess)
          }
          /* Run the function */
          n = key_actions[kb->action].handler (wid, evt, kb->data1,
-                     kb->data2, sess);
+                     kb->data2);
          switch (n)
          {
          case 0:
@@ -491,8 +897,7 @@ key_load_kbs (void)
 /* "Run command" */
 
 int
-key_action_handle_command (GtkWidget * wid, GdkEventKey * evt, char *d1,
-       char *d2, session_t *sess)
+key_action_handle_command (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2)
 {
    int ii, oi, len;
    char out[2048], d = 0;
@@ -525,13 +930,12 @@ key_action_handle_command (GtkWidget * wid, GdkEventKey * evt, char *d1,
    }
    out[oi] = 0;
 
-   handle_multiline (sess, out, 0, 0);
+   handle_multiline (session, out, 0, 0);
    return 0;
 }
 
 static int
-key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
-                 session_t *sess)
+key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,)
 {
    int len, i, num;
 
@@ -574,8 +978,7 @@ key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
 }
 
 int
-key_action_insert (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
-                 session_t *sess)
+key_action_insert (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2)
 {
    int tmp_pos;
 
@@ -590,8 +993,7 @@ key_action_insert (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
 
 /* handles PageUp/Down keys */
 int
-key_action_scroll_page (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
-                 session_t *sess)
+key_action_scroll_page (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2)
 {
    int value, end;
    GtkAdjustment *adj;
@@ -600,9 +1002,9 @@ key_action_scroll_page (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
    if (d1 && d1[0] != 0)
       up++;
 
-   if (sess)
+   if (session)
    {
-      adj = GTK_RANGE (sess->gui->vscrollbar)->adjustment;
+      adj = GTK_RANGE (session->gui->vscrollbar)->adjustment;
       if (up)                   /* PageUp */
       {
          value = adj->value - adj->page_size;
@@ -621,8 +1023,7 @@ key_action_scroll_page (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
 }
 
 int
-key_action_set_buffer (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
-                 session_t *sess)
+key_action_set_buffer (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2)
 {
    if (!d1)
       return 1;
@@ -634,24 +1035,21 @@ key_action_set_buffer (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,
 }
 
 int
-key_action_history_up (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
-                 session_t *sess)
+key_action_history_up (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2)
 {
-   history_up (wid, &sess->history);
+   history_up (wid, &session->history);
    return 2;
 }
 
 int
-key_action_history_down (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
-			 session_t *sess)
+key_action_history_down (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2)
 {
-   history_down (wid, &sess->history);
+   history_down (wid, &session->history);
    return 2;
 }
 
 int
-key_action_tab_comp (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
-                 session_t *sess)
+key_action_tab_comp (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2)
 {
    if (d1 && d1[0])
    {
@@ -669,8 +1067,7 @@ key_action_tab_comp (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
 }
 
 int
-key_action_comp_chng (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
-                 session_t *sess)
+key_action_comp_chng (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2)
 {
    if (d1 && d1[0] != 0)
       nick_comp_chng (wid, 1);
@@ -681,464 +1078,15 @@ key_action_comp_chng (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
 }
 
 int
-key_action_replace (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2,
-                 session_t *sess)
+key_action_replace (GtkWidget * wid, GdkEventKey * ent, char *d1, char *d2)
 {
    replace_handle (wid);
    return 1;
 }
 
 
-/* -------- */
 
 
-#define STATE_SHIFT     GDK_SHIFT_MASK
-#define	STATE_ALT	GDK_MOD1_MASK
-#define STATE_CTRL	GDK_CONTROL_MASK
 
-void
-replace_handle (GtkWidget * t)
-{
-   char *text, *postfix_pnt;
-   char word[140];
-   char postfix[140];
-   int c, len, xlen;
 
-   text = gtk_entry_get_text (GTK_ENTRY (t));
 
-   len = strlen (text);
-   for (c = len - 1; c > 0; c--)
-   {
-      if (text[c] == ' ')
-         break;
-   }
-   if (text[c] == ' ')
-      c++;
-   xlen = c;
-   if (len - c >= (sizeof (word) - 12))
-      return;
-   memcpy (word, &text[c], len - c);
-   word[len - c] = 0;
-   len = strlen (word);
-   if (word[0] == '\'' && word[len] == '\'')
-      return;
-   postfix_pnt = NULL;
-   for (c = 0; c < len; c++)
-   {
-      if (word[c] == '\'')
-      {
-         postfix_pnt = &word[c + 1];
-         word[c] = 0;
-         break;
-      }
-   }
-
-   if (postfix_pnt != NULL)
-   {
-      if (strlen (postfix_pnt) > sizeof (postfix) - 12)
-         return;
-      strcpy (postfix, postfix_pnt);
-   }
-
-}
-
-session_t *
-find_session_from_inputgad (GtkWidget * w)
-{
-   GSList *list = sess_list;
-   session_t *sess = 0;
-
-   /* First find the session from the widget */
-   while (list)
-   {
-      sess = (session_t *) list->data;
-      if (sess->gui->inputgad == w)
-         break;
-      list = list->next;
-   }
-   if (!list)
-   {
-      /*Erm, we didn't find ANY valid session, HELP! */
-      return NULL;
-   }
-   return sess;
-}
-
-int
-text_is_more_than_just_nick (char *tx)
-{
-   int c, len = strlen (tx);
-
-   for (c = 0; c < len; c++)
-   {
-      if (tx[c] == ' ' || tx[c] == ':' || tx[c] == '.' || tx[c] == '?')
-         return 1;
-   }
-   return 0;
-}
-
-int
-nick_comp_get_nick (char *tx, char *n)
-{
-   int c, len = strlen (tx);
-
-   for (c = 0; c < len; c++)
-   {
-      if (tx[c] == ':')
-      {
-         n[c] = 0;
-         return 0;
-      }
-      if (tx[c] == ' ' || tx[c] == '.' || tx[c] == 0)
-         return -1;
-      n[c] = tx[c];
-   }
-   return -1;
-}
-
-void
-nick_comp_chng (GtkWidget * t, int updown)
-{
-   session_t *sess;
-   struct user *user, *last = NULL;
-   char *text, nick[64];
-   int len, slen;
-   GSList *list;
-
-   sess = find_session_from_inputgad (t);
-   if (sess == NULL)
-      return;
-
-   text = gtk_entry_get_text (GTK_ENTRY (t));
-
-   if (nick_comp_get_nick (text, nick) == -1)
-      return;
-   len = strlen (nick);
-
-   list = sess->userlist;
-   while (list)
-   {
-      user = (struct user *) list->data;
-      slen = strlen (user->nick);
-      if (len != slen)
-      {
-         last = user;
-         list = list->next;
-         continue;
-      }
-      if (strncasecmp (user->nick, nick, len) == 0)
-      {
-         if (updown == 0)
-         {
-            if (list->next == NULL)
-               return;
-            user->weight--;
-            ((struct user *)list->next->data)->weight++;
-            snprintf (nick, sizeof (nick), "%s: ", ((struct user *)list->next->data)->nick);
-         } else
-         {
-            if (last == NULL)
-               return;
-            user->weight--;
-            last->weight++;
-            snprintf (nick, sizeof (nick), "%s: ", last->nick);
-         }
-         gtk_entry_set_text (GTK_ENTRY (t), nick);
-         return;
-      }
-      last = user;
-      list = list->next;
-   }
-}
-
-void
-tab_comp_find_common (char *a, char *b)
-{
-   int c;
-   int alen = strlen (a), blen = strlen (b),
-       len;
-
-   if (blen > alen)
-      len = alen;
-   else
-      len = blen;
-   for (c = 0; c < len; c++)
-   {
-      if (a[c] != b[c])
-      {
-         a[c] = 0;
-         return;
-      }
-   }
-   a[c] = 0;
-}
-
-void
-tab_comp_cmd (GtkWidget * t)
-{
-   char *text, *last = NULL, *cmd, *postfix = NULL;
-   int len, i, slen;
-   session_t *sess;
-   char buf[2048];
-   char lcmd[2048];
-
-   text = gtk_entry_get_text (GTK_ENTRY (t));
-
-   sess = find_session_from_inputgad (t);
-
-   text++;
-   len = strlen (text);
-   if (len == 0)
-      return;
-   for (i = 0; i < len; i++)
-   {
-      if (text[i] == ' ')
-      {
-         postfix = &text[i + 1];
-         text[i] = 0;
-         len = strlen (text);
-         break;
-      }
-   }
-
-   i = 0;
-   while (cmds[i].name != NULL)
-   {
-      cmd = cmds[i].name;
-      slen = strlen (cmd);
-      if (len > slen)
-      {
-         i++;
-         continue;
-      }
-      if (strncasecmp (cmd, text, len) == 0)
-      {
-         if (last == NULL)
-         {
-            last = cmd;
-            snprintf (lcmd, sizeof (lcmd), "%s", last);
-         } else if (last > (char *) 1)
-         {
-            snprintf (buf, sizeof (buf), "%s %s ", last, cmd);
-            PrintText (sess, buf);
-            /*PrintText (sess, last);
-            PrintText (sess, "\t");
-            PrintText (sess, cmd);
-            PrintText (sess, "\t");*/
-            last = (void *) 1;
-            tab_comp_find_common (lcmd, cmd);
-         } else if (last == (void *) 1)
-         {
-            PrintText (sess, cmd);
-            /*PrintText (sess, cmd);
-            PrintText (sess, "\t");*/
-            tab_comp_find_common (lcmd, cmd);
-         }
-      }
-      i++;
-   }
-
-   if (last == NULL)
-      return;
-   if (last == (void *) 1)
-      PrintText (sess, "\n");
-
-   if (last > (char *) 1)
-   {
-      if (strlen (last) > (sizeof (buf) - 1))
-         return;
-      if (postfix == NULL)
-         snprintf (buf, sizeof (buf), "/%s ", last);
-      else
-         snprintf (buf, sizeof (buf), "/%s %s", last, postfix);
-      gtk_entry_set_text (GTK_ENTRY (t), buf);
-      return;
-   } else if (strlen (lcmd) > (sizeof (buf) - 1))
-      return;
-   if (postfix == NULL)
-      snprintf (buf, sizeof (buf), "/%s", lcmd);
-   else
-      snprintf (buf, sizeof (buf), "/%s %s", lcmd, postfix);
-   gtk_entry_set_text (GTK_ENTRY (t), buf);
-}
-
-/* In the following 'b4' is *before* the text (just say b4 and before out loud)
-   and c5 is *after* (because c5 is next after b4, get it??) --AGL */
-
-int
-tab_nick_comp_next (session_t *sess, GtkWidget * wid, char *b4,
-      char *nick, char *c5, int shift)
-{
-   struct user *user = 0, *last = NULL;
-   char buf[4096];
-   GSList *list;
-
-   list = sess->userlist;
-   while (list)
-   {
-      user = (struct user *)list->data;
-      if (strcmp (user->nick, nick) == 0)
-         break;
-      last = user;
-      list = list->next;
-   }
-   if (!list)
-      return 0;
-   if (shift)
-   {
-      if (last)
-         snprintf (buf, 4096, "%s %s%s", b4, last->nick, c5);
-      else
-         snprintf (buf, 4096, "%s %s%s", b4, nick, c5);
-   } else
-   {
-      if (list->next)
-         snprintf (buf, 4096, "%s %s%s", b4, ((struct user *)list->next->data)->nick, c5);
-      else
-      {
-         if (sess->userlist)
-            snprintf (buf, 4096, "%s %s%s", b4, ((struct user *)sess->userlist->data)->nick, c5);
-         else
-            snprintf (buf, 4096, "%s %s%s", b4, nick, c5);
-      }
-   }
-   gtk_entry_set_text (GTK_ENTRY (wid), buf);
-
-   return 1;
-}
-
-int
-tab_nick_comp (GtkWidget * t, int shift)
-{
-   session_t *sess;
-   struct user *user, *best = NULL;
-   char *text;
-   int len, slen, highest = -10000, first = 0,
-       i, j;
-   char buf[16384], *b4 = NULL, *c5 = NULL;
-   GSList *list;
-
-   text = gtk_entry_get_text (GTK_ENTRY (t));
-
-   sess = find_session_from_inputgad (t);
-   
-   if (sess == NULL)
-      return 0;
-
-   len = strlen (text);
-   if (!strchr (text, ' '))
-   {
-      if (text[0] == '/')
-      {
-         tab_comp_cmd (t);
-         return 0;
-      }
-   }
-   if (text_is_more_than_just_nick (text))
-   {
-      j = GTK_EDITABLE (t)->current_pos;
-      b4 = (char *) malloc (len + 1);
-      c5 = (char *) malloc (len + 1);
-      memcpy (c5, &text[j], len - j);
-      c5[len - j] = 0;
-      memcpy (b4, text, len + 1);
-
-      for (i = j - 1; i > -1; i--)
-      {
-         if (b4[i] == ' ')
-         {
-            b4[i] = 0;
-            break;
-         }
-         b4[i] = 0;
-      }
-      memcpy (text, &text[i + 1], (j - i) + 1);
-      text[(j - i) - 1] = 0;
-
-      if (tab_nick_comp_next (sess, t, b4, text, c5, shift))
-      {
-         free (b4);
-         free (c5);
-         return 1;
-      }
-      first = 0;
-   } else
-      first = 1;
-
-   len = strlen (text);
-
-   if (text[0] == 0)
-      return -1;
-
-   list = sess->userlist;
-   while (list)
-   {
-      user = (struct user *)list->data;
-      slen = strlen (user->nick);
-      if (len > slen)
-      {
-         list = list->next;
-         continue;
-      }
-      if (strncasecmp (user->nick, text, len) == 0)
-      {
-         if (user->weight > highest)
-         {
-            best = user;
-            highest = user->weight;
-         }
-      }
-      list = list->next;
-   }
-   if (best == NULL)
-      return 0;
-
-   if (first)
-      snprintf (buf, sizeof (buf), "%s: ", best->nick);
-   else
-   {
-      snprintf (buf, sizeof (buf), "%s %s%s", b4, best->nick, c5);
-      GTK_EDITABLE (t)->current_pos = strlen (b4) + strlen (best->nick);
-      free (b4);
-      free (c5);
-   }
-   gtk_entry_set_text (GTK_ENTRY (t), buf);
-   return 0;
-}
-
-void
-history_down (GtkWidget * widget, struct history *his)
-{
-   his->pos++;
-   if (his->pos == HISTORY_SIZE)
-      his->pos = 0;
-   if (his->lines[his->pos])
-   {
-      gtk_entry_set_text (GTK_ENTRY (widget), his->lines[his->pos]);
-   } else
-   {
-      if (his->pos != 0)
-         his->pos--;
-      else
-         his->pos = (HISTORY_SIZE - 1);
-   }
-}
-
-void
-history_up (GtkWidget * widget, struct history *his)
-{
-   if (his->pos == 0)
-      his->pos = (HISTORY_SIZE - 1);
-   else
-      his->pos--;
-   if (his->lines[his->pos])
-   {
-      gtk_entry_set_text (GTK_ENTRY (widget), his->lines[his->pos]);
-   } else
-   {
-      if (his->pos == (HISTORY_SIZE - 1))
-         his->pos = 0;
-      else
-         his->pos++;
-   }
-}

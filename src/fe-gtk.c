@@ -40,21 +40,17 @@ GtkStyle *channelwin_style;
 extern char *xdir;
 extern session_t *current_tab;
 extern struct xchatprefs prefs;
-extern GSList *sess_list;
 
-extern int is_session (session_t *sess);
 extern char *get_cpu_str (int color);
 extern void PrintTextRaw (GtkWidget * textwidget, unsigned char *text);
 extern void notify_gui_update (void);
 extern void update_all_of (char *name);
 extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, session_t *sess);
 extern void key_init (void);
-extern void create_window (session_t *);
+extern void create_window (void);
 extern void PrintText (session_t *, char *);
 extern session_t *new_session (void);
 extern void init_userlist_xpm (session_t *sess);
-extern session_t *find_session_from_waitchannel (char *target);
-
 
 GdkFont *my_font_load (char *fontname);
 GtkStyle *my_widget_get_style (char *bg_pic);
@@ -116,31 +112,6 @@ fe_init (void)
    inputgad_style = my_widget_get_style ("");
 }
 
-static int done_intro = 0;
-
-static void
-init_sess (void)
-{
-   char buf[512];
-   session_t *sess = sess_list->data;
-
-   if (done_intro)
-      return;
-   done_intro = 1;
-
-   init_userlist_xpm (sess_list->data);
-
-   snprintf (buf, sizeof buf,
-   "Welcome to \002NF\002-Chat %s; An irc-client for dancings, clubs and discos.\n"
-   "Written by \0032_Death_\003 for \0034NetForce\003 (\002www.netforce.be\002)\n\n\n",
-   VERSION );
-
-   PrintText (sess, buf);
-
-   while (gtk_events_pending ())
-      gtk_main_iteration ();
-}
-
 void
 fe_main (void)
 {
@@ -166,12 +137,28 @@ fe_timeout_remove (int tag)
 }
 
 void
-fe_new_window (session_t *sess)
+fe_new_window (void)
 {
-  sess->gui = malloc (sizeof (struct session_gui));
-  memset (sess->gui, 0, sizeof (struct session_gui));
-  create_window (sess);
-  init_sess ();
+  char buf[512];
+
+  if (session->gui)
+    {
+      fprintf(stderr, "dont define 2 windows please!!!\n");
+      return;
+    }
+
+  session->gui = malloc (sizeof (struct session_gui));
+  memset (session->gui, 0, sizeof (struct session_gui));
+  create_window (void);
+
+  init_userlist_xpm (session);
+  
+  snprintf (buf, sizeof buf, "Welcome to \002NF\002-Chat %s; An irc-client for dancings, clubs and discos.\n Written by \0032_Death_\003 for \0034NetForce\003 (\002www.netforce.be\002)\n\n\n", VERSION );
+  
+  PrintText (session, buf);
+  
+  while (gtk_events_pending ())
+    gtk_main_iteration ();
 }
 
 void
@@ -253,73 +240,24 @@ my_widget_get_style (char *bg_pic)
    }
    return style;
 }
-static session_t *
-find_unused_session (void)
-{
-   session_t *sess;
-   GSList *list = sess_list;
-   while (list)
-   {
-      sess = (session_t *) list->data;
-      if (sess->channel[0] == 0)
-         return sess;
-      list = list->next;
-   }
-   return 0;
-}
 
-session_t *
-fe_new_window_popup (char *target)
+void
+fe_set_topic (char *topic)
 {
-  session_t *sess = find_session_from_waitchannel (target);
-  
-  if (!sess)
-    {
-      sess = find_unused_session ();
-      if (!sess)
-	sess = new_session ();
-    }
-  if (sess)
-    {
-      strncpy (sess->channel, target, 200);
-      fe_set_channel (sess);
-      fe_set_title (sess);
-    }
-  return sess;
+   gtk_entry_set_text (GTK_ENTRY (session->gui->topicgad), topic);
 }
 
 void
-fe_set_topic (session_t *sess, char *topic)
+fe_set_hilight (void)
 {
-   gtk_entry_set_text (GTK_ENTRY (sess->gui->topicgad), topic);
-}
-
-void
-fe_set_hilight (session_t *sess)
-{
-   gtk_widget_set_style (sess->gui->changad, bluetab_style);
-}
-
-void
-fe_text_clear (session_t *sess)
-{
-   gtk_xtext_remove_lines ((GtkXText *)sess->gui->textgad, -1, TRUE);
-}
-
-void
-fe_close_window (session_t *sess)
-{
-   gtk_widget_destroy (sess->gui->window);
+   gtk_widget_set_style (session->gui->changad, bluetab_style);
 }
 
 static int
-updatedate_bar (session_t *sess)
+updatedate_bar (void)
 {
    static int type = 0;
    static float pos = 0;
-
-   if (!is_session (sess))
-      return 0;
 
    pos += 0.05;
    if (pos >= 0.99)
@@ -327,69 +265,51 @@ updatedate_bar (session_t *sess)
       if (type == 0)
       {
          type = 1;
-         gtk_progress_bar_set_orientation ((GtkProgressBar *) sess->gui->bar, GTK_PROGRESS_RIGHT_TO_LEFT);
+         gtk_progress_bar_set_orientation ((GtkProgressBar *) session->gui->bar, GTK_PROGRESS_RIGHT_TO_LEFT);
       } else
       {
          type = 0;
-         gtk_progress_bar_set_orientation ((GtkProgressBar *) sess->gui->bar, GTK_PROGRESS_LEFT_TO_RIGHT);
+         gtk_progress_bar_set_orientation ((GtkProgressBar *) session->gui->bar, GTK_PROGRESS_LEFT_TO_RIGHT);
       }
       pos = 0.05;
    }
-   gtk_progress_bar_update ((GtkProgressBar *) sess->gui->bar, pos);
+   gtk_progress_bar_update ((GtkProgressBar *) session->gui->bar, pos);
    return 1;
 }
 
 void
-fe_progressbar_start (session_t *sess)
+fe_progressbar_start ()
 {
-   if (sess->gui->op_box)
+   if (session->gui->op_box)
    {
-      sess->gui->bar = gtk_progress_bar_new ();
-      gtk_box_pack_start (GTK_BOX (sess->gui->op_box), sess->gui->bar, 0, 0, 0);
-      gtk_widget_show (sess->gui->bar);
-      server->bartag = gtk_timeout_add (50, (GtkFunction) updatedate_bar, sess);
+      session->gui->bar = gtk_progress_bar_new ();
+      gtk_box_pack_start (GTK_BOX (session->gui->op_box), session->gui->bar, 0, 0, 0);
+      gtk_widget_show (session->gui->bar);
+      server->bartag = gtk_timeout_add (50, (GtkFunction) updatedate_bar, session);
    }
 }
 
 void
-fe_progressbar_end (session_t *sess)
+fe_progressbar_end (void)
 {
-
-   GSList *list = sess_list;
-
-   if (sess)
-   {
-      while (list)       /* check all windows that use this server and  *
-                          * remove the connecting graph, if it has one. */
-      {
-         sess = (session_t *) list->data;
-         if (sess->gui->bar)
-         {
-            if (GTK_IS_WIDGET (sess->gui->bar))
-               gtk_widget_destroy (sess->gui->bar);
-            sess->gui->bar = 0;
-            gtk_timeout_remove (server->bartag);
-         }
-         list = list->next;
-      }
-   }
+  if (session->gui->bar)
+    {
+      if (GTK_IS_WIDGET (session->gui->bar))
+	gtk_widget_destroy (session->gui->bar);
+      session->gui->bar = 0;
+      gtk_timeout_remove (server->bartag);
+    }
 }
 
 void
-fe_print_text (session_t *sess, char *text)
+fe_print_text (char *text)
 {
-   PrintTextRaw (sess->gui->textgad, text);
+   PrintTextRaw (session->gui->textgad, text);
 
-   if (!sess->new_data && sess != current_tab &&
-     sess->is_tab && !sess->nick_said)
+   if (!session->new_data && session != current_tab &&
+     session->is_tab && !session->nick_said)
    {
-      sess->new_data = TRUE;
-      gtk_widget_set_style (sess->gui->changad, redtab_style);
+      session->new_data = TRUE;
+      gtk_widget_set_style (session->gui->changad, redtab_style);
    }
-}
-
-char *
-fe_buffer_get (session_t *sess)
-{
-   return gtk_xtext_get_chars (GTK_XTEXT (sess->gui->textgad));
 }

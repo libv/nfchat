@@ -34,10 +34,8 @@
 extern struct xchatprefs prefs;
 
 extern int buf_get_line (char *, char **, int *, int len);
-extern void PrintText (session_t *sess, unsigned char *text);
 
-
-void
+static void
 list_addentry (GSList ** list, char *cmd, char *name)
 {
    struct popup *pop = malloc (sizeof (struct popup));
@@ -109,38 +107,7 @@ list_loadconf (char *file, GSList ** list, char *defaultconf)
    free (ibuf);
 }
 
-void
-list_free (GSList ** list)
-{
-   void *data;
-   while (*list)
-   {
-      data = (void *) (*list)->data;
-      free (data);
-      *list = g_slist_remove (*list, data);
-   }
-}
-
-int
-list_delentry (GSList ** list, char *name)
-{
-   struct popup *pop;
-   GSList *alist = *list;
-
-   while (alist)
-   {
-      pop = (struct popup *) alist->data;
-      if (!strcasecmp (name, pop->name))
-      {
-         *list = g_slist_remove (*list, pop);
-         return 1;
-      }
-      alist = alist->next;
-   }
-   return 0;
-}
-
-char *
+static char *
 cfg_get_str (char *cfg, char *var, char *dest)
 {
    while (1)
@@ -183,7 +150,7 @@ cfg_put_str (int fh, char *var, char *value)
    write (fh, buf, strlen (buf));
 }
 
-void
+static void
 cfg_put_int (int fh, int value, char *var)
 {
    char buf[400];
@@ -195,7 +162,7 @@ cfg_put_int (int fh, int value, char *var)
    write (fh, buf, strlen (buf));
 }
 
-int
+static int
 cfg_get_int_with_result (char *cfg, char *var, int *result)
 {
    char str[128];
@@ -207,17 +174,6 @@ cfg_get_int_with_result (char *cfg, char *var, int *result)
    }
 
    *result = 1;
-   return atoi (str);
-}
-
-int
-cfg_get_int (char *cfg, char *var)
-{
-   char str[128];
-
-   if (!cfg_get_str (cfg, var, str))
-      return 0;
-
    return atoi (str);
 }
 
@@ -234,7 +190,7 @@ get_xdir (void)
    return xdir;
 }
 
-void
+static void
 check_prefs_dir (void)
 {
    char *xdir = get_xdir ();
@@ -243,7 +199,7 @@ check_prefs_dir (void)
        fprintf (stderr, "Error: Cannot create ~/.nfchat");
 }
 
-char *
+static char *
 default_file (void)
 {
    static char *dfile = 0;
@@ -405,121 +361,3 @@ load_config (void)
    if (prefs.indent_pixels < 1)
       prefs.indent_pixels = 80;
 }
-
-
-static void
-set_list (session_t *sess, char *tbuf)
-{
-   struct prefs tmp_pref;
-   struct prefs sorted_vars[sizeof (vars) / sizeof (tmp_pref)];
-   int i, j;
-
-   memcpy (&sorted_vars[0], &vars[0], sizeof (vars));
-
-   /* lame & dirty bubble sort */
-   i = 0;
-   while (sorted_vars[i].type != 0)
-   {
-      j = 0;
-      while (sorted_vars[j].type != 0)
-      {
-         if (strcmp (sorted_vars[j].name, sorted_vars[i].name) > 0)
-         {
-            memcpy (&tmp_pref, &sorted_vars[j], sizeof (tmp_pref));
-            memcpy (&sorted_vars[j], &sorted_vars[i], sizeof (tmp_pref));
-            memcpy (&sorted_vars[i], &tmp_pref, sizeof (tmp_pref));
-         }
-         j++;
-      }
-      i++;
-   }      
-
-   i = 0;
-   do
-   {
-      switch (sorted_vars[i].type)
-      {
-      case TYPE_STR:
-         sprintf(tbuf, "%s \0033=\017 %s\n", sorted_vars[i].name, (char *)&prefs + sorted_vars[i].offset);
-         break;
-      case TYPE_INT:
-      case TYPE_BOOL:
-         sprintf(tbuf, "%s \0033=\017 %d\n", sorted_vars[i].name, *((int *)&prefs + sorted_vars[i].offset));
-         break;
-      }
-      PrintText (sess, tbuf);
-      i++;
-   }
-   while (sorted_vars[i].type != 0);
-}
-
-int
-cmd_set (session_t *sess, char *tbuf, char *word[], char *word_eol[])
-{
-   int i = 0;
-   char *var = word[2];
-   char *val = word_eol[3];
-
-   if (!*var)
-   {
-      set_list (sess, tbuf);
-      return TRUE;
-   }
-
-   if (*val == '=')
-      val++;
-
-   do
-   {
-      if (!strcasecmp (var, vars[i].name))
-      {
-         switch (vars[i].type)
-         {
-         case TYPE_STR:
-            if (*val)
-            {
-               strcpy ((char *)&prefs + vars[i].offset, val);
-               sprintf (tbuf, "%s set to: %s\n", var, val);
-            } else
-            {
-               sprintf (tbuf, "%s (string) has value: %s\n", var, (char *)&prefs + vars[i].offset);
-            }
-            PrintText (sess, tbuf);
-            break;
-         case TYPE_INT:
-         case TYPE_BOOL:
-            if (*val)
-            {
-               if (vars[i].type == TYPE_BOOL)
-               {
-                  if (atoi (val))
-                     *((int *)&prefs + vars[i].offset) = 1;
-                  else
-                     *((int *)&prefs + vars[i].offset) = 0;
-               } else
-               {
-                  *((int *)&prefs + vars[i].offset) = atoi (val);
-               }
-               sprintf (tbuf, "%s set to: %d\n", var, *((int *)&prefs + vars[i].offset));
-            } else
-            {
-               if (vars[i].type == TYPE_BOOL)
-                  sprintf (tbuf, "%s (boolean) has value: %d\n", var, *((int *)&prefs + vars[i].offset));
-               else
-                  sprintf (tbuf, "%s (number) has value: %d\n", var, *((int *)&prefs + vars[i].offset));
-            }
-            PrintText (sess, tbuf);
-            break;
-
-         }
-         return TRUE;
-      }
-      i++;
-   }
-   while (vars[i].type != 0);
-
-   PrintText (sess, "No such variable.\n");
-
-   return TRUE;
-}
-
