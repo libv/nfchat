@@ -34,39 +34,6 @@ extern GtkWidget *maingui_new_tab (char *title, char *name, void *close_callback
 extern struct xchatprefs prefs;
 extern GtkWidget *main_window;
 
-GtkWidget *
-gtkutil_window_new (char *title, char *wmclass, int x, int y, void *callback, gpointer userdata, int allowtab)
-{
-   GtkWidget *win;
-
-   if (prefs.windows_as_tabs && main_window && allowtab)
-      return maingui_new_tab (title, wmclass, callback, userdata);
-
-   win = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-   gtk_window_set_wmclass (GTK_WINDOW (win), wmclass, "X-Chat");
-   gtk_widget_set_usize (win, x, y);
-   gtk_window_set_title (GTK_WINDOW (win), title);
-   gtk_window_set_position (GTK_WINDOW (win), GTK_WIN_POS_MOUSE);
-   gtk_signal_connect (GTK_OBJECT (win), "destroy",
-                       GTK_SIGNAL_FUNC (callback), userdata);
-   return win;
-}
-
-GtkWidget *
-gtkutil_dialog_new (char *title, char *wmclass, void *callback, gpointer userdata)
-{
-   GtkWidget *dialog;
-
-   dialog = gtk_dialog_new ();
-   gtk_window_set_wmclass (GTK_WINDOW (dialog), wmclass, "X-Chat");
-   gtk_window_set_title (GTK_WINDOW (dialog), title);
-   gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_MOUSE);
-   gtk_signal_connect (GTK_OBJECT (dialog), "destroy",
-                       GTK_SIGNAL_FUNC (callback), userdata);
-
-   return dialog;
-}
-
 void
 gtkutil_destroy (GtkWidget * igad, GtkWidget * dgad)
 {
@@ -98,53 +65,6 @@ gtkutil_simpledialog (char *msg)
    gtk_widget_show (dialog);
 
    return dialog;
-}
-
-GtkWidget *
-gtkutil_button (GtkWidget * win, char *stock, char *labeltext,
-                void *callback, gpointer userdata, GtkWidget * box)
-{
-   GtkWidget *button, *label, *hbox;
-
-   hbox = gtk_hbox_new (0, 0);
-   gtk_widget_show (hbox);
-
-   button = gtk_button_new ();
-   gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                       GTK_SIGNAL_FUNC (callback), userdata);
-   gtk_widget_show (button);
-
-   if (labeltext)
-   {
-      label = gtk_label_new (labeltext);
-      gtk_container_add (GTK_CONTAINER (hbox), label);
-      gtk_widget_show (label);
-   }
-   gtk_container_add (GTK_CONTAINER (button), hbox);
-   if (box)
-      gtk_container_add (GTK_CONTAINER (box), button);
-
-   return button;
-}
-
-void
-gtkutil_label_new (char *text, GtkWidget * box)
-{
-   GtkWidget *label = gtk_label_new (text);
-   gtk_container_add (GTK_CONTAINER (box), label);
-   gtk_widget_show (label);
-}
-
-GtkWidget *
-gtkutil_entry_new (int max, GtkWidget * box, void *callback, gpointer userdata)
-{
-   GtkWidget *entry = gtk_entry_new_with_max_length (max);
-   gtk_container_add (GTK_CONTAINER (box), entry);
-   if (callback)
-      gtk_signal_connect (GTK_OBJECT (entry), "changed",
-                          GTK_SIGNAL_FUNC (callback), userdata);
-   gtk_widget_show (entry);
-   return entry;
 }
 
 GtkWidget *
@@ -204,18 +124,3 @@ gtkutil_null_this_var (GtkWidget * unused, GtkWidget ** dialog)
 {
    *dialog = 0;
 }
-
-void
-gtkutil_set_icon (GdkWindow *window, GdkPixmap *pixmap, GdkBitmap *mask)
-{
-   Atom icon_atom;
-   glong data[2];
-
-   data[0] = ((GdkPixmapPrivate *)pixmap)->xwindow;
-   data[1] = ((GdkPixmapPrivate *)mask)->xwindow;
-   icon_atom = gdk_atom_intern ("KWM_WIN_ICON", FALSE);
-   gdk_property_change (window, icon_atom, icon_atom,
-                        32, GDK_PROP_MODE_REPLACE,
-                        (guchar *)data, 2);
-}
-

@@ -49,7 +49,23 @@ NF-chat;
      - removed from gtkutil.c
         - gtkutil_file_req, *filereqcallback, gtkutil_file_req_cancel, 
           gtkutil_file_req_done, gtkutil_file_req, last_dir
-   d)
+   d) 
+     - removed from fkeys.c
+       - key_dialog_show, key_dialog_set_data, key_dialog_close, 
+         key_dialog_add_new, key_dialog_sel_act, key_dialog_tog_key
+         key_dialog_make_toggle, key_dialog_make_entry, key_dialog_set_key
+         key_save_kbs, key_dialog, key_get_key_name, key_make_mod_str, 
+         key_dialog_act_menu, key_dialog_kb_clist, key_dialog_tog_c
+         key_dialog_tog_s, key_dialog_tog_a, key_dialog_ent_key,
+         key_dialog_ent_d1, key_dialog_ent_d2, key_dialog_text
+         key_get_key_name, key_make_mod_str, key_free_all
+         key_dialog_delete, *fkey_list, *command_list, *replace_list
+         colors[], *font_normal, *font_bold, *normaltab_style, 
+         *redtab_style, *channelwin_style, *current_tab, 
+         prefs, *my_widget_get_style, key_save_kbs, PrintTextRaw
+     - removed from gtkutil.c/h
+       - gtkutil_window_new, gtkutil_dialog_new, gtkutil_button
+         gtkutil_label_new, gtkutil_entry_new, gtkutil_set_icon
 
 0.2.4;
 """"""
