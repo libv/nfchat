@@ -41,7 +41,6 @@ extern GdkFont *font_normal;
 extern GtkWidget *main_window, *main_book;
 
 extern void palette_save (void);
-extern void search_open (session *sess);
 extern void my_system (char *cmd);
 extern void show_and_unfocus (GtkWidget * wid);
 extern char *default_file (void);
@@ -616,12 +615,6 @@ menu_close (GtkWidget * wid, gpointer sess)
 }
 
 static void
-menu_search ()
-{
-   search_open (menu_sess);
-}
-
-static void
 menu_flushbuffer (GtkWidget * wid, gpointer sess)
 {
    fe_text_clear (menu_sess);
@@ -988,7 +981,6 @@ static struct mymenu mymenu[] =
    {M_MENU, N_ ("Ignore Window.."), (menucallback)ignore_gui_open, 0, 1},
    {M_SEP, 0, 0, 0, 0},
    {M_MENU, N_ ("Flush Buffer"), (menucallback)menu_flushbuffer, 0, 1},
-   {M_MENU, N_ ("Search Buffer.."), (menucallback)menu_search, 0, 1},
    {M_MENU, N_ ("Save Buffer.."), (menucallback)menu_savebuffer, 0, 1},  /* 23 */
 
    {M_NEWMENU, N_ ("User Modes"), 0, 0, 1},

@@ -1,6 +1,16 @@
 NF-chat;
 
+
 start gtk strip
+0.1.2;
+""""""
+
+
+0.1.1;
+""""""
+  - removed about.c
+  - removed menu_about from menu.c
+  - edited Makefile.am
 
 0.1.0;
 """"""
@@ -12,9 +22,7 @@ start gtk strip
  
 ### remember prefs autoconnect/prefs.skipserverlist
 
-
-
-Starting new level in development - strippin gtk frontend
+Migrating to 0.1.*
 
 0.0.5;
 """"""

@@ -15,5 +15,5 @@ nfchat_SOURCES =	ascii.c chanlist.c dccgui.c dialog.c \
 			maingui.c \
 			menu.c notifygui.c palette.c \
 			plugingui.c rawlog.c \
-			search.c settings.c \
+			settings.c \
 			textgui.c themes.c usermenu.c urlgrab.c userlistgui.c xtext.c
