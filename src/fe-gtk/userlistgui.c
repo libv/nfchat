@@ -32,7 +32,6 @@
 
 extern GdkColor colors[]; 
 extern struct xchatprefs prefs;
-extern int notify_isnotify (struct session *sess, char *name); 
 
 GdkPixmap *op_pixmap, *voice_pixmap;
 GdkBitmap *op_mask_bmp, *voice_mask_bmp;
@@ -179,12 +178,6 @@ fe_userlist_insert (struct session *sess, struct user *newuser, int row)
    {
          gtk_clist_set_pixtext ((GtkCList *) sess->gui->namelistgad, row, 0,
                                 newuser->nick, 3, voice_pixmap, voice_mask_bmp);
-   }
-
-   if (prefs.hilitenotify && notify_isnotify (sess, name))
-   {
-      gtk_clist_set_foreground ((GtkCList *) sess->gui->namelistgad, row,
-             &colors[prefs.nu_color]);
    }
 
    gtk_adjustment_set_value (adj, val);

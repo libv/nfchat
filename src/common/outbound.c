@@ -67,9 +67,7 @@ extern void channel_action (struct session *sess, char *tbuf, char *chan, char *
 extern void user_new_nick (struct server *serv, char *outbuf, char *nick, char *newnick, int quiet);
 extern void channel_msg (struct server *serv, char *outbuf, char *chan, char *from, char *text, char fromme);
 extern void disconnect_server (struct session *sess, int sendquit, int err);
-extern void notify_showlist (struct session *sess);
-extern void notify_adduser (char *name);
-extern int notify_deluser (char *name);
+
 #ifdef USE_PERL
 extern int perl_load_file (char *script_name);
 extern int perl_command (char *cmd, struct session *sess);
@@ -261,7 +259,6 @@ static int cmd_nctcp (struct session *sess, char *tbuf, char *word[], char *word
 static int cmd_newserver (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_nick (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_notice (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_notify (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_op (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_part (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_ping (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -329,7 +326,6 @@ struct commands cmds[] =
    {"NEWSERVER", cmd_newserver,0,0, "/NEWSERVER <hostname> [<port>]\n"},
    {"NICK", cmd_nick, 0, 0, "/NICK <nickname>, sets your nick\n"},
    {"NOTICE", cmd_notice, 1, 0, "/NOTICE <nick/channel> <message>, sends a notice. Notices are a type of message that should be auto reacted to\n"},
-   {"NOTIFY", cmd_notify, 0, 0, "/NOTIFY [<nick>], lists your notify list or adds someone to it\n"},
    {"OP", cmd_op, 1, 1, "/OP <nick>, gives chanop status to the nick (needs chanop)\n"},
    {"PART", cmd_part, 1, 1, "/PART [<channel>] [<reason>], leaves the channel, by default the current one\n"},
    {"PING", cmd_ping, 1, 0, "/PING <nick | channel>, CTCP pings nick or channel\n"},
@@ -1630,31 +1626,6 @@ cmd_notice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
       return TRUE;
    }
    return FALSE;
-}
-
-int
-cmd_notify (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-   int i = 1;
-
-   if (*word[2])
-   {
-      while (1)
-      {
-         i++;
-         if (!*word[i])
-            break;
-         if (notify_deluser (word[i]))
-         {
-            EMIT_SIGNAL (XP_TE_DELNOTIFY, sess, word[i], NULL, NULL, NULL, 0);
-            return TRUE;
-         }
-         notify_adduser (word[i]);
-         EMIT_SIGNAL (XP_TE_ADDNOTIFY, sess, word[i], NULL, NULL, NULL, 0);
-      }
-   } else
-      notify_showlist (sess);
-   return TRUE;
 }
 
 int

@@ -302,7 +302,6 @@ static struct prefs vars[] = {
 {"timestamp",           PREFS_OFFINT(timestamp),         TYPE_BOOL},
 {"skipserverlist",      PREFS_OFFINT(skipserverlist),    TYPE_BOOL},
 {"filterbeep",          PREFS_OFFINT(filterbeep),        TYPE_BOOL},
-{"hilight_notify",      PREFS_OFFINT(hilitenotify),      TYPE_BOOL},
 {"beep_msg",            PREFS_OFFINT(beepmsg),           TYPE_BOOL},
 {"priv_msg_tabs",       PREFS_OFFINT(privmsgtab),        TYPE_BOOL},
 {"logging",             PREFS_OFFINT(logging),           TYPE_BOOL},
@@ -329,8 +328,6 @@ static struct prefs vars[] = {
 {"dialog_wordwrap",     PREFS_OFFINT(dialog_wordwrap),   TYPE_BOOL},
 {"mail_check",          PREFS_OFFINT(mail_check),        TYPE_BOOL},
 {"double_buffer",       PREFS_OFFINT(double_buffer),     TYPE_BOOL},
-{"notify_timeout",      PREFS_OFFINT(notify_timeout),    TYPE_INT},
-{"nu_color",            PREFS_OFFINT(nu_color),          TYPE_INT},
 {"mainwindow_left",     PREFS_OFFINT(mainwindow_left),   TYPE_INT},
 {"mainwindow_top",      PREFS_OFFINT(mainwindow_top),    TYPE_INT},
 {"mainwindow_width",    PREFS_OFFINT(mainwindow_width),  TYPE_INT},
@@ -426,7 +423,6 @@ load_config (void)
       prefs.max_lines = 300;
       prefs.mainwindow_width = 601;
       prefs.mainwindow_height = 422;
-      prefs.notify_timeout = 15;
       prefs.tint_red =
       prefs.tint_green =
       prefs.tint_blue =
@@ -454,8 +450,6 @@ load_config (void)
       prefs.mainwindow_height = 106;
    if (prefs.mainwindow_width < 116)
       prefs.mainwindow_width = 116;
-   if (prefs.notify_timeout > 1000)
-      fprintf (stderr, "*** X-Chat: fix your notify timeout! It's too high\n");
    if (prefs.indent_pixels < 1)
       prefs.indent_pixels = 80;
    if (prefs.dialog_indent_pixels < 1)

@@ -58,10 +58,6 @@ extern int handle_command (char *cmd, struct session *sess, int history, int noc
 extern void process_data_init (unsigned char *buf, char *cmd, char *word[], char *word_eol[]);
 extern int command_level;
 
-/* notify.c */
-
-extern void notify_markonline (struct session *sess, char *outbuf, char *word[]);
-
 #ifdef USE_PERL
 /* perl.c */
 
@@ -1084,10 +1080,10 @@ process_line (struct session *sess, struct server *serv, char *buf)
                handle_away (serv, outbuf, find_word (pdibuf, 4),
                             find_word_to_end (buf, 5) + 1);
                break;
-            case 303:
+	       /*case 303: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                word[4]++;
                notify_markonline (sess, outbuf, word);
-               break;
+               break; */
             case 312:
                EMIT_SIGNAL (XP_TE_WHOIS3, sess, word[4],
                             word_eol[5], NULL, NULL, 0);

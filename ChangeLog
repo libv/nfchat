@@ -26,9 +26,8 @@ NF-chat;
             - xchat.h 
               ignore_date, ignore_mode, ignore_names
         
-    b)
-	-cleaning up the conf files
-	    - we dont need buttons.conf so...
+    b) cleaning up the conf files
+	  - we dont need buttons.conf so...
 		- xchat.c 
 		  define defaultconf_buttons, list_loadconf, button_list
 		- outbound.c
@@ -46,7 +45,29 @@ NF-chat;
       		- xchat.c
 		  *urlhandler_list, *url_list, defaultconf, xchat_init
 		- removed autosave_url from cfgfiles.c & xchat.h
-		
+    c) removin notify.c/.h
+	- removin notify_save from xchat.c (definition & cleanup)
+				   notify.c	
+	- removin notify_load from xchat.c (definition & init)
+				   notify.c
+	- removin notify_markonline from notify.c;
+				inbound.c: def, process_line
+	- removin notify_checklist; notify.c - xchat: def, init
+	- removin notify_tag; xchat: def + init
+        - removin prefs.notify_timeout; xchat.c/h, cfgfiles (3x)
+	- removin prefs.hilight_notify/hilitenotify; cfgfiles.c
+		xchat.h
+	- removin notify_showlist; notify.c - oubound.c (def, cmd_notify) 
+        - removin notify_adduser/deluser; notify.c - outbound.c
+	- removin cmd_notify;  def, cmds, function
+	- removin notify_isnotify; notify.c/userlist.c
+	- removin notify_cleanup; notify.c/server.c(def,disconnect_server)
+			xchat.c(def,kill_server_callback)
+	- edited Makefile.am
+
+	- removin notify_isnotify/hilitenotify from fe-gtk: 
+		userlist.c (def, fe_userlist_insert)
+	- removin prefs.nu_color (cfgfiles, fe-gtk>userlist.c)
 
 0.3.0; Starting work on the actual client
 """"""

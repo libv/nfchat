@@ -11,12 +11,11 @@ INCLUDES = \
 
 libnfchatmain_a_SOURCES = cfgfiles.c ctcp.c \
                 history.c \
-		inbound.c notify.c outbound.c \
+		inbound.c outbound.c \
 		$(perl_c) plugin.c server.c \
 		text.c themes-common.c userlist.c util.c xchat.c
 
 noinst_HEADERS = history.h \
-		notify.h \
 		plugin.h \
 		userlist.h \
 		util.h \

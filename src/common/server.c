@@ -46,7 +46,6 @@ extern void read_data (struct server *serv, gint sok);
 extern char *errorstring (int err);
 extern int waitline (int sok, char *buf, int bufsize);
 extern void notc_msg (struct session *sess);
-extern void notify_cleanup (void);
 
 static void
 server_cleanup (server *serv)
@@ -233,7 +232,6 @@ disconnect_server (struct session *sess, int sendquit, int err)
       }
       list = list->next;
    }
-   notify_cleanup ();
 }
 
 void

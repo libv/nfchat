@@ -664,12 +664,6 @@ static char *pevt_sconnect_help[] =
    NULL
 };
 
-static char *pevt_generic_nick_help[] =
-{
-   "Nickname",
-   NULL
-};
-
 static char *pevt_wintype_help[] =
 {
    "Type of window",
@@ -694,12 +688,6 @@ static char *pevt_kill_help[] =
 {
    "Nickname",
    "Reason",
-   NULL
-};
-
-static char *pevt_notifynumber_help[] =
-{
-   "Number of notify items",
    NULL
 };
 
@@ -848,8 +836,10 @@ struct text_event te[] =
 /*080*/   {"Stop Connection", pevt_sconnect_help, "-%C10-%C11-%O$tStopped previous connection attempt (pid=$1)", 1, NULL},
 /*081*/   {"Disconnected", pevt_generic_none_help, "-%C10-%C11-%O$tDisconnected ($1).", 1, NULL},
 /*082*/   {NULL, NULL, NULL, 0, NULL},
-/*083*/   {"Delete Notify", pevt_generic_nick_help, "-%C10-%C11-%O$t$1 deleted from notify list.", 1, NULL},
-/*084*/   {"Add Notify", pevt_generic_nick_help, "-%C10-%C11-%O$t$1 added to notify list.", 1, NULL},
+/*083*/   {NULL, NULL, NULL, 0, NULL},
+/* {"Delete Notify", pevt_generic_nick_help, "-%C10-%C11-%O$t$1 deleted from notify list.", 1, NULL}, */
+/*084*/   {NULL, NULL, NULL, 0, NULL},
+/*  {"Add Notify", pevt_generic_nick_help, "-%C10-%C11-%O$t$1 added to notify list.", 1, NULL}, */
 /*085*/   {"Window Type Error", pevt_wintype_help, "-%C10-%C11-%O$tYou can't do that in a $1 window.", 1, NULL},
 /*086*/   {"Channel Modes", pevt_chanmodes_help, "-%C10-%C11-%O$tChannel $1 modes: $2", 2, NULL},
 /*087*/   {"Raw Modes", pevt_rawmodes_help, "-%C10-%C11-%O$t$1 sets modes%B %C14[%O$2%B%C14]%O", 2, NULL},
@@ -874,9 +864,12 @@ struct text_event te[] =
 /*106*/   {NULL, NULL, NULL, 0, NULL},
 /*107*/   {NULL, NULL, NULL, 0, NULL},
 /*108*/   {NULL, NULL, NULL, 0, NULL},
-/*109*/   {"Notify Online", pevt_generic_nick_help, "-%C10-%C11-%O$tNotify: $1 is online ($2).", 2, NULL},
-/*110*/   {"Notify Number", pevt_notifynumber_help, "-%C10-%C11-%O$t$1 users in notify list.", 1, NULL},
-/*111*/   {"Notify Empty", pevt_generic_none_help, "-%C10-%C11-%O$tNotify list is empty.", 0, NULL},
+/*109*/   {NULL, NULL, NULL, 0, NULL},
+  /* {"Notify Online", pevt_generic_nick_help, "-%C10-%C11-%O$tNotify: $1 is online ($2).", 2, NULL}, */
+/*110*/   {NULL, NULL, NULL, 0, NULL},
+ /*{"Notify Number", pevt_notifynumber_help, "-%C10-%C11-%O$t$1 users in notify list.", 1, NULL},*/
+/*111*/   {NULL, NULL, NULL, 0, NULL},
+  /* {"Notify Empty", pevt_generic_none_help, "-%C10-%C11-%O$tNotify list is empty.", 0, NULL},*/
 /*112*/   {"No Running Process", pevt_generic_none_help, "-%C10-%C11-%O$tNo process is currently running", 0, NULL},
 /*113*/   {"Process Already Running", pevt_generic_none_help, "-%C10-%C11-%O$tA process is already running", 0, NULL},
 /*114*/   {"Server Lookup", pevt_serverlookup_help, "-%C10-%C11-%O$tLooking up %C11$1%C..", 1, NULL},
@@ -898,7 +891,8 @@ struct text_event te[] =
 /*130*/   {"Resolving User", pevt_resolvinguser_help, "-%C10-%C11-%O$tLooking up IP number for%C11 $1%O..", 2, NULL},
 /*131*/   {"Ignorelist Empty", pevt_generic_none_help, "  Ignore list is empty.", 0, NULL},
 /*132*/   {NULL, NULL, NULL, 0, NULL},
-/*133*/   {"Notify Offline", pevt_generic_nick_help, "-%C10-%C11-%O$tNotify: $1 is offline ($2).", 2, NULL},
+/*133*/   {NULL, NULL, NULL, 0, NULL},
+  /* {"Notify Offline", pevt_generic_nick_help, "-%C10-%C11-%O$tNotify: $1 is offline ($2).", 2, NULL}, */
 /*134*/   {NULL, NULL, NULL, 0, NULL}, /* XP_TE_MALFORMED_FROM */
 /*135*/   {NULL, NULL, NULL, 0, NULL}, /* XP_TE_MALFORMED_PACKET */
 /*136*/   {"Part with Reason", pevt_partreason_help, "<%C10-%C11-%O$t$1 %C14(%O$2%C14)%C has left $3 %C14(%O$4%C14)%O", 4, NULL},

@@ -41,7 +41,6 @@ GSList *sess_list = 0;
 GSList *serv_list = 0;
 GSList *away_list = 0;
 
-int notify_tag = -1;
 int xchat_is_quitting = 0;
 
 extern GSList *ctcp_list;
@@ -82,13 +81,6 @@ extern void disconnect_server (struct session *sess, int sendquit, int err);
 /* userlist.c */
 
 extern struct user *find_name (struct session *sess, char *name);
-
-/* notify.c */
-
-extern void notify_load (void);
-extern void notify_save (void);
-extern int notify_checklist (void);
-extern void notify_cleanup (void);
 
 #ifdef USE_PERL
 /* perl.c */
@@ -538,8 +530,6 @@ kill_server_callback (server *serv)
    flush_server_queue (serv);
 
    free (serv);
-
-   notify_cleanup ();
 }
 
 static void
@@ -868,7 +858,6 @@ xchat_init (void)
 
    signal_setup ();
    load_text_events ();
-   notify_load ();
    list_loadconf ("ctcpreply.conf", &ctcp_list, defaultconf_ctcp);
    list_loadconf ("commands.conf", &command_list, defaultconf_commands);
 
@@ -890,10 +879,6 @@ xchat_init (void)
 #ifdef USE_PERL
    perl_init (sess, TRUE);
 #endif
-
-   if (prefs.notify_timeout)
-      notify_tag = fe_timeout_add (prefs.notify_timeout*1000, notify_checklist, 0);
-
    fe_timeout_add (2000, xchat_misc_checks, 0);
 }
 
@@ -909,7 +894,6 @@ xchat_cleanup (void)
       save_config ();
       pevent_dialog_save (NULL);
    }
-   notify_save ();
    free_sessions ();
    fe_exit ();
 }

@@ -97,7 +97,6 @@ struct xchatprefs
    int indent_pixels;
    int dialog_indent_pixels;
    int max_lines;
-   int notify_timeout;
    int mainwindow_left;
    int mainwindow_top;
    int mainwindow_width;
@@ -137,7 +136,6 @@ struct xchatprefs
    unsigned int privmsgtab;
    unsigned int logging;
    unsigned int newtabstofront;
-   unsigned int hilitenotify;
    unsigned int hidever;
    unsigned int ip_from_server;
    unsigned int raw_modes;
