@@ -3,6 +3,20 @@ NF-chat;
 
 start gtk strip
 
+0.1.8;
+""""""
+  - removed rawlog.c
+  - removed open_rawlog from menu.c
+## prefs.autosave_url
+  - removed fe_add_rawlog from src/common/xchat.c fe.h inbound.c
+  - removed rawlog entries from fe-gtk.c & fe-gtk.h
+  - removed struct server_gui from fe-gtk.c and fe_new_server
+  - and from fe.h xchat.c accordingly
+  - struct server_gui *gui from struct server from xchat.h    
+  - removed the calls to the gui pointer from xchat.c
+  - removed rawlog entries from maingui.c
+  - edited Makefile.am
+
 0.1.7;
 """"""
   - removed urlgrab.c

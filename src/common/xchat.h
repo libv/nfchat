@@ -244,8 +244,6 @@ struct server
 
    struct session *front_session;
 
-   struct server_gui *gui;			/* initialized by fe_new_server */
-
    int motd_skipped:1;
    int connected:1;
    int connecting:1;

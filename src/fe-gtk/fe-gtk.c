@@ -51,7 +51,6 @@ extern void PrintTextRaw (GtkWidget * textwidget, unsigned char *text);
 extern void notify_gui_update (void);
 extern void update_all_of (char *name);
 extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, struct session *sess);
-extern void add_rawlog (struct server *serv, char *text, int outbound);
 extern void palette_load (void);
 extern void key_init (void);
 extern void palette_save (void);
@@ -228,13 +227,6 @@ fe_new_window (struct session *sess)
    memset (sess->gui, 0, sizeof (struct session_gui));
    create_window (sess);
    init_sess ();
-}
-
-void
-fe_new_server (struct server *serv)
-{
-   serv->gui = malloc (sizeof (struct server_gui));
-   memset (serv->gui, 0, sizeof (struct server_gui));
 }
 
 void

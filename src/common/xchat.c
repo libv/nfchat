@@ -162,7 +162,6 @@ tcp_send_queue (struct server *serv)
       if (serv->bytes_sent > SEND_MAX)
          return 1;              /* don't remove the timeout handler */
 
-      fe_add_rawlog (serv, buf, TRUE);
       if (!EMIT_SIGNAL (XP_IF_SEND, (void *)serv->sok, buf, (void *)len, NULL, NULL, 0))
 		  send (serv->sok, buf, len, 0);
 
@@ -214,7 +213,6 @@ tcp_send_len (struct server *serv, char *buf, int len)
 	 
      strcpy(tbuf,buf);
      user2serv(tbuf);
-     fe_add_rawlog (serv, buf, TRUE);
      ret=(!EMIT_SIGNAL (XP_IF_SEND,
                        (void *)serv->sok, buf,
                        (void *)len, NULL, NULL, 0)
@@ -224,8 +222,6 @@ tcp_send_len (struct server *serv, char *buf, int len)
      return ret;
    }
 /* ~trans */
-   fe_add_rawlog (serv, buf, TRUE);
-
    if (!EMIT_SIGNAL (XP_IF_SEND, (void *)serv->sok, buf, (void *)len, NULL, NULL, 0))
 	   return send (serv->sok, buf, len, 0);
    return 1;
@@ -491,9 +487,7 @@ new_server (void)
    serv->iotag = -1;
    strcpy (serv->nick, prefs.nick1);
    serv_list = g_slist_prepend (serv_list, serv);
-
-   fe_new_server (serv);
-
+   
    if (prefs.use_server_tab)
    {
       serv->front_session = new_session (serv, 0);
@@ -554,7 +548,6 @@ kill_server_callback (server *serv)
    dcc_notify_kill (serv);
    flush_server_queue (serv);
 
-   free (serv->gui);
    free (serv);
 
    notify_cleanup ();
@@ -699,7 +692,7 @@ kill_session_callback (session *killsess)
    send_quit_or_part (killsess);
 
    history_free (&killsess->history);
-   free (killsess->gui);
+  
    free (killsess);
 
    if (!sess_list)

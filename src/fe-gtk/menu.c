@@ -59,7 +59,6 @@ extern void xchat_cleanup (GtkWidget * wid, gpointer sess);
 extern struct server *new_server (void);
 extern struct session *new_session (struct server *, char *from);
 extern void PrintText (struct session *, char *);
-extern void open_rawlog (struct server *);
 extern void settings_opengui (struct session *sess);
 extern char *find_selected_nick (struct session *sess);
 extern int handle_command (char *cmd, struct session *sess, int, int);
@@ -546,12 +545,6 @@ menu_newchannel_tab (GtkWidget * wid, gpointer sess)
 }
 
 static void
-menu_rawlog (GtkWidget * wid, gpointer sess)
-{
-   open_rawlog (menu_sess->server);
-}
-
-static void
 menu_autorejoin (GtkWidget * wid, gpointer sess)
 {
    prefs.autorejoin = !prefs.autorejoin;
@@ -957,7 +950,6 @@ static struct mymenu mymenu[] =
    {M_MENU, N_ ("DCC Send Window.."), (menucallback)fe_dcc_open_send_win, 0, 1},
    {M_MENU, N_ ("DCC Receive Window.."), (menucallback)fe_dcc_open_recv_win, 0, 1},
    {M_MENU, N_ ("DCC Chat Window.."), (menucallback)fe_dcc_open_chat_win, 0, 1},
-   {M_MENU, N_ ("Raw Log Window.."), (menucallback)menu_rawlog, 0, 1},
    {M_SEP, 0, 0, 0, 0},
    {M_MENU, N_ ("Flush Buffer"), (menucallback)menu_flushbuffer, 0, 1},
    {M_MENU, N_ ("Save Buffer.."), (menucallback)menu_savebuffer, 0, 1},  /* 23 */

@@ -73,13 +73,6 @@
 #define flag_l flag_wid[6]
 #define flag_k flag_wid[7]
 
-struct server_gui
-{
-   GtkWidget *rawlog_window;
-   GtkWidget *rawlog_textlist;
-
-};
-
 struct session_gui
 {
    GtkWidget *window;
