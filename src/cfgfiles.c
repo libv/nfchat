@@ -213,40 +213,41 @@ default_file (void)
 }
 
 static struct prefs vars[] = {
-{"nickname1",           PREFS_OFFSET(nick1),             TYPE_STR},
-{"nickname2",           PREFS_OFFSET(nick2),             TYPE_STR},
-{"nickname3",           PREFS_OFFSET(nick3),             TYPE_STR},
-{"realname",            PREFS_OFFSET(realname),          TYPE_STR},
-{"username",            PREFS_OFFSET(username),          TYPE_STR},
-{"quitreason",          PREFS_OFFSET(quitreason),        TYPE_STR},
-{"font_normal",         PREFS_OFFSET(font_normal),       TYPE_STR},
-{"background_pic",      PREFS_OFFSET(background),        TYPE_STR},
-{"bluestring",          PREFS_OFFSET(bluestring),        TYPE_STR},
-{"hostname",            PREFS_OFFSET(hostname),          TYPE_STR},
-{"autoreconnect",       PREFS_OFFINT(autoreconnect),     TYPE_BOOL},
-{"autoreconnectonfail", PREFS_OFFINT(autoreconnectonfail),TYPE_BOOL},
-{"invisible",           PREFS_OFFINT(invisible),         TYPE_BOOL},
-{"skipmotd",            PREFS_OFFINT(skipmotd),          TYPE_BOOL},
-{"autorejoin",          PREFS_OFFINT(autorejoin),        TYPE_BOOL},
-{"nickcompletion",      PREFS_OFFINT(nickcompletion),    TYPE_BOOL},
-{"tabchannels",         PREFS_OFFINT(tabchannels),       TYPE_BOOL},
-{"transparent",         PREFS_OFFINT(transparent),       TYPE_BOOL},
-{"tint",                PREFS_OFFINT(tint),              TYPE_BOOL},
-{"use_server_tab",      PREFS_OFFINT(use_server_tab),    TYPE_BOOL},
-{"use_fontset",         PREFS_OFFINT(use_fontset),       TYPE_BOOL},
-{"mainwindow_left",     PREFS_OFFINT(mainwindow_left),   TYPE_INT},
-{"mainwindow_top",      PREFS_OFFINT(mainwindow_top),    TYPE_INT},
-{"mainwindow_width",    PREFS_OFFINT(mainwindow_width),  TYPE_INT},
-{"mainwindow_height",   PREFS_OFFINT(mainwindow_height), TYPE_INT},
-{"max_lines",           PREFS_OFFINT(max_lines),         TYPE_INT},
-{"bt_color",            PREFS_OFFINT(bt_color),          TYPE_INT},
-{"reconnect_delay",     PREFS_OFFINT(recon_delay),       TYPE_INT},
-{"tint_red",            PREFS_OFFINT(tint_red),          TYPE_INT},
-{"tint_green",          PREFS_OFFINT(tint_green),        TYPE_INT},
-{"tint_blue",           PREFS_OFFINT(tint_blue),         TYPE_INT},
-{"indent_pixels",       PREFS_OFFINT(indent_pixels),     TYPE_INT},
-{"max_auto_indent",     PREFS_OFFINT (max_auto_indent),  TYPE_INT},
-{"tabs_position",       PREFS_OFFINT (tabs_position),    TYPE_INT},
+{"nickname1",           PREFS_OFFSET(nick1),                TYPE_STR},
+{"nickname2",           PREFS_OFFSET(nick2),                TYPE_STR},
+{"nickname3",           PREFS_OFFSET(nick3),                TYPE_STR},
+{"realname",            PREFS_OFFSET(realname),             TYPE_STR},
+{"username",            PREFS_OFFSET(username),             TYPE_STR},
+{"server",              PREFS_OFFSET(server),               TYPE_STR},
+{"serverpass",          PREFS_OFFSET(serverpass),           TYPE_STR},         
+{"channel",             PREFS_OFFSET(channel),              TYPE_STR},
+{"quitreason",          PREFS_OFFSET(quitreason),           TYPE_STR},
+{"font_normal",         PREFS_OFFSET(font_normal),          TYPE_STR},
+{"background_pic",      PREFS_OFFSET(background),           TYPE_STR},
+{"bluestring",          PREFS_OFFSET(bluestring),           TYPE_STR},
+{"hostname",            PREFS_OFFSET(hostname),             TYPE_STR},
+{"autoreconnect",       PREFS_OFFINT(autoreconnect),       TYPE_BOOL},
+{"autoreconnectonfail", PREFS_OFFINT(autoreconnectonfail), TYPE_BOOL},
+{"invisible",           PREFS_OFFINT(invisible),           TYPE_BOOL},
+{"skipmotd",            PREFS_OFFINT(skipmotd),            TYPE_BOOL},
+{"autorejoin",          PREFS_OFFINT(autorejoin),          TYPE_BOOL},
+{"nickcompletion",      PREFS_OFFINT(nickcompletion),      TYPE_BOOL},
+{"transparent",         PREFS_OFFINT(transparent),         TYPE_BOOL},
+{"tint",                PREFS_OFFINT(tint),                TYPE_BOOL},
+{"use_fontset",         PREFS_OFFINT(use_fontset),         TYPE_BOOL},
+{"port",                PREFS_OFFSET(port),                 TYPE_INT},
+{"mainwindow_left",     PREFS_OFFINT(mainwindow_left),      TYPE_INT},
+{"mainwindow_top",      PREFS_OFFINT(mainwindow_top),       TYPE_INT},
+{"mainwindow_width",    PREFS_OFFINT(mainwindow_width),     TYPE_INT},
+{"mainwindow_height",   PREFS_OFFINT(mainwindow_height),    TYPE_INT},
+{"max_lines",           PREFS_OFFINT(max_lines),            TYPE_INT},
+{"bt_color",            PREFS_OFFINT(bt_color),             TYPE_INT},
+{"reconnect_delay",     PREFS_OFFINT(recon_delay),          TYPE_INT},
+{"tint_red",            PREFS_OFFINT(tint_red),             TYPE_INT},
+{"tint_green",          PREFS_OFFINT(tint_green),           TYPE_INT},
+{"tint_blue",           PREFS_OFFINT(tint_blue),            TYPE_INT},
+{"indent_pixels",       PREFS_OFFINT(indent_pixels),        TYPE_INT},
+{"max_auto_indent",     PREFS_OFFINT (max_auto_indent),     TYPE_INT},
 {0, 0, 0},
 };
 
@@ -332,8 +333,6 @@ load_config (void)
       prefs.autorejoin = 1;
       prefs.autoreconnect = 1;
       prefs.recon_delay = 2;
-      prefs.tabchannels = 1;
-      prefs.use_server_tab = 1;
       prefs.nickcompletion = 1;
       prefs.bt_color = 8;
       prefs.max_lines = 50;
@@ -342,6 +341,7 @@ load_config (void)
       prefs.tint_red = 0;
       prefs.tint_green = 0;
       prefs.tint_blue = 0;
+      prefs.port = 6667;
       strcpy (prefs.nick1, username);
       strcpy (prefs.nick2, username);
       strcat (prefs.nick2, "_");

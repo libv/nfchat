@@ -31,7 +31,7 @@
 
 extern int handle_command (char *cmd, int history, int nocommand);
 extern int tcp_send (char *buf);
-extern void channel_action (char *tbuf, char *chan, char *from, char *text, int fromme);
+extern void channel_action (char *tbuf, char *from, char *text, int fromme);
 
 extern GSList *ctcp_list;
 
@@ -137,7 +137,7 @@ handle_ctcp (char *outbuf, char *to, char *nick, char *msg, char *word[], char *
          po = strchr (msg + 7, '\001');
          if (po)
 	   po[0] = 0;
-         channel_action (outbuf, to, nick, msg + 7, FALSE);
+         channel_action (outbuf, nick, msg + 7, FALSE);
          return;
        }
    
@@ -145,8 +145,8 @@ handle_ctcp (char *outbuf, char *to, char *nick, char *msg, char *word[], char *
    po = strchr (msg, '\001');
    if (po)
       po[0] = 0;
-   if (!is_channel (to))
-      fire_signal (XP_TE_CTCPGEN, msg, nick, NULL, NULL, 0);
-   else
+   if (to == session->channel)
       fire_signal (XP_TE_CTCPGENC, msg, nick, to, NULL, 0);
+   else
+      fire_signal (XP_TE_CTCPGEN, msg, nick, NULL, NULL, 0);
 }

@@ -35,7 +35,7 @@
 extern struct xchatprefs prefs;
 
 extern void auto_reconnect (int send_quit, int err);
-extern void clear_channel (session_t *sess);
+extern void clear_channel ();
 extern void set_server_name (char *name);
 extern void flush_server_queue (void);
 extern int tcp_send (char *buf);
@@ -198,7 +198,7 @@ disconnect_server (int sendquit, int err)
    server->no_login = FALSE;
    server->servername[0] = 0;
 
-   clear_channel (session);
+   clear_channel ();
 }
 
 void
@@ -213,6 +213,9 @@ connect_server (char *server_str, int port, int no_login)
       disconnect_server (TRUE, -1);
    else
       check_connecting ();
+
+   if (!port)
+     port = 6667;
 
    fe_progressbar_start ();
 

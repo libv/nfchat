@@ -48,6 +48,7 @@ fire_signal (int s, char *a, char *b, char *c, char *d, char e)
    GSList *cur;
    struct xp_signal *sig;
    int flag = 0;
+   fprintf(stderr, "signal: %d\n", s);
    cur = sigroots[s];
    current_signal = s;
    while (cur) {

@@ -46,7 +46,7 @@
 #define XP_TE_UCHANGENICK 38
 #define XP_TE_UKICK     39
 #define XP_TE_UPART     40
-#define XP_TE_CTCPSND   41
+#define XP_TE_ALREADYJ   41
 #define XP_TE_CTCPGEN   42
 #define XP_TE_CTCPGENC  43
 #define XP_TE_CHANSETKEY 44

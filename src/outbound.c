@@ -38,12 +38,11 @@
 extern struct xchatprefs prefs;
 
 extern void auto_reconnect (int send_quit, int err);
-extern void do_dns (session_t *sess, char *tbuf, char *nick, char *host);
 extern int tcp_send (char *buf);
 extern void connect_server (char *server, int port, int quiet);
-extern void channel_action (char *tbuf, char *chan, char *from, char *text, int fromme);
+extern void channel_action (char *tbuf, char *from, char *text, int fromme);
 extern void user_new_nick (char *outbuf, char *nick, char *newnick, int quiet);
-extern void channel_msg (char *outbuf, char *chan, char *from, char *text, char fromme);
+extern void channel_msg (char *outbuf, char *from, char *text, char fromme);
 extern void disconnect_server (int sendquit, int err);
 extern void PrintText (char *text);
 
@@ -273,24 +272,30 @@ cmd_help (char *tbuf, char *word[], char *word_eol[])
 int
 cmd_join (char *tbuf, char *word[], char *word_eol[])
 {
-  char *chan = find_word (pdibuf, 2);
-  if (*chan)
+  if (session->channel[0] == 0)
     {
-      char *po, *pass = find_word (pdibuf, 3);
-      if (*pass)
-	sprintf (tbuf, "JOIN %s %s\r\n", chan, pass);
-      else
-	sprintf (tbuf, "JOIN %s\r\n", chan);
-      tcp_send (tbuf);
-      if (session->channel[0] == 0)
+      char *chan = find_word (pdibuf, 2);
+      if (*chan)
 	{
-	  po = strchr (chan, ',');
-	  if (po)
-            *po = 0;
+	  char /**po, */*pass = find_word (pdibuf, 3);
+	  if (*pass)
+	    sprintf (tbuf, "JOIN %s %s\r\n", chan, pass);
+	  else
+	    sprintf (tbuf, "JOIN %s\r\n", chan);
+	  tcp_send (tbuf);
+	  /*  if (session->channel[0] == 0)
+	      {
+	      po = strchr (chan, ',');
+	      if (po)
+	      *po = 0; */
 	  strncpy (session->waitchannel, chan, 200);
+
+	  return TRUE;
 	}
-      return TRUE;
+      return FALSE;
     }
+  else 
+    fire_signal(XP_TE_ALREADYJ, NULL, NULL, NULL, NULL, 0);
   return FALSE;
 }
 
@@ -300,7 +305,7 @@ cmd_me (char *tbuf, char *word[], char *word_eol[])
    char *act = find_word_to_end (cmd, 2);
    if (*act)
    {
-      channel_action (tbuf, session->channel, server->nick, act, TRUE);
+      channel_action (tbuf, server->nick, act, TRUE);
       sprintf (tbuf, "\001ACTION %s\001\r", act);
       sprintf (tbuf, "PRIVMSG %s :\001ACTION %s\001\r\n", session->channel, act);
       tcp_send (tbuf);
@@ -368,13 +373,10 @@ cmd_nick (char *tbuf, char *word[], char *word_eol[])
 int
 cmd_part (char *tbuf, char *word[], char *word_eol[])
 {
-  char *chan = find_word (pdibuf, 2);
   char *reason = word_eol[3];
-  if (!*chan)
-    chan = session->channel;
-  if ((*chan) && is_channel (chan))
+  if (session->channel)
     {
-      sprintf (tbuf, "PART %s :%s\r\n", chan, reason);
+      sprintf (tbuf, "PART %s :%s\r\n", session->channel, reason);
       tcp_send (tbuf);
       return TRUE;
     }
@@ -621,7 +623,7 @@ handle_command (char *cmd, int history, int nocommand)
    {
       check_special_chars (cmd);
 
-      if (session->channel[0] && !session->is_server)
+      if (session->channel[0])
       {
          char newcmd[4096];
          if (prefs.nickcompletion)
@@ -632,7 +634,7 @@ handle_command (char *cmd, int history, int nocommand)
 	   {
 	     if (server->connected)
                {
-		 channel_msg (tbuf, session->channel, server->nick, cmd, TRUE);
+		 channel_msg (tbuf, server->nick, cmd, TRUE);
 		 sprintf (tbuf, "PRIVMSG %s :%s\r\n", session->channel, cmd);
                } else
 		 {
@@ -643,7 +645,7 @@ handle_command (char *cmd, int history, int nocommand)
 	     {
 	       if (server->connected)
 		 {
-		   channel_msg (tbuf, session->channel, server->nick, newcmd, TRUE);
+		   channel_msg (tbuf, server->nick, newcmd, TRUE);
 		   sprintf (tbuf, "PRIVMSG %s :%s\r\n", session->channel, newcmd);
 		 } else
 		   {

@@ -1,5 +1,8 @@
 NF-chat;
 
+0.3.4; final cleanups
+""""""
+
 0.3.3;
 """"""
      a) first some cleanups
@@ -224,16 +227,40 @@ NF-chat;
 	- removed main_book & is_tab from maingui.c
 	- removed is_tab from xchat.h
 	- removed main_book from fkeys.c
+	- saving as 4
+    c) further cleanups
+	- removed is_server from inbound.c, maingui.c, outbound.c
+	  xchat.c/h
+	- cleaning up the preferences; 
+	  removed tabs_position, tabchannels, use_server_tab from xchat.h,
+	  cfgfiles.c
+	- removed chan from channel_action in outbound.c, inbound.c,
+	  ctcp.c
+	- removed chan from channel_msg in outbound.c, inbound.c
+	- removed chan from you_joined, you_kicked, you_parted,
+	  names_list, new_topic, user_joined, user_kicked, user_parted,
+	  channel_date, topic_nametime, channel_mode
+	- edited handle_ctcp to no longer take a channel in inbound.c
+	- moved unused XP_TE_CTPCSND (41) to XP_TE_ALREADYJ
+	- added a new output to text.c's te
+	- edited cmd_part to use only session-channel
+	- adding prefs.server/channels
+	- made it autoconnect, autojoin
+	- moving to 3.4 -> last cleanups
+
+### clean up debug stuff
+### clean up *tbuf
+### is_channel, is_server
+### userlist dusnt need all that inf, nickname should suffise
+### *ip
 ### remove key_action_page_switch
-### is_server
 ### main_window
 ### ctcpreply.conf
-### clean up chans; theres only 1 channel out there
 ### clean up fe
-### prefs.use_server_tab
 ### struct user
 ### clean up fkeys.c
-### struct session_gui  
+### clean up signals
+### remove commands server, reconnect, quit, part, join, debug
 
 0.3.2;
 """"""

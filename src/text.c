@@ -610,7 +610,7 @@ struct text_event te[] =
 /*038*/   {"Your Nick Changing", pevt_uchangenick_help, "-%C10-%C11-%O$tYou are now known as $2", 2},
 /*039*/   {"You're Kicked", pevt_ukick_help, "-%C10-%C11-%O$tYou have been kicked from $2 by $3 ($4%O)", 4},
 /*040*/   {"You Parting", pevt_part_help, "-%C10-%C11-%O$tYou have left channel $3", 3},
-/*041*/   {NULL, NULL, NULL, 0}, /* ctcpsnd */
+/*041*/   {"Already joined", pevt_generic_none_help, "-%C10-%C11-%O$tUnable to join more than one channel.", 0}, /* ctcpsnd */
 /*042*/   {"CTCP Generic", pevt_ctcpgen_help, "-%C10-%C11-%O$tReceived a CTCP $1 from $2", 2},
 /*043*/   {"CTCP Generic to Channel", pevt_ctcpgenc_help, "-%C10-%C11-%O$tReceived a CTCP $1 from $2 (to $3)", 3},
 /*044*/   {"Channel Set Key", pevt_chansetkey_help, "-%C10-%C11-%O$t$1 sets channel keyword to $2", 2},
@@ -699,9 +699,9 @@ struct text_event te[] =
 /*122*/   {"Notice Send", pevt_ctcpsend_help, "%C3>%O$1%C3<%O$t$2%O", 2},
 /*123*/   {"Receive Wallops", pevt_dprivmsg_help, "%C12-%C13$1/Wallops%C12-%O$t$2%O", 2},
 /*124*/   {NULL, NULL, NULL, 0},  /* XP_HIGHLIGHT */
-/*125*/   {"Ignore Header", pevt_generic_none_help, "%C08,02 Hostmask             PRIV NOTI CHAN CTCP INVI UNIG %O", 0},
+/*125*/   {"Ignore Header", pevt_generic_none_help, "%C08,02 Hostmask PRIV NOTI CHAN CTCP INVI UNIG %O", 0},
 /*126*/   {NULL, NULL, NULL, 0},
-/*127*/   {"Ignore Footer", pevt_generic_none_help, "%C08,02                                                    %O", 0},
+/*127*/   {"Ignore Footer", pevt_generic_none_help, "%C08,02 %O", 0},
 /*128*/   {NULL, NULL, NULL, 0},
 /*129*/   {NULL, NULL, NULL, 0},
 /*130*/   {"Resolving User", pevt_resolvinguser_help, "-%C10-%C11-%O$tLooking up IP number for%C11 $1%O..", 2},

@@ -169,7 +169,7 @@ auto_reconnect (int send_quit, int err)
   if (prefs.recon_delay)
     fe_timeout_add (prefs.recon_delay * 1000, timeout_auto_reconnect, server);
   else
-      connect_server (server->hostname, server->port, FALSE);
+    connect_server (server->hostname, server->port, FALSE);
 }
 
 void
@@ -301,32 +301,29 @@ kill_server_callback (void)
 static void
 send_quit_or_part (void)
 {
-   int willquit = TRUE;
-   char tbuf[256];
-     
-   if (xchat_is_quitting)
-      willquit = TRUE;
-
-   if (server->connected)
-   {
+  int willquit = TRUE;
+  char tbuf[256];
+  
+  if (xchat_is_quitting)
+    willquit = TRUE;
+  
+  if (server->connected)
+    {
       if (willquit)
-      {
-         if (!server->sent_quit)
-         {
-            flush_server_queue ();
-            snprintf (tbuf, sizeof tbuf, "QUIT :%s\r\n", session->quitreason);
-            tcp_send (tbuf);
-            server->sent_quit = TRUE;
-         }
-      } else
-      {
-         if (!session->is_server && session->channel[0])
-         {
-            snprintf (tbuf, sizeof tbuf, "PART %s\r\n", session->channel);
-            tcp_send (tbuf); 
-         }
-      }
-   }
+	{
+	  if (!server->sent_quit)
+	    {
+	      flush_server_queue ();
+	      snprintf (tbuf, sizeof tbuf, "QUIT :%s\r\n", session->quitreason);
+	      tcp_send (tbuf);
+	      server->sent_quit = TRUE;
+	    }
+	} else if (session->channel[0])
+	  {
+	    snprintf (tbuf, sizeof tbuf, "PART %s\r\n", session->channel);
+	    tcp_send (tbuf); 
+	  }
+    }
 }
 
 void
@@ -405,6 +402,21 @@ xchat_init (void)
   
   init_server ();
   init_session ();
+
+  if (!prefs.server || !prefs.channel)
+    {
+      fprintf(stderr, "Check your options!\n");
+      exit;
+    }
+
+  if (prefs.serverpass)
+   strcpy (server->password, prefs.serverpass);
+
+  if (prefs.channel)
+    strcpy (session->willjoinchannel, prefs.channel);
+
+  connect_server(prefs.server, prefs.port, FALSE);
+  
 }
 
 void

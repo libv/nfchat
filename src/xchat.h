@@ -51,46 +51,45 @@
 
 struct xchatprefs
 {
-   char nick1[64];
-   char nick2[64];
-   char nick3[64];
-   char realname[127];
-   char username[127];
-   char quitreason[256];
-   char font_normal[FONTNAMELEN + 1];
-   char background[PATHLEN + 1];
-   char bluestring[64];
-
-   char hostname[127];
-
-   int tint_red;
-   int tint_green;
-   int tint_blue;
-
-   int tabs_position;
-   int max_auto_indent;
-   int indent_pixels;
-   int max_lines;
-   int mainwindow_left;
-   int mainwindow_top;
-   int mainwindow_width;
-   int mainwindow_height;
-   int recon_delay;
-   int userlist_sort;
-   int bt_color;
-   unsigned long local_ip;
-
-   unsigned int autoreconnect;
-   unsigned int autoreconnectonfail;
-   unsigned int invisible;
-   unsigned int skipmotd;
-   unsigned int autorejoin;
-   unsigned int nickcompletion;
-   unsigned int tabchannels;
-   unsigned int transparent;
-   unsigned int tint;
-   unsigned int use_server_tab;
-   unsigned int use_fontset;
+  char nick1[64];
+  char nick2[64];
+  char nick3[64];
+  char realname[127];
+  char username[127];
+  char quitreason[256];
+  char font_normal[FONTNAMELEN + 1];
+  char background[PATHLEN + 1];
+  char bluestring[64];
+  char server[127];
+  char serverpass[86];
+  char channel[127];
+  char hostname[127];
+  
+  int tint_red;
+  int tint_green;
+  int tint_blue;
+  int port;
+  int max_auto_indent;
+  int indent_pixels;
+  int max_lines;
+  int mainwindow_left;
+  int mainwindow_top;
+  int mainwindow_width;
+  int mainwindow_height;
+  int recon_delay;
+  int userlist_sort;
+  int bt_color;
+  unsigned long local_ip;
+  
+  unsigned int autoreconnect;
+  unsigned int autoreconnectonfail;
+  unsigned int invisible;
+  unsigned int skipmotd;
+  unsigned int autorejoin;
+  unsigned int nickcompletion;
+  unsigned int transparent;
+  unsigned int tint;
+  unsigned int use_fontset;
 };
 
 struct session_t
@@ -113,10 +112,8 @@ struct session_t
    char *quitreason;
 
    struct setup *setup;
-
    struct session_gui *gui;	     /* initialized by fe_new_window */
 
-   int is_server:1;		  /* for use_server_tab feature */
    int new_data:1;              /* new data avail? (red tab) */
    int nick_said:1;             /* your nick mentioned? (green tab) */
    int end_of_names:1;

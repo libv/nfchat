@@ -260,7 +260,7 @@ updatedate_bar (void)
 }
 
 void
-fe_progressbar_start ()
+fe_progressbar_start (void)
 {
    if (session->gui->op_box)
    {

@@ -89,7 +89,7 @@ fe_set_title (void)
    char tbuf[200];
    if (!server->connected)
       strcpy (tbuf, "NF-Chat [" VERSION "]");
-   else if (session->channel[0] == 0 || session->is_server)
+   else if (session->channel[0] == 0)
      snprintf (tbuf, sizeof tbuf, "NF-Chat [" VERSION "]: %s", server->servername);
    else
      snprintf (tbuf, sizeof tbuf, "NF-Chat [" VERSION "]: %s / %s", server->servername, session->channel);
