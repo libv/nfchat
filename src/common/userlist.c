@@ -26,7 +26,6 @@ extern struct xchatprefs prefs;
 extern GSList *sess_list;
 
 extern int notify_isnotify (struct session *sess, char *name);
-extern void dcc_send (struct session *sess, char *tbuf, char *to, char *file);
 
 int add_name (struct session *sess, char *name, char *hostname);
 int sub_name (struct session *sess, char *name);

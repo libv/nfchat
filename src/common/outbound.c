@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "xchat.h"
-#include "dcc.h"
 #include "plugin.h"
 #include "ignore.h"
 #include "util.h"
@@ -45,7 +44,7 @@ void check_special_chars (char *cmd);
 
 extern GSList *sess_list;
 extern GSList *serv_list;
-extern GSList *dcc_list;
+/* extern GSList *dcc_list; */
 extern GSList *command_list;
 extern GSList *button_list;
 extern struct xchatprefs prefs;
@@ -63,7 +62,6 @@ extern struct session *tab_msg_session (char *target, struct server *serv);
 extern struct session *find_session_from_channel (char *chan, struct server *serv);
 extern int list_delentry (GSList ** list, char *name);
 extern void list_addentry (GSList ** list, char *cmd, char *name);
-extern struct DCC *find_dcc (char *nick, char *file, int type);
 extern struct session *find_dialog (struct server *serv, char *nick);
 extern void PrintText (struct session *sess, char *text);
 extern void connect_server (struct session *sess, char *server, int port, int quiet);
@@ -234,7 +232,6 @@ static int cmd_close (struct session *sess, char *tbuf, char *word[], char *word
 static int cmd_ctcp (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_country (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_cycle (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_delbutton (struct session *sess, char *tbuf, char *word[], char *word_eol[]); 
 static int cmd_deop (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -302,14 +299,6 @@ struct commands cmds[] =
    {"CTCP", cmd_ctcp, 1, 0, "/CTCP <nick> <message>, send the CTCP message to nick, common messages are VERSION and USERINFO\n"},
    {"COUNTRY", cmd_country,0,0, "/COUNTRY <code>, finds a country code, eg: au = australia\n"},
    {"CYCLE", cmd_cycle, 1, 1, "/CYCLE, parts current channel and immediately rejoins\n"},
-   {"DCC", cmd_dcc, 0, 0, "\n"
-    "/DCC GET <nick>          - receive an offered file\n"
-    "/DCC SEND <nick> <file>  - send a file to someone\n"
-    "/DCC LIST                - show DCC list\n"
-    "/DCC CHAT <nick>         - offer DCC CHAT to someone\n"
-    "/DCC CLOSE <type> <nick> <file>         example:\n"
-    "         /dcc close send johnsmith file.tar.gz\n"
-   },
    {"DEBUG", cmd_debug, 0, 0, 0},
    {"DELBUTTON", cmd_delbutton, 0, 0, "/DELBUTTON <name>, deletes a button from under the user-list\n"},
    {"DEOP", cmd_deop, 1, 1, "/DEOP <nick>, removes chanop status from the nick on the current channel (needs chanop)\n"},
@@ -710,113 +699,6 @@ cmd_cycle (struct session *sess, char *tbuf, char *word[], char *word_eol[])
       return TRUE;
    }
    return FALSE;
-}
-
-int
-cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-   int goodtype;
-   struct DCC *dcc = 0;
-   char *type = find_word (pdibuf, 2);
-   if (*type)
-   {
-      if (!strcasecmp (type, "HELP"))
-         return FALSE;
-      if (!strcasecmp (type, "CLOSE"))
-      {
-         if (*word[3] && *word[4])
-         {
-            goodtype = 0;
-            if (!strcasecmp (word[3], "SEND"))
-            {
-               dcc = find_dcc (word[4], word[5], TYPE_SEND);
-               if (dcc)
-                  dcc_close (dcc, 0, TRUE);
-               goodtype = TRUE;
-            }
-            if (!strcasecmp (word[3], "GET"))
-            {
-               dcc = find_dcc (word[4], word[5], TYPE_RECV);
-               if (dcc)
-                  dcc_close (dcc, 0, TRUE);
-               goodtype = TRUE;
-            }
-            if (!strcasecmp (word[3], "CHAT"))
-            {
-               dcc = find_dcc (word[4], "", TYPE_CHATRECV);
-               if (!dcc)
-                  dcc = find_dcc (word[4], "", TYPE_CHATSEND);
-               if (dcc)
-                  dcc_close (dcc, 0, TRUE);
-               goodtype = TRUE;
-            }
-
-            if (!goodtype)
-               return FALSE;
-
-            if (!dcc)
-               EMIT_SIGNAL (XP_TE_NODCC, sess, NULL, NULL, NULL, NULL, 0);
-            return TRUE;
-
-         }
-         return FALSE;
-      }
-      if (!strcasecmp (type, "CHAT"))
-      {
-         char *nick = find_word (pdibuf, 3);
-         if (*nick)
-            dcc_chat (sess, nick);
-         return TRUE;
-      }
-      if (!strcasecmp (type, "LIST"))
-      {
-         dcc_show_list (sess, tbuf);
-         return TRUE;
-      }
-      if (!strcasecmp (type, "GET"))
-      {
-         char *nick = find_word (pdibuf, 3);
-         char *file = find_word (pdibuf, 4);
-         if (!*file)
-         {
-            if (*nick)
-               dcc_get_nick (sess, nick);
-         } else
-         {
-            struct DCC *dcc = find_dcc (nick, file, TYPE_RECV);
-            if (dcc)
-               dcc_get (dcc);
-            else
-               EMIT_SIGNAL (XP_TE_NODCC, sess, NULL, NULL, NULL, NULL, 0);
-         }
-         return TRUE;
-      }
-      if (!strcasecmp (type, "SEND"))
-      {
-         char *nick = find_word (pdibuf, 3);
-         if (*nick)
-         {
-            int i = 4;
-            char *file;
-            while (1)
-            {
-               file = find_word (pdibuf, i);
-               if (!*file && i == 4)
-               {
-                 /* fe_dcc_send_filereq (sess, nick); */
-                  return TRUE;
-               }
-               if (!*file)
-                  break;
-               dcc_send (sess, tbuf, nick, file);
-               i++;
-            }
-         }
-         return TRUE;
-      }
-   } else
-      dcc_show_list (sess, tbuf);
-   return TRUE;
 }
 
 int
@@ -1736,11 +1618,8 @@ cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
    {
       channel_action (sess, tbuf, sess->channel, sess->server->nick, act, TRUE);
       sprintf (tbuf, "\001ACTION %s\001\r", act);
-      if (!dcc_write_chat (sess->channel, tbuf))
-      {
-         sprintf (tbuf, "PRIVMSG %s :\001ACTION %s\001\r\n", sess->channel, act);
-         tcp_send (sess->server, tbuf);
-      }
+      sprintf (tbuf, "PRIVMSG %s :\001ACTION %s\001\r\n", sess->channel, act);
+      tcp_send (sess->server, tbuf);
       return TRUE;
    }
    return FALSE;
@@ -1766,11 +1645,8 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
          if (*nick == '=')
          {
             nick++;
-            if (!dcc_write_chat (nick, msg))
-            {
-               EMIT_SIGNAL (XP_TE_NODCC, sess, NULL, NULL, NULL, NULL, 0);
-               return TRUE;
-            }
+            EMIT_SIGNAL (XP_TE_NODCC, sess, NULL, NULL, NULL, NULL, 0);
+            return TRUE;
          } else
          {
             if (!sess->server->connected)
@@ -2550,26 +2426,15 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
          {
            if (sess->is_dialog)
             {
-               struct sockaddr_in *ip;
-
-               ip = dcc_write_chat (sess->channel, cmd);
-               if (ip)
-               {
-                  channel_msg (sess->server, tbuf, sess->channel, sess->server->nick, cmd, TRUE);
-                  fe_set_topic (sess, inet_ntoa (ip->sin_addr));
-                  return TRUE;
-               } else
-               {
-                  if (sess->server->connected)
-                  {
-                     channel_msg (sess->server, tbuf, sess->channel, sess->server->nick, cmd, TRUE);
-                     sprintf (tbuf, "PRIVMSG %s :%s\r\n", sess->channel, cmd);
-                  } else
-                  {
-                     notc_msg (sess);
-                     return TRUE;
-                  }
-               }
+              if (sess->server->connected)
+              {
+                 channel_msg (sess->server, tbuf, sess->channel, sess->server->nick, cmd, TRUE);
+                 sprintf (tbuf, "PRIVMSG %s :%s\r\n", sess->channel, cmd);
+              } else
+              {
+                 notc_msg (sess);
+                 return TRUE;
+              }
             } else
             { 
                if (sess->server->connected)

@@ -29,7 +29,6 @@
 #include <signal.h>
 #include <time.h>
 #include "cfgfiles.h"
-#include "dcc.h"
 #include "ignore.h"
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -547,7 +546,6 @@ kill_server_callback (server *serv)
    
    serv_list = g_slist_remove (serv_list, serv);
 
-   dcc_notify_kill (serv);
    flush_server_queue (serv);
 
    free (serv);
@@ -830,8 +828,6 @@ static int
 xchat_misc_checks (void) /* this gets called every 2 seconds */
 {
    static int count = 0;
-
-   dcc_check_timeouts ();
 
    count++;
    if (count == 10)

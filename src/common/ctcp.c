@@ -34,7 +34,6 @@ extern void my_system (char *cmd);
 extern int handle_command (char *cmd, void *sess, int history, int nocommand);
 extern int tcp_send (struct server *serv, char *buf);
 extern void channel_action (struct session *sess, char *tbuf, char *chan, char *from, char *text, int fromme);
-extern void handle_dcc (struct session *sess, char *outbuf, char *nick, char *word[], char *word_eol[]);
 extern struct session *find_session_from_channel (char *chan, struct server *serv);
 
 
@@ -149,11 +148,6 @@ handle_ctcp (struct session *sess, char *outbuf, char *to, char *nick, char *msg
          if (po)
             po[0] = 0;
          channel_action (sess, outbuf, to, nick, msg + 7, FALSE);
-         return;
-      }
-      if (!strncasecmp (msg, "DCC", 3))
-      {
-         handle_dcc (sess, outbuf, nick, word, word_eol);
          return;
       }
       if (!strncasecmp (msg, "SOUND", 5))

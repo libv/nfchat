@@ -5,6 +5,36 @@ NF-chat;
      - removed all in the plugins dir
      - edited po files
      - removed all in the scripts-perl dir
+   b) removing dcc.c\h
+     - removing from dcc.c
+       dcc_show_list, handle_dcc, handle_dcc, dcc_resume, dcc_malformed
+       dcc_chat, new_dcc, dcc_get_nick, dcc_get, dcc_change_nick, 
+       find_dcc, find_dcc_from_port, dcc_send, dcc_send_wild
+       *dccsess, *dccto, *dcctbuf, dcc_listen_init, dcc_accept,
+       dcc_read_ack, dcc_send_data, dcc_connect, dcc_connect_finished,
+       dcc_read, dcc_read_chat, dcc_write_chat, dcc_notify_kill, dcc_close 
+       dcc_connect_sok, dcc_check_timeouts, dcc_calc_cps, dccstat, dcctypes
+     - removing from dcc.h
+       dcc_show_list, handle_dcc, dcc_chat, new_dcc, dcc_get_nick,
+       dcc_get, dcc_connect, dcc_write_chat, dcc_notify_kill, dcc_close
+       dcc_check_timeouts 
+     - removing from outbound.c
+       dcc_show_list from cmd_dcc, dcc_chat from cmd_dcc, dcc_get_nick
+       from cmd_dcc, dcc_get from cmd_dcc, find_dcc from cmd_dcc, 
+       dcc_send from cmd_dcc, dcc_write_chat from cmd_me; handle_command; cmd_msg,
+       dcc_close from cmd_dcc, cmd_dcc, include dcc.h, removed cmd_dcc from cmds
+     - removing from ctcp.c
+       handle_dcc from handle_ctcp, 
+     - removing from inbound.c
+       handle_dcc, dcc_change_nick from user_new_nick,
+     - removing from userlist.c
+       dcc_send 
+     - removed from xchat.c
+       dcc_notify_kill from kill_server_callback,
+       dcc_check_timeouts from xchat_misc_checks, dcc.h include
+     - deleted dcc.c, dcc.h, edited Makefile.am & Potfiles.in
+   c)
+
 0.2.5;
 """"""
    a) cleanin up menu.c

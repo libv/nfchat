@@ -49,11 +49,6 @@ extern unsigned char *strip_color (unsigned char *text);
 extern void PrintText (struct session *sess, char *text);
 extern void setup_logging (struct session *sess);
 
-/* dcc.c */
-
-extern void dcc_change_nick (struct server *serv, char *oldnick, char *newnick);
-extern void handle_dcc (struct session *sess, char *outbuf, char *nick, char *word[], char *word_eol[]);
-
 /* userlist.c */
 
 extern void change_nick (struct session *sess, char *oldnick, char *newnick);
@@ -325,8 +320,6 @@ user_new_nick (struct server *serv, char *outbuf, char *nick, char *newnick, int
       }
       list = list->next;
    }
-
-  dcc_change_nick (serv, nick, newnick);
 
    if (me)
       fe_set_nick (serv, newnick);
