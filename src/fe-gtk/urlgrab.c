@@ -181,10 +181,8 @@ url_opengui ()
    gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
    gtk_widget_show (hbox);
 
-   gtkutil_button (urlgrabberwindow, GNOME_STOCK_PIXMAP_CLEAR,
-   "Clear", url_button_clear, 0, hbox);
-   gtkutil_button (urlgrabberwindow, GNOME_STOCK_PIXMAP_SAVE,
-    "Save", url_button_save, 0, hbox);
+   gtkutil_button (urlgrabberwindow, 0, "Clear", url_button_clear, 0, hbox);
+   gtkutil_button (urlgrabberwindow, 0, "Save", url_button_save, 0, hbox);
 
    gtk_widget_show (urlgrabberwindow);
 

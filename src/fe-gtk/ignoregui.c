@@ -442,16 +442,11 @@ ignore_gui_open ()
    gtk_box_pack_start (GTK_BOX (vbox), box, FALSE, TRUE, 2);
    gtk_widget_show (box);
 
-   gtkutil_button (ignorewin, GNOME_STOCK_BUTTON_OK, "OK",
-           close_ignore_list, 0, box);
-   gtkutil_button (ignorewin, GNOME_STOCK_PIXMAP_NEW, "New",
-    ignore_new_entry_clicked, 0, box);
-   gtkutil_button (ignorewin, GNOME_STOCK_PIXMAP_CLOSE, "Delete",
-                   ignore_delete_entry_clicked, 0, box);
-   gtkutil_button (ignorewin, GNOME_STOCK_PIXMAP_SPELLCHECK, "Sort",
-         ignore_sort_clicked, 0, box);
-   gtkutil_button (ignorewin, GNOME_STOCK_BUTTON_CANCEL, "Cancel",
-     gtkutil_destroy, ignorewin, box);
+   gtkutil_button (ignorewin, 0, "OK", close_ignore_list, 0, box);
+   gtkutil_button (ignorewin, 0, "New", ignore_new_entry_clicked, 0, box);
+   gtkutil_button (ignorewin, 0, "Delete", ignore_delete_entry_clicked, 0, box);
+   gtkutil_button (ignorewin, 0, "Sort", ignore_sort_clicked, 0, box);
+   gtkutil_button (ignorewin, 0, "Cancel", gtkutil_destroy, ignorewin, box);
 
    while (temp)
    {

@@ -178,10 +178,8 @@ notify_opengui (void)
    gtk_box_pack_start (GTK_BOX (vbox), bbox, FALSE, FALSE, 0);
    gtk_widget_show (bbox);
 
-   Add = gtkutil_button (notify_window, GNOME_STOCK_PIXMAP_NEW, "Add",
-                         notify_add_clicked, 0, bbox);
-   Remove = gtkutil_button (notify_window, GNOME_STOCK_PIXMAP_CLOSE, "Remove",
-                            notify_remove_clicked, 0, bbox);
+   Add = gtkutil_button (notify_window, 0, "Add", notify_add_clicked, 0, bbox);
+   Remove = gtkutil_button (notify_window, 0, "Remove", notify_remove_clicked, 0, bbox);
 
    notify_gui_update ();
 

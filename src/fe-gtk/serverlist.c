@@ -574,10 +574,8 @@ edit_entry_clicked (GtkWidget * wid, GtkCTreeNode * temp)
    }
    box1 = gtk_hbox_new (TRUE, 2);
 
-   gtkutil_button (slwin, GNOME_STOCK_BUTTON_OK, "Ok",
-            done_edit_entry, 0, box1);
-   gtkutil_button (slwin, GNOME_STOCK_BUTTON_CANCEL, "Cancel",
-           close_edit_entry, 0, box1);
+   gtkutil_button (slwin, 0, "Ok", done_edit_entry, 0, box1);
+   gtkutil_button (slwin, 0, "Cancel", close_edit_entry, 0, box1);
 
    gtk_box_pack_start (GTK_BOX (vbox), box1, TRUE, TRUE, 0);
    gtk_widget_show (box1);
@@ -1118,21 +1116,17 @@ open_server_list (GtkWidget * widd, struct session *sess)
 
    /* FIRST "NORMAL" BUTTON */
    button_conn =
-      gtkutil_button (slwin, GNOME_STOCK_PIXMAP_REFRESH, "Connect",
-         connect_clicked, sess, wid1);
+      gtkutil_button (slwin, 0, "Connect", connect_clicked, sess, wid1);
 
    button_connnew =
-      gtkutil_button (slwin, GNOME_STOCK_PIXMAP_REFRESH, "Connect New",
-      connectnew_clicked, sess, wid1);
+      gtkutil_button (slwin, 0, "Connect New", connectnew_clicked, sess, wid1);
 
    gtkutil_button (slwin, 0, "New Server", new_server_clicked, 0, wid1);
    gtkutil_button (slwin, 0, "New Group", new_group_clicked, 0, wid1);
 
    /* 2 MORE "NORMAL" BUTTONS */
-   gtkutil_button (slwin, GNOME_STOCK_PIXMAP_CUT, "Delete",
-      delete_server_clicked, 0, wid1);
-   gtkutil_button (slwin, GNOME_STOCK_PIXMAP_PREFERENCES, "Edit",
-         edit_entry_clicked, 0, wid1);
+   gtkutil_button (slwin, 0, "Delete", delete_server_clicked, 0, wid1);
+   gtkutil_button (slwin, 0, "Edit", edit_entry_clicked, 0, wid1);
 
    gtk_widget_set_sensitive (button_conn, FALSE);
    gtk_widget_set_sensitive (button_connnew, FALSE);

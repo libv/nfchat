@@ -296,8 +296,7 @@ palette_edit ()
    gtk_widget_set_usize (bbbox, 100, 0);
    gtk_widget_show (bbbox);
 
-   gtkutil_button (palwin, GNOME_STOCK_BUTTON_OK, "OK",
-      gtkutil_destroy, palwin, bbbox);
+   gtkutil_button (palwin, 0, "OK", gtkutil_destroy, palwin, bbbox);
 
    gtk_widget_show (palwin);
 }

@@ -573,16 +573,12 @@ menu_themehandler (void)
    gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
    gtk_widget_show (hbox);
 
-   done_button = gtkutil_button (themewin, GNOME_STOCK_BUTTON_OK, "OK", 
-				 close_themelist, 0, hbox);
-   select_button = gtkutil_button (themewin, GNOME_STOCK_BUTTON_YES, "Select theme", 
-				   select_clicked, 0, hbox);
-   notheme_button = gtkutil_button (themewin, GNOME_STOCK_BUTTON_NO, "No theme", 
-				    notheme_clicked, 0, hbox);
-   copy_button = gtkutil_button (themewin, GNOME_STOCK_PIXMAP_COPY, "Copy to local", 
-				 copy_clicked, 0, hbox);
-   remove_button = gtkutil_button (themewin, GNOME_STOCK_PIXMAP_REMOVE, "Remove theme", 
-				   remove_clicked, 0, hbox);
+   done_button = gtkutil_button (themewin, 0, "OK", close_themelist, 0, hbox);
+   select_button = gtkutil_button (themewin, 0, "Select theme", select_clicked, 0, hbox);
+   notheme_button = gtkutil_button (themewin, 0, "No theme", notheme_clicked, 0, hbox);
+   copy_button = gtkutil_button (themewin, 0, "Copy to local", copy_clicked, 0, hbox);
+   remove_button = gtkutil_button (themewin, 0, "Remove theme", remove_clicked, 0, hbox);
+
    gtk_widget_set_sensitive (select_button, FALSE);
    gtk_widget_set_sensitive (remove_button, FALSE);   
    gtk_widget_set_sensitive (copy_button, FALSE);   

@@ -3,7 +3,6 @@
 #endif
 
 #include <gtk/gtk.h>
-#include "fake_gnome.h"
 #ifdef ENABLE_NLS
 #  include <libintl.h>
 #  define _(x) gettext(x)

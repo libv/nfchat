@@ -230,12 +230,12 @@ chanlist_opengui (struct server *serv)
    gtk_widget_show (hbox);
 
    serv->gui->chanlist_refresh =
-      gtkutil_button (serv->gui->chanlist_window, GNOME_STOCK_PIXMAP_REFRESH,
-                      "Refresh the list", chanlist_refresh, serv, hbox);
-   gtkutil_button (serv->gui->chanlist_window, GNOME_STOCK_PIXMAP_SAVE,
-                   "Save the list", chanlist_save, serv, hbox);
-   gtkutil_button (serv->gui->chanlist_window, GNOME_STOCK_PIXMAP_JUMP_TO,
-                   "Join Channel", chanlist_join, serv, hbox);
+      gtkutil_button (serv->gui->chanlist_window, 0, "Refresh the list",
+                      chanlist_refresh, serv, hbox);
+   gtkutil_button (serv->gui->chanlist_window, 0, "Save the list",
+                   chanlist_save, serv, hbox);
+   gtkutil_button (serv->gui->chanlist_window, 0, "Join Channel",
+                   chanlist_join, serv, hbox);
 
    gtk_widget_show (serv->gui->chanlist_window);
 }

@@ -319,11 +319,11 @@ editlist_gui_open (GSList * list, char *title, char *wmclass, char *file, char *
    gtk_box_pack_end (GTK_BOX (vbox), hbox, 0, 0, 0);
    gtk_widget_show (hbox);
 
-   button = gtkutil_button (editlist_gui_window, GNOME_STOCK_PIXMAP_UP, "Move Up",
+   button = gtkutil_button (editlist_gui_window, 0, "Move Up",
         editlist_gui_moveup, 0, hbox);
    gtk_widget_set_usize (button, 100, 0);
 
-   button = gtkutil_button (editlist_gui_window, GNOME_STOCK_PIXMAP_DOWN, "Move Dn",
+   button = gtkutil_button (editlist_gui_window, 0, "Move Dn",
       editlist_gui_movedown, 0, hbox);
    gtk_widget_set_usize (button, 100, 0);
 
@@ -331,11 +331,11 @@ editlist_gui_open (GSList * list, char *title, char *wmclass, char *file, char *
    gtk_container_add (GTK_CONTAINER (hbox), button);
    gtk_widget_show (button);
 
-   button = gtkutil_button (editlist_gui_window, GNOME_STOCK_BUTTON_CANCEL, "Cancel",
+   button = gtkutil_button (editlist_gui_window, 0, "Cancel",
                             gtkutil_destroy, editlist_gui_window, hbox);
    gtk_widget_set_usize (button, 100, 0);
 
-   button = gtkutil_button (editlist_gui_window, GNOME_STOCK_PIXMAP_SAVE, "Save",
+   button = gtkutil_button (editlist_gui_window, 0, "Save",
           editlist_gui_save, 0, hbox);
    gtk_widget_set_usize (button, 100, 0);
 
@@ -343,11 +343,11 @@ editlist_gui_open (GSList * list, char *title, char *wmclass, char *file, char *
    gtk_box_pack_end (GTK_BOX (vbox), hbox, 0, 0, 0);
    gtk_widget_show (hbox);
 
-   button = gtkutil_button (editlist_gui_window, GNOME_STOCK_PIXMAP_NEW, "Add New",
+   button = gtkutil_button (editlist_gui_window, 0, "Add New",
         editlist_gui_addnew, 0, hbox);
    gtk_widget_set_usize (button, 100, 0);
 
-   button = gtkutil_button (editlist_gui_window, GNOME_STOCK_PIXMAP_CUT, "Delete",
+   button = gtkutil_button (editlist_gui_window, 0, "Delete",
         editlist_gui_delete, 0, hbox);
    gtk_widget_set_usize (button, 100, 0);
 
@@ -355,11 +355,11 @@ editlist_gui_open (GSList * list, char *title, char *wmclass, char *file, char *
    gtk_container_add (GTK_CONTAINER (hbox), button);
    gtk_widget_show (button);
 
-   button = gtkutil_button (editlist_gui_window, GNOME_STOCK_PIXMAP_SPELLCHECK, "Sort",
+   button = gtkutil_button (editlist_gui_window, 0, "Sort",
           editlist_gui_sort, 0, hbox);
    gtk_widget_set_usize (button, 100, 0);
 
-   button = gtkutil_button (editlist_gui_window, GNOME_STOCK_PIXMAP_HELP, "Help",
+   button = gtkutil_button (editlist_gui_window, 0, "Help",
           editlist_gui_help, 0, hbox);
    gtk_widget_set_usize (button, 100, 0);
 

@@ -38,8 +38,20 @@ removing all gnome/panel/python stuff
     src/fe-gtk/textgui.c
     src/fe-gtk/userlistgui.c
     src/fe-gtk/usermenu.c
- - removed fake_gnome.c
-   and edited the following files
+    configure.in
+## Lost dcc receive window??? - it has to be removed anyway ;)
+## Check out dnd*
+ - removed fake_gnome.c and edited the following files
+    src/fe-gtk/fe-gtk.h
+    src/fe-gtk/chanlist.c
+    src/fe-gtk/editlist.c
+    src/fe-gtk/ignoregui.c
+    src/fe-gtk/notifygui.c
+    src/fe-gtk/palette.c
+    src/fe-gtk/serverlist.c
+    src/fe-gtk/themes.c
+    src/fe-gtk/urlgrab.c
+
 
 0.0.1;
 """"""

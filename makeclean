@@ -1,3 +1,4 @@
+make maintainer-clean
 rm aclocal.m4
 rm config.h.in
 rm configure
