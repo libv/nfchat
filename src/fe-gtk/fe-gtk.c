@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "../common/xchat.h"
 #include "../common/fe.h"
 #include "fe-gtk.h"
@@ -31,13 +32,12 @@
 static int autoconnect = 0;
 
 GdkFont *font_normal;
-GdkFont *dialog_font_normal;
 
+extern GdkColor colors[];
 extern GtkStyle *redtab_style;
 extern GtkStyle *bluetab_style;
 extern GtkStyle *inputgad_style;
 GtkStyle *channelwin_style;
-GtkStyle *dialogwin_style;
 
 extern char *xdir;
 extern struct session *current_tab;
@@ -53,7 +53,6 @@ extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, struct session *
 extern void palette_load (void);
 extern void key_init (void);
 extern void create_window (struct session *);
-extern GtkStyle *my_widget_get_style (char *bg_pic);
 extern void PrintText (struct session *, char *);
 extern struct session *new_session (struct server *serv, char *from);
 extern void init_userlist_xpm (struct session *sess);
@@ -61,7 +60,7 @@ extern struct session *find_session_from_waitchannel (char *target, struct serve
 
 
 GdkFont *my_font_load (char *fontname);
-
+GtkStyle *my_widget_get_style (char *bg_pic);
 
 int
 fe_args (int argc, char *argv[])
@@ -70,7 +69,7 @@ fe_args (int argc, char *argv[])
    {
       if (!strcasecmp (argv[1], "-v") || !strcasecmp (argv[1], "--version"))
       {
-         puts ("X-Chat " VERSION "");
+         puts ("NF-Chat " VERSION "");
          return 0;
       }
 #ifdef ENABLE_NLS
@@ -79,7 +78,7 @@ fe_args (int argc, char *argv[])
 #endif
       if (!strcasecmp (argv[1], "-h") || !strcasecmp (argv[1], "--help"))
       {
-         puts ("X-Chat " VERSION " Options:\n\n"
+         puts ("NF-Chat " VERSION " Options:\n\n"
                "   --connect      -c        : auto connect\n"
                "   --cfgdir <dir> -d        : use a different config dir\n"
                "   --version      -v        : show version information\n"
@@ -104,8 +103,6 @@ fe_args (int argc, char *argv[])
       }
    }
 
-   gtk_set_locale ();
-
    gtk_init (&argc, &argv);
 
 #ifdef USE_IMLIB
@@ -119,13 +116,11 @@ void
 fe_init (void)
 {
    font_normal = my_font_load (prefs.font_normal);
-   dialog_font_normal = my_font_load (prefs.dialog_font_normal);
-
+ 
    palette_load ();
    key_init ();
 
    channelwin_style = my_widget_get_style (prefs.background);
-   dialogwin_style = my_widget_get_style (prefs.background_dialog);
    inputgad_style = my_widget_get_style ("");
 }
 
@@ -230,8 +225,7 @@ GdkFont *
 my_font_load (char *fontname)
 {
    GdkFont *font;
-   char temp[256];
-
+ 
    if (!*fontname)
       fontname = "fixed";
    if (prefs.use_fontset)
@@ -240,8 +234,7 @@ my_font_load (char *fontname)
       font = gdk_font_load (fontname);
    if (!font)
    {
-      snprintf (temp, 255, "Cannot open font:\n\n%s", fontname);
-      gtkutil_simpledialog (temp);
+      fprintf (stderr, "Error: Cannot open font:\n\n%s", fontname);
       font = gdk_font_load ("fixed");
       if (!font)
       {
@@ -252,6 +245,50 @@ my_font_load (char *fontname)
    return font;
 }
 
+GtkStyle *
+my_widget_get_style (char *bg_pic)
+{
+   GtkStyle *style;
+   GdkPixmap *pixmap;
+#ifdef USE_IMLIB
+   GdkImlibImage *img;
+#endif
+
+   style = gtk_style_new ();
+
+   gdk_font_unref (style->font);
+   gdk_font_ref (font_normal);
+   style->font = font_normal;
+
+   style->base[GTK_STATE_NORMAL] = colors[19];
+   style->bg[GTK_STATE_NORMAL] = colors[19];
+   style->fg[GTK_STATE_NORMAL] = colors[18];
+
+   if (bg_pic[0])
+   {
+      if (access (bg_pic, R_OK) == 0)
+      {
+#ifdef USE_IMLIB
+         img = gdk_imlib_load_image (bg_pic);
+         if (img)
+         {
+            gdk_imlib_render (img, img->rgb_width, img->rgb_height);
+            pixmap = gdk_imlib_move_image (img);
+            gdk_imlib_destroy_image (img);
+            style->bg_pixmap[GTK_STATE_NORMAL] = pixmap;
+         }
+#else
+         pixmap = gdk_pixmap_create_from_xpm (0, 0,
+                                              &style->bg[GTK_STATE_NORMAL], bg_pic);
+         style->bg_pixmap[0] = pixmap;
+#endif
+      } else
+      {
+         fprintf (stderr, "Error: Cannot access %s", bg_pic);
+      }
+   }
+   return style;
+}
 static struct session *
 find_unused_session (struct server *serv)
 {

@@ -425,13 +425,6 @@ static char *pevt_partreason_help[] =
    NULL
 };
 
-static char *pevt_ctcpsnd_help[] =
-{
-   "The sound",
-   "The nick of the person",
-   NULL
-};
-
 static char *pevt_ctcpgen_help[] =
 {
    "The CTCP event",
@@ -739,7 +732,6 @@ struct text_event
    char **help;
    char *def;
    int num_args;
-   char *sound;
 };
 
 /* *BBIIGG* struct ahead!! --AGL */
@@ -747,158 +739,158 @@ struct text_event
 struct text_event te[] =
 {
    /* Padding for all the non-text signals */
-/*000*/   {NULL, NULL, NULL, 0, NULL},
-/*001*/   {NULL, NULL, NULL, 0, NULL},
-/*002*/   {NULL, NULL, NULL, 0, NULL},
-/*003*/   {NULL, NULL, NULL, 0, NULL},
-/*004*/   {NULL, NULL, NULL, 0, NULL},
-/*005*/   {NULL, NULL, NULL, 0, NULL},
-/*006*/   {NULL, NULL, NULL, 0, NULL},
-/*007*/   {NULL, NULL, NULL, 0, NULL},
-/*008*/   {NULL, NULL, NULL, 0, NULL},
-/*009*/   {NULL, NULL, NULL, 0, NULL},
-/*010*/   {NULL, NULL, NULL, 0, NULL},
-/*011*/   {NULL, NULL, NULL, 0, NULL},
-/*012*/   {NULL, NULL, NULL, 0, NULL},
-/*013*/   {NULL, NULL, NULL, 0, NULL},
-/*014*/   {NULL, NULL, NULL, 0, NULL},
-/*015*/   {NULL, NULL, NULL, 0, NULL},
-/*016*/   {NULL, NULL, NULL, 0, NULL},
-/*017*/   {NULL, NULL, NULL, 0, NULL},
-/*018*/   {NULL, NULL, NULL, 0, NULL},
-/*019*/   {NULL, NULL, NULL, 0, NULL},
-/*020*/   {NULL, NULL, NULL, 0, NULL},
+/*000*/   {NULL, NULL, NULL, 0},
+/*001*/   {NULL, NULL, NULL, 0},
+/*002*/   {NULL, NULL, NULL, 0},
+/*003*/   {NULL, NULL, NULL, 0},
+/*004*/   {NULL, NULL, NULL, 0},
+/*005*/   {NULL, NULL, NULL, 0},
+/*006*/   {NULL, NULL, NULL, 0},
+/*007*/   {NULL, NULL, NULL, 0},
+/*008*/   {NULL, NULL, NULL, 0},
+/*009*/   {NULL, NULL, NULL, 0},
+/*010*/   {NULL, NULL, NULL, 0},
+/*011*/   {NULL, NULL, NULL, 0},
+/*012*/   {NULL, NULL, NULL, 0},
+/*013*/   {NULL, NULL, NULL, 0},
+/*014*/   {NULL, NULL, NULL, 0},
+/*015*/   {NULL, NULL, NULL, 0},
+/*016*/   {NULL, NULL, NULL, 0},
+/*017*/   {NULL, NULL, NULL, 0},
+/*018*/   {NULL, NULL, NULL, 0},
+/*019*/   {NULL, NULL, NULL, 0},
+/*020*/   {NULL, NULL, NULL, 0},
 
    /* Now we get down to business */
 
-/*021*/   {"Join", pevt_join_help, "-%C10-%C11>%O$t%B$1%B %C14(%C10$3%C14)%C has joined $2", 3, NULL},
-/*022*/   {"Channel Action", pevt_chanaction_help, "%C13*%O$t$1 $2%O", 2, NULL},
-/*023*/   {"Channel Message", pevt_chanmsg_help, "%C2<%O$1%C2>%O$t$2%O", 2, NULL},
-/*024*/   {"Private Message", pevt_privmsg_help, "%C12*%C13$1%C12*$t%O$2%O", 2, NULL},
-/*025*/   {"Change Nick", pevt_changenick_help, "-%C10-%C11-%O$t$1 is now known as $2", 2, NULL},
-/*026*/   {"New Topic", pevt_newtopic_help, "-%C10-%C11-%O$t$1 has changed the topic to: $2%O", 3, NULL},
-/*027*/   {"Topic", pevt_topic_help, "-%C10-%C11-%O$tTopic for %C11$1%C is %C11$2%O", 2, NULL},
-/*028*/   {"Kick", pevt_kick_help, "<%C10-%C11-%O$t$1 has kicked $2 from $3 ($4%O)", 4, NULL},
-/*029*/   {"Part", pevt_part_help, "<%C10-%C11-%O$t$1 %C14(%O$2%C14)%C has left $3", 3, NULL},
-/*030*/   {"Channel Creation", pevt_chandate_help, "-%C10-%C11-%O$tChannel $1 created on $2", 2, NULL},
-/*031*/   {"Topic Creation", pevt_topicdate_help, "-%C10-%C11-%O$tTopic for %C11$1%C set by %C11$2%C at %C11$3%O", 3, NULL},
-/*032*/   {"Quit", pevt_quit_help, "<%C10-%C11-%O$t$1 has quit %C14(%O$2%O%C14)%O", 2, NULL},
-/*033*/   {"Ping Reply", pevt_pingrep_help, "-%C10-%C11-%O$tPing reply from $1 : $2 second(s)", 2, NULL},
-/*034*/   {"Notice", pevt_notice_help, "%C12-%C13$1%C12-%O$t$2%O", 2, NULL},
-/*035*/   {"You Joining", pevt_ujoin_help, "-%C10-%C11>%O$t%B$1%B %C14(%C10$3%C14)%C has joined $2", 3, NULL},
-/*036*/   {"Your Message", pevt_uchanmsg_help, "%C6<%O$1%C6>%O$t$2%O", 2, NULL},
-/*037*/   {"Private Message to Dialog", pevt_dprivmsg_help, "%C2<%O$1%C2>%O$t$2%O", 2, NULL},
-/*038*/   {"Your Nick Changing", pevt_uchangenick_help, "-%C10-%C11-%O$tYou are now known as $2", 2, NULL},
-/*039*/   {"You're Kicked", pevt_ukick_help, "-%C10-%C11-%O$tYou have been kicked from $2 by $3 ($4%O)", 4, NULL},
-/*040*/   {"You Parting", pevt_part_help, "-%C10-%C11-%O$tYou have left channel $3", 3, NULL},
-/*041*/   {"CTCP Sound", pevt_ctcpsnd_help, "-%C10-%C11-%O$tReceived a CTCP Sound $1 from $2", 2, NULL},
-/*042*/   {"CTCP Generic", pevt_ctcpgen_help, "-%C10-%C11-%O$tReceived a CTCP $1 from $2", 2, NULL},
-/*043*/   {"CTCP Generic to Channel", pevt_ctcpgenc_help, "-%C10-%C11-%O$tReceived a CTCP $1 from $2 (to $3)", 3, NULL},
-/*044*/   {"Channel Set Key", pevt_chansetkey_help, "-%C10-%C11-%O$t$1 sets channel keyword to $2", 2, NULL},
-/*045*/   {"Channel Set Limit", pevt_chansetlimit_help, "-%C10-%C11-%O$t$1 sets channel limit to $2", 2, NULL},
-/*046*/   {"Channel Operator", pevt_chanop_help, "-%C10-%C11-%O$t$1 gives channel operator status to $2", 2, NULL},
-/*047*/   {"Channel Voice", pevt_chanvoice_help, "-%C10-%C11-%O$t$1 gives voice to $2", 2, NULL},
-/*048*/   {"Channel Ban", pevt_chanban_help, "-%C10-%C11-%O$t$1 sets ban on $2", 2, NULL},
-/*049*/   {"Channel Remove Keyword", pevt_chanrmkey_help, "-%C10-%C11-%O$t$1 removes channel keyword", 1, NULL},
-/*050*/   {"Channel Remove Limit", pevt_chanrmlimit_help, "-%C10-%C11-%O$t$1 removes user limit", 1, NULL},
-/*051*/   {"Channel DeOp", pevt_chandeop_help, "-%C10-%C11-%O$t$1 removes channel operator status from $2", 2, NULL},
-/*052*/   {"Channel DeVoice", pevt_chandevoice_help, "-%C10-%C11-%O$t$1 removes voice from $2", 2, NULL},
-/*053*/   {"Channel UnBan", pevt_chanunban_help, "-%C10-%C11-%O$t$1 removes ban on $2", 2, NULL},
-/*054*/   {"Channel Exempt", pevt_chanexempt_help, "-%C10-%C11-%O$t$1 sets exempt on $2", 2, NULL},
-/*055*/   {"Channel Remove Exempt", pevt_chanrmexempt_help, "-%C10-%C11-%O$t$1 removes exempt on $2", 2, NULL},
-/*056*/   {"Channel INVITE", pevt_chaninvite_help, "-%C10-%C11-%O$t$1 sets invite on $2", 2, NULL},
-/*057*/   {"Channel Remove INVITE", pevt_chanrminvite_help, "-%C10-%C11-%O$t$1 removes invite on $2", 2, NULL},
-/*058*/   {"Channel Mode Generic", pevt_chanmodegen_help, "-%C10-%C11-%O$t$1 sets mode $2$3 $4", 4, NULL},
-/*059*/   {"WhoIs Name Line", pevt_whois1_help, "-%C10-%C11-%O$t%C12[%O$1%C12] %C14(%O$2@$3%C14) %O: $4%O", 4, NULL},
-/*060*/   {"WhoIs Channel/Oper Line", pevt_whois2_help, "-%C10-%C11-%O$t%C12[%O$1%C12]%C $2", 2, NULL},
-/*061*/   {"WhoIs Server Line", pevt_whois3_help, "-%C10-%C11-%O$t%C12[%O$1%C12]%O $2", 2, NULL},
-/*062*/   {"WhoIs Idle Line", pevt_whois4_help, "-%C10-%C11-%O$t%C12[%O$1%C12]%O idle %C11$2%O", 2, NULL},
-/*063*/   {"WhoIs Idle Line with Signon", pevt_whois4t_help, "-%C10-%C11-%O$t%C12[%O$1%C12]%O idle %C11$2%O, signon: %C11$3%O", 3, NULL},
-/*064*/   {"WhoIs Away Line", pevt_whois5_help, "-%C10-%C11-%O$t%C12[%O$1%C12] %Cis away %C14(%O$2%O%C14)", 2, NULL},
-/*065*/   {"WhoIs End", pevt_whois6_help, "-%C10-%C11-%O$t%C12[%O$1%C12] %CEnd of WHOIS list.", 1, NULL},
-/*066*/   {"User Limit", pevt_generic_channel_help, "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(User limit reached).", 1, NULL},
-/*067*/   {"Banned", pevt_generic_channel_help, "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(You are banned).", 1, NULL},
-/*068*/   {"Invite", pevt_generic_channel_help, "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(Channel is invite only).", 1, NULL},
-/*069*/   {"Keyword", pevt_generic_channel_help, "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(Requires keyword).", 1, NULL},
-/*070*/   {"MOTD Skipped", pevt_generic_none_help, "-%C10-%C11-%O$tMOTD Skipped.", 0, NULL},
-/*071*/   {"Server Text", pevt_servertext_help, "-%C10-%C11-%O$t$1%O", 1, NULL},
-/*072*/   {"Invited", pevt_invited_help, "-%C10-%C11-%O$tYou have been invited to %C11$1%C by %C11$2", 2, NULL},
-/*073*/   {"Users On Channel", pevt_usersonchan_help, "-%C10-%C11-%O$t%C11Users on $1:%C $2", 2, NULL},
-/*074*/   {"Nick Clash", pevt_nickclash_help, "-%C10-%C11-%O$t$1 already in use. Retrying with $2..", 2, NULL},
-/*075*/   {"Nick Failed", pevt_generic_none_help, "-%C10-%C11-%O$tNickname already in use. Use /NICK to try another.", 0, NULL},
-/*076*/   {"Unknown Host", pevt_generic_none_help, "-%C10-%C11-%O$tUnknown host. Maybe you misspelled it?", 0, NULL},
-/*077*/   {"Connection Failed", pevt_connfail_help, "-%C10-%C11-%O$tConnection failed. Error: $1", 1, NULL},
-/*078*/   {"Connecting", pevt_connect_help, "-%C10-%C11-%O$tConnecting to %C11$1 %C14(%C11$2%C14)%C port %C11$3%C..", 3, NULL},
-/*079*/   {"Connected", pevt_generic_none_help, "-%C10-%C11-%O$tConnected. Now logging in..", 0, NULL},
-/*080*/   {"Stop Connection", pevt_sconnect_help, "-%C10-%C11-%O$tStopped previous connection attempt (pid=$1)", 1, NULL},
-/*081*/   {"Disconnected", pevt_generic_none_help, "-%C10-%C11-%O$tDisconnected ($1).", 1, NULL},
-/*082*/   {NULL, NULL, NULL, 0, NULL},
-/*083*/   {NULL, NULL, NULL, 0, NULL},
+/*021*/   {"Join", pevt_join_help, "-%C10-%C11>%O$t%B$1%B %C14(%C10$3%C14)%C has joined $2", 3},
+/*022*/   {"Channel Action", pevt_chanaction_help, "%C13*%O$t$1 $2%O", 2},
+/*023*/   {"Channel Message", pevt_chanmsg_help, "%C2<%O$1%C2>%O$t$2%O", 2},
+/*024*/   {"Private Message", pevt_privmsg_help, "%C12*%C13$1%C12*$t%O$2%O", 2},
+/*025*/   {"Change Nick", pevt_changenick_help, "-%C10-%C11-%O$t$1 is now known as $2", 2},
+/*026*/   {"New Topic", pevt_newtopic_help, "-%C10-%C11-%O$t$1 has changed the topic to: $2%O", 3},
+/*027*/   {"Topic", pevt_topic_help, "-%C10-%C11-%O$tTopic for %C11$1%C is %C11$2%O", 2},
+/*028*/   {"Kick", pevt_kick_help, "<%C10-%C11-%O$t$1 has kicked $2 from $3 ($4%O)", 4},
+/*029*/   {"Part", pevt_part_help, "<%C10-%C11-%O$t$1 %C14(%O$2%C14)%C has left $3", 3},
+/*030*/   {"Channel Creation", pevt_chandate_help, "-%C10-%C11-%O$tChannel $1 created on $2", 2},
+/*031*/   {"Topic Creation", pevt_topicdate_help, "-%C10-%C11-%O$tTopic for %C11$1%C set by %C11$2%C at %C11$3%O", 3},
+/*032*/   {"Quit", pevt_quit_help, "<%C10-%C11-%O$t$1 has quit %C14(%O$2%O%C14)%O", 2},
+/*033*/   {"Ping Reply", pevt_pingrep_help, "-%C10-%C11-%O$tPing reply from $1 : $2 second(s)", 2},
+/*034*/   {"Notice", pevt_notice_help, "%C12-%C13$1%C12-%O$t$2%O", 2},
+/*035*/   {"You Joining", pevt_ujoin_help, "-%C10-%C11>%O$t%B$1%B %C14(%C10$3%C14)%C has joined $2", 3},
+/*036*/   {"Your Message", pevt_uchanmsg_help, "%C6<%O$1%C6>%O$t$2%O", 2},
+/*037*/   {"Private Message to Dialog", pevt_dprivmsg_help, "%C2<%O$1%C2>%O$t$2%O", 2},
+/*038*/   {"Your Nick Changing", pevt_uchangenick_help, "-%C10-%C11-%O$tYou are now known as $2", 2},
+/*039*/   {"You're Kicked", pevt_ukick_help, "-%C10-%C11-%O$tYou have been kicked from $2 by $3 ($4%O)", 4},
+/*040*/   {"You Parting", pevt_part_help, "-%C10-%C11-%O$tYou have left channel $3", 3},
+/*041*/   {NULL, NULL, NULL, 0}, /* ctcpsnd */
+/*042*/   {"CTCP Generic", pevt_ctcpgen_help, "-%C10-%C11-%O$tReceived a CTCP $1 from $2", 2},
+/*043*/   {"CTCP Generic to Channel", pevt_ctcpgenc_help, "-%C10-%C11-%O$tReceived a CTCP $1 from $2 (to $3)", 3},
+/*044*/   {"Channel Set Key", pevt_chansetkey_help, "-%C10-%C11-%O$t$1 sets channel keyword to $2", 2},
+/*045*/   {"Channel Set Limit", pevt_chansetlimit_help, "-%C10-%C11-%O$t$1 sets channel limit to $2", 2},
+/*046*/   {"Channel Operator", pevt_chanop_help, "-%C10-%C11-%O$t$1 gives channel operator status to $2", 2},
+/*047*/   {"Channel Voice", pevt_chanvoice_help, "-%C10-%C11-%O$t$1 gives voice to $2", 2},
+/*048*/   {"Channel Ban", pevt_chanban_help, "-%C10-%C11-%O$t$1 sets ban on $2", 2},
+/*049*/   {"Channel Remove Keyword", pevt_chanrmkey_help, "-%C10-%C11-%O$t$1 removes channel keyword", 1},
+/*050*/   {"Channel Remove Limit", pevt_chanrmlimit_help, "-%C10-%C11-%O$t$1 removes user limit", 1},
+/*051*/   {"Channel DeOp", pevt_chandeop_help, "-%C10-%C11-%O$t$1 removes channel operator status from $2", 2},
+/*052*/   {"Channel DeVoice", pevt_chandevoice_help, "-%C10-%C11-%O$t$1 removes voice from $2", 2},
+/*053*/   {"Channel UnBan", pevt_chanunban_help, "-%C10-%C11-%O$t$1 removes ban on $2", 2},
+/*054*/   {"Channel Exempt", pevt_chanexempt_help, "-%C10-%C11-%O$t$1 sets exempt on $2", 2},
+/*055*/   {"Channel Remove Exempt", pevt_chanrmexempt_help, "-%C10-%C11-%O$t$1 removes exempt on $2", 2},
+/*056*/   {"Channel INVITE", pevt_chaninvite_help, "-%C10-%C11-%O$t$1 sets invite on $2", 2},
+/*057*/   {"Channel Remove INVITE", pevt_chanrminvite_help, "-%C10-%C11-%O$t$1 removes invite on $2", 2},
+/*058*/   {"Channel Mode Generic", pevt_chanmodegen_help, "-%C10-%C11-%O$t$1 sets mode $2$3 $4", 4},
+/*059*/   {"WhoIs Name Line", pevt_whois1_help, "-%C10-%C11-%O$t%C12[%O$1%C12] %C14(%O$2@$3%C14) %O: $4%O", 4},
+/*060*/   {"WhoIs Channel/Oper Line", pevt_whois2_help, "-%C10-%C11-%O$t%C12[%O$1%C12]%C $2", 2},
+/*061*/   {"WhoIs Server Line", pevt_whois3_help, "-%C10-%C11-%O$t%C12[%O$1%C12]%O $2", 2},
+/*062*/   {"WhoIs Idle Line", pevt_whois4_help, "-%C10-%C11-%O$t%C12[%O$1%C12]%O idle %C11$2%O", 2},
+/*063*/   {"WhoIs Idle Line with Signon", pevt_whois4t_help, "-%C10-%C11-%O$t%C12[%O$1%C12]%O idle %C11$2%O, signon: %C11$3%O", 3},
+/*064*/   {"WhoIs Away Line", pevt_whois5_help, "-%C10-%C11-%O$t%C12[%O$1%C12] %Cis away %C14(%O$2%O%C14)", 2},
+/*065*/   {"WhoIs End", pevt_whois6_help, "-%C10-%C11-%O$t%C12[%O$1%C12] %CEnd of WHOIS list.", 1},
+/*066*/   {"User Limit", pevt_generic_channel_help, "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(User limit reached).", 1},
+/*067*/   {"Banned", pevt_generic_channel_help, "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(You are banned).", 1},
+/*068*/   {"Invite", pevt_generic_channel_help, "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(Channel is invite only).", 1},
+/*069*/   {"Keyword", pevt_generic_channel_help, "-%C10-%C11-%O$tCannot join%C11 %B$1 %O(Requires keyword).", 1},
+/*070*/   {"MOTD Skipped", pevt_generic_none_help, "-%C10-%C11-%O$tMOTD Skipped.", 0},
+/*071*/   {"Server Text", pevt_servertext_help, "-%C10-%C11-%O$t$1%O", 1},
+/*072*/   {"Invited", pevt_invited_help, "-%C10-%C11-%O$tYou have been invited to %C11$1%C by %C11$2", 2},
+/*073*/   {"Users On Channel", pevt_usersonchan_help, "-%C10-%C11-%O$t%C11Users on $1:%C $2", 2},
+/*074*/   {"Nick Clash", pevt_nickclash_help, "-%C10-%C11-%O$t$1 already in use. Retrying with $2..", 2},
+/*075*/   {"Nick Failed", pevt_generic_none_help, "-%C10-%C11-%O$tNickname already in use. Use /NICK to try another.", 0},
+/*076*/   {"Unknown Host", pevt_generic_none_help, "-%C10-%C11-%O$tUnknown host. Maybe you misspelled it?", 0},
+/*077*/   {"Connection Failed", pevt_connfail_help, "-%C10-%C11-%O$tConnection failed. Error: $1", 1},
+/*078*/   {"Connecting", pevt_connect_help, "-%C10-%C11-%O$tConnecting to %C11$1 %C14(%C11$2%C14)%C port %C11$3%C..", 3},
+/*079*/   {"Connected", pevt_generic_none_help, "-%C10-%C11-%O$tConnected. Now logging in..", 0},
+/*080*/   {"Stop Connection", pevt_sconnect_help, "-%C10-%C11-%O$tStopped previous connection attempt (pid=$1)", 1},
+/*081*/   {"Disconnected", pevt_generic_none_help, "-%C10-%C11-%O$tDisconnected ($1).", 1},
+/*082*/   {NULL, NULL, NULL, 0},
+/*083*/   {NULL, NULL, NULL, 0},
 /* {"Delete Notify", pevt_generic_nick_help, "-%C10-%C11-%O$t$1 deleted from notify list.", 1, NULL}, */
-/*084*/   {NULL, NULL, NULL, 0, NULL},
+/*084*/   {NULL, NULL, NULL, 0},
 /*  {"Add Notify", pevt_generic_nick_help, "-%C10-%C11-%O$t$1 added to notify list.", 1, NULL}, */
-/*085*/   {"Window Type Error", pevt_wintype_help, "-%C10-%C11-%O$tYou can't do that in a $1 window.", 1, NULL},
-/*086*/   {"Channel Modes", pevt_chanmodes_help, "-%C10-%C11-%O$tChannel $1 modes: $2", 2, NULL},
-/*087*/   {"Raw Modes", pevt_rawmodes_help, "-%C10-%C11-%O$t$1 sets modes%B %C14[%O$2%B%C14]%O", 2, NULL},
-/*088*/   {"Killed", pevt_kill_help, "-%C10-%C11-%O$tYou have been killed by $1 ($2%O)", 2, NULL},
-/*089*/   {NULL, NULL, NULL, 0, NULL},
-/*090*/   {NULL, NULL, NULL, 0, NULL},
-/*091*/   {NULL, NULL, NULL, 0, NULL},
-/*092*/   {NULL, NULL, NULL, 0, NULL},
-/*093*/   {NULL, NULL, NULL, 0, NULL},
-/*094*/   {NULL, NULL, NULL, 0, NULL},
-/*095*/   {NULL, NULL, NULL, 0, NULL},
-/*096*/   {NULL, NULL, NULL, 0, NULL},
-/*097*/   {NULL, NULL, NULL, 0, NULL},
-/*098*/   {NULL, NULL, NULL, 0, NULL},
-/*099*/   {NULL, NULL, NULL, 0, NULL},
-/*100*/   {NULL, NULL, NULL, 0, NULL},
-/*101*/   {NULL, NULL, NULL, 0, NULL},
-/*102*/   {NULL, NULL, NULL, 0, NULL},
-/*103*/   {NULL, NULL, NULL, 0, NULL},
-/*104*/   {NULL, NULL, NULL, 0, NULL},
-/*105*/   {NULL, NULL, NULL, 0, NULL},
-/*106*/   {NULL, NULL, NULL, 0, NULL},
-/*107*/   {NULL, NULL, NULL, 0, NULL},
-/*108*/   {NULL, NULL, NULL, 0, NULL},
-/*109*/   {NULL, NULL, NULL, 0, NULL},
+/*085*/   {"Window Type Error", pevt_wintype_help, "-%C10-%C11-%O$tYou can't do that in a $1 window.", 1},
+/*086*/   {"Channel Modes", pevt_chanmodes_help, "-%C10-%C11-%O$tChannel $1 modes: $2", 2},
+/*087*/   {"Raw Modes", pevt_rawmodes_help, "-%C10-%C11-%O$t$1 sets modes%B %C14[%O$2%B%C14]%O", 2},
+/*088*/   {"Killed", pevt_kill_help, "-%C10-%C11-%O$tYou have been killed by $1 ($2%O)", 2},
+/*089*/   {NULL, NULL, NULL, 0},
+/*090*/   {NULL, NULL, NULL, 0},
+/*091*/   {NULL, NULL, NULL, 0},
+/*092*/   {NULL, NULL, NULL, 0},
+/*093*/   {NULL, NULL, NULL, 0},
+/*094*/   {NULL, NULL, NULL, 0},
+/*095*/   {NULL, NULL, NULL, 0},
+/*096*/   {NULL, NULL, NULL, 0},
+/*097*/   {NULL, NULL, NULL, 0},
+/*098*/   {NULL, NULL, NULL, 0},
+/*099*/   {NULL, NULL, NULL, 0},
+/*100*/   {NULL, NULL, NULL, 0},
+/*101*/   {NULL, NULL, NULL, 0},
+/*102*/   {NULL, NULL, NULL, 0},
+/*103*/   {NULL, NULL, NULL, 0},
+/*104*/   {NULL, NULL, NULL, 0},
+/*105*/   {NULL, NULL, NULL, 0},
+/*106*/   {NULL, NULL, NULL, 0},
+/*107*/   {NULL, NULL, NULL, 0},
+/*108*/   {NULL, NULL, NULL, 0},
+/*109*/   {NULL, NULL, NULL, 0},
   /* {"Notify Online", pevt_generic_nick_help, "-%C10-%C11-%O$tNotify: $1 is online ($2).", 2, NULL}, */
-/*110*/   {NULL, NULL, NULL, 0, NULL},
+/*110*/   {NULL, NULL, NULL, 0},
  /*{"Notify Number", pevt_notifynumber_help, "-%C10-%C11-%O$t$1 users in notify list.", 1, NULL},*/
-/*111*/   {NULL, NULL, NULL, 0, NULL},
+/*111*/   {NULL, NULL, NULL, 0},
   /* {"Notify Empty", pevt_generic_none_help, "-%C10-%C11-%O$tNotify list is empty.", 0, NULL},*/
-/*112*/   {"No Running Process", pevt_generic_none_help, "-%C10-%C11-%O$tNo process is currently running", 0, NULL},
-/*113*/   {"Process Already Running", pevt_generic_none_help, "-%C10-%C11-%O$tA process is already running", 0, NULL},
-/*114*/   {"Server Lookup", pevt_serverlookup_help, "-%C10-%C11-%O$tLooking up %C11$1%C..", 1, NULL},
-/*115*/   {"Server Connected", pevt_generic_none_help, "-%C10-%C11-%O$tConnected.", 0, NULL},
-/*116*/   {"Server Error", pevt_servererror_help, "-%C10-%C11-%O$t$1%O", 1, NULL},
-/*117*/   {"Server Generic Message", pevt_servererror_help, "-%C10-%C11-%O$t$1%O", 1, NULL},
-/*118*/   {"Found IP", pevt_foundip_help, "-%C10-%C11-%O$tFound your IP: [$1]", 1, NULL},
-/*119*/   {NULL, NULL, NULL, 0, NULL},
-/*120*/   {"CTCP Send", pevt_ctcpsend_help, "%C3>%O$1%C3<%O$tCTCP $2%O", 2, NULL},
-/*121*/   {"Message Send", pevt_ctcpsend_help, "%C3>%O$1%C3<%O$t$2%O", 2, NULL},
-/*122*/   {"Notice Send", pevt_ctcpsend_help, "%C3>%O$1%C3<%O$t$2%O", 2, NULL},
-/*123*/   {"Receive Wallops", pevt_dprivmsg_help, "%C12-%C13$1/Wallops%C12-%O$t$2%O", 2, NULL},
-/*124*/   {NULL, NULL, NULL, 0, NULL},  /* XP_HIGHLIGHT */
-/*125*/   {"Ignore Header", pevt_generic_none_help, "%C08,02 Hostmask             PRIV NOTI CHAN CTCP INVI UNIG %O", 0, NULL},
-/*126*/   {NULL, NULL, NULL, 0, NULL},
-/*127*/   {"Ignore Footer", pevt_generic_none_help, "%C08,02                                                    %O", 0, NULL},
-/*128*/   {NULL, NULL, NULL, 0, NULL},
-/*129*/   {NULL, NULL, NULL, 0, NULL},
-/*130*/   {"Resolving User", pevt_resolvinguser_help, "-%C10-%C11-%O$tLooking up IP number for%C11 $1%O..", 2, NULL},
-/*131*/   {"Ignorelist Empty", pevt_generic_none_help, "  Ignore list is empty.", 0, NULL},
-/*132*/   {NULL, NULL, NULL, 0, NULL},
-/*133*/   {NULL, NULL, NULL, 0, NULL},
+/*112*/   {"No Running Process", pevt_generic_none_help, "-%C10-%C11-%O$tNo process is currently running", 0},
+/*113*/   {"Process Already Running", pevt_generic_none_help, "-%C10-%C11-%O$tA process is already running", 0},
+/*114*/   {"Server Lookup", pevt_serverlookup_help, "-%C10-%C11-%O$tLooking up %C11$1%C..", 1},
+/*115*/   {"Server Connected", pevt_generic_none_help, "-%C10-%C11-%O$tConnected.", 0},
+/*116*/   {"Server Error", pevt_servererror_help, "-%C10-%C11-%O$t$1%O", 1},
+/*117*/   {"Server Generic Message", pevt_servererror_help, "-%C10-%C11-%O$t$1%O", 1},
+/*118*/   {"Found IP", pevt_foundip_help, "-%C10-%C11-%O$tFound your IP: [$1]", 1},
+/*119*/   {NULL, NULL, NULL, 0},
+/*120*/   {"CTCP Send", pevt_ctcpsend_help, "%C3>%O$1%C3<%O$tCTCP $2%O", 2},
+/*121*/   {"Message Send", pevt_ctcpsend_help, "%C3>%O$1%C3<%O$t$2%O", 2},
+/*122*/   {"Notice Send", pevt_ctcpsend_help, "%C3>%O$1%C3<%O$t$2%O", 2},
+/*123*/   {"Receive Wallops", pevt_dprivmsg_help, "%C12-%C13$1/Wallops%C12-%O$t$2%O", 2},
+/*124*/   {NULL, NULL, NULL, 0},  /* XP_HIGHLIGHT */
+/*125*/   {"Ignore Header", pevt_generic_none_help, "%C08,02 Hostmask             PRIV NOTI CHAN CTCP INVI UNIG %O", 0},
+/*126*/   {NULL, NULL, NULL, 0},
+/*127*/   {"Ignore Footer", pevt_generic_none_help, "%C08,02                                                    %O", 0},
+/*128*/   {NULL, NULL, NULL, 0},
+/*129*/   {NULL, NULL, NULL, 0},
+/*130*/   {"Resolving User", pevt_resolvinguser_help, "-%C10-%C11-%O$tLooking up IP number for%C11 $1%O..", 2},
+/*131*/   {"Ignorelist Empty", pevt_generic_none_help, "  Ignore list is empty.", 0},
+/*132*/   {NULL, NULL, NULL, 0},
+/*133*/   {NULL, NULL, NULL, 0},
   /* {"Notify Offline", pevt_generic_nick_help, "-%C10-%C11-%O$tNotify: $1 is offline ($2).", 2, NULL}, */
-/*134*/   {NULL, NULL, NULL, 0, NULL}, /* XP_TE_MALFORMED_FROM */
-/*135*/   {NULL, NULL, NULL, 0, NULL}, /* XP_TE_MALFORMED_PACKET */
-/*136*/   {"Part with Reason", pevt_partreason_help, "<%C10-%C11-%O$t$1 %C14(%O$2%C14)%C has left $3 %C14(%O$4%C14)%O", 4, NULL},
-/*137*/   {"You Part with Reason", pevt_partreason_help, "-%C10-%C11-%O$tYou have left channel $3 %C14(%O$4%C14)%O", 4, NULL},
-/*138*/   {"New Mail", pevt_newmail_help, "-%C3-%C9-%O$tYou have new mail ($1 messages, $2 bytes total).", 2, NULL},
-/*139*/   {"Motd", pevt_servertext_help, "-%C10-%C11-%O$t$1%O", 1, NULL},
+/*134*/   {NULL, NULL, NULL, 0}, /* XP_TE_MALFORMED_FROM */
+/*135*/   {NULL, NULL, NULL, 0}, /* XP_TE_MALFORMED_PACKET */
+/*136*/   {"Part with Reason", pevt_partreason_help, "<%C10-%C11-%O$t$1 %C14(%O$2%C14)%C has left $3 %C14(%O$4%C14)%O", 4},
+/*137*/   {"You Part with Reason", pevt_partreason_help, "-%C10-%C11-%O$tYou have left channel $3 %C14(%O$4%C14)%O", 4},
+/*138*/   {"New Mail", pevt_newmail_help, "-%C3-%C9-%O$tYou have new mail ($1 messages, $2 bytes total).", 2},
+/*139*/   {"Motd", pevt_servertext_help, "-%C10-%C11-%O$t$1%O", 1},
 
-/*140*/   {NULL, NULL, NULL, 0, NULL},	/* XP_IF_SEND */
-/*141*/   {NULL, NULL, NULL, 0, NULL},	/* XP_IF_RECV */
+/*140*/   {NULL, NULL, NULL, 0},	/* XP_IF_SEND */
+/*141*/   {NULL, NULL, NULL, 0},	/* XP_IF_RECV */
 };
 
 int
@@ -967,10 +959,10 @@ pevent_make_pntevts ()
 /* Better hope you pass good args.. --AGL */
 
 void
-pevent_trigger_load (int *i_penum, char **i_text, char **i_snd)
+pevent_trigger_load (int *i_penum, char **i_text)
 {
    int penum = *i_penum, len;
-   char *text = *i_text, *snd = *i_snd;
+   char *text = *i_text;
    
    if (penum == -1)
       goto cleanup_exit;
@@ -982,22 +974,11 @@ pevent_trigger_load (int *i_penum, char **i_text, char **i_snd)
       free (pntevts_text[penum]);
    pntevts_text[penum] = malloc (len);
    memcpy (pntevts_text[penum], text, len);
-   if (te[penum].sound)
-	 free (te[penum].sound);
-   if (snd) {
-      len = strlen (snd) + 1;
-      te[penum].sound = malloc (len);
-      memcpy (te[penum].sound, snd, len);
-   } else
-      te[penum].sound = NULL;
-
+  
  cleanup_exit:
    if (text)
       free (text);
-   if (snd)
-      free (snd);
    *i_text = NULL;
-   *i_snd = NULL;
    *i_penum = 0;
 }
 
@@ -1034,7 +1015,7 @@ pevent_load (char *filename)
    char *buf, *ibuf;
    int fd, i = 0, pnt = 0;
    struct stat st;
-   char *text = NULL, *snd = NULL;
+   char *text = NULL;
    int penum = 0;
    char *ofs;
 
@@ -1073,7 +1054,7 @@ pevent_load (char *filename)
 
       if (strcmp (buf, "event_name") == 0) {
 	 if (penum)
-	    pevent_trigger_load (&penum, &text, &snd);
+	    pevent_trigger_load (&penum, &text);
 	 penum = pevent_find (ofs, &i);
 	 continue;
       } else if (strcmp (buf, "event_text") == 0) {
@@ -1081,17 +1062,12 @@ pevent_load (char *filename)
 	    free (text);
 	 text = strdup (ofs);
 	 continue;
-      } else if (strcmp (buf, "event_sound") == 0) {
-	 if (snd)
-	    free (snd);
-	 snd = strdup (ofs);
-	 continue;
       }
 
       continue;
    }
 
-   pevent_trigger_load (&penum, &text, &snd);
+   pevent_trigger_load (&penum, &text);
    free (ibuf);
    return 0;
 }      
@@ -1385,20 +1361,6 @@ pevt_build_string (char *input, char **output, int *max_arg)
    return 0;
 }
 
-static void
-play_wave (char *file)
-{
-   char *buf = malloc (512);
-
-   snprintf (buf, 512, "%s/%s", prefs.sounddir, file);
-   if (access (buf, R_OK) == 0)
-   {
-      snprintf (buf, 512, "%s %s/%s", prefs.soundcmd, prefs.sounddir, file);
-      my_system (buf);
-   }
-   free (buf);
-}
-
 int
 textsignal_handler (struct session *sess, void *b, void *c,
              void *d, void *e, char f)
@@ -1420,9 +1382,6 @@ textsignal_handler (struct session *sess, void *b, void *c,
    }
    numargs = te[current_signal].num_args;
    i = 0;
-
-   if (te[current_signal].sound)
-      play_wave (te[current_signal].sound);
 
    args[0] = b;
    args[1] = c;
@@ -1486,9 +1445,6 @@ pevent_dialog_save (char *fn)
 				"event_name=%s\n", te[i].name));
       write (fd, buf, snprintf (buf, sizeof (buf),
 				"event_text=%s\n", pntevts_text[i]));
-      if (te[i].sound && te[i].sound[0])
-	 write (fd, buf, snprintf (buf, sizeof (buf),
-		"event_sound=%s\n", te[i].sound));
       write (fd, "\n", 1);
    }
 

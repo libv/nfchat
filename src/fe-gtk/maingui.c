@@ -182,55 +182,6 @@ show_and_unfocus (GtkWidget * wid)
    gtk_widget_show (wid);
 }
 
-/* could be moved to fe-gtk.c */
-
-GtkStyle *
-my_widget_get_style (char *bg_pic)
-{
-   char buf[256];
-   GtkStyle *style;
-   GdkPixmap *pixmap;
-#ifdef USE_IMLIB
-   GdkImlibImage *img;
-#endif
-
-   style = gtk_style_new ();
-
-   gdk_font_unref (style->font);
-   gdk_font_ref (font_normal);
-   style->font = font_normal;
-
-   style->base[GTK_STATE_NORMAL] = colors[19];
-   style->bg[GTK_STATE_NORMAL] = colors[19];
-   style->fg[GTK_STATE_NORMAL] = colors[18];
-
-   if (bg_pic[0])
-   {
-      if (access (bg_pic, R_OK) == 0)
-      {
-#ifdef USE_IMLIB
-         img = gdk_imlib_load_image (bg_pic);
-         if (img)
-         {
-            gdk_imlib_render (img, img->rgb_width, img->rgb_height);
-            pixmap = gdk_imlib_move_image (img);
-            gdk_imlib_destroy_image (img);
-            style->bg_pixmap[GTK_STATE_NORMAL] = pixmap;
-         }
-#else
-         pixmap = gdk_pixmap_create_from_xpm (0, 0,
-                                              &style->bg[GTK_STATE_NORMAL], bg_pic);
-         style->bg_pixmap[0] = pixmap;
-#endif
-      } else
-      {
-         snprintf (buf, sizeof buf, "Cannot access %s", bg_pic);
-         gtkutil_simpledialog (buf);
-      }
-   }
-   return style;
-}
-
 static void
 maingui_create_textlist (struct session *sess, GtkWidget *leftpane)
 {

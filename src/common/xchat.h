@@ -72,12 +72,10 @@ struct xchatprefs
    char awayreason[256];
    char quitreason[256];
    char font_normal[FONTNAMELEN + 1];
-   char dialog_font_normal[FONTNAMELEN + 1];
    char doubleclickuser[256];
    char sounddir[PATHLEN + 1];
    char soundcmd[PATHLEN + 1];
    char background[PATHLEN + 1];
-   char background_dialog[PATHLEN + 1];
    char bluestring[64];
    char dnsprogram[72];
    char hostname[127];
@@ -185,7 +183,7 @@ struct session
    struct setup *setup;
    struct nbexec *running_exec;
 
-   struct session_gui *gui;			/* initialized by fe_new_window */
+   struct session_gui *gui;	     /* initialized by fe_new_window */
 
    int is_shell:1;
    int is_tab:1;                /* is this a tab or toplevel window? */

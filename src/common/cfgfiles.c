@@ -155,8 +155,6 @@ cfg_get_str (char *cfg, char *var, char *dest)
             cfg++;
          while (*cfg == ' ')
             cfg++;
-         /*while (*cfg == ' ' || *cfg == '=')
-            cfg++;*/
          value = cfg;
          while (*cfg != 0 && *cfg != '\n')
             cfg++;
@@ -230,8 +228,8 @@ get_xdir (void)
 {
    if (!xdir)
    {
-      xdir = malloc (strlen (g_get_home_dir ()) + 8);
-      sprintf (xdir, "%s/.xchat", g_get_home_dir ());
+      xdir = malloc (strlen (g_get_home_dir ()) + 9);
+      sprintf (xdir, "%s/.nfchat", g_get_home_dir ());
    }
    return xdir;
 }
@@ -243,7 +241,7 @@ check_prefs_dir (void)
    if (access (xdir, F_OK) != 0)
    {
       if (mkdir (xdir, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
-         fe_message ("Cannot create ~/.xchat", FALSE);
+         fe_message ("Cannot create ~/.nfchat", FALSE);
    }
 }
 
@@ -255,7 +253,7 @@ default_file (void)
    if (!dfile)
    {
       dfile = malloc (strlen (get_xdir ()) + 12);
-      sprintf (dfile, "%s/xchat.conf", get_xdir ());
+      sprintf (dfile, "%s/nfchat.conf", get_xdir ());
    }
    return dfile;
 }
@@ -269,11 +267,9 @@ static struct prefs vars[] = {
 {"awayreason",          PREFS_OFFSET(awayreason),        TYPE_STR},
 {"quitreason",          PREFS_OFFSET(quitreason),        TYPE_STR},
 {"font_normal",         PREFS_OFFSET(font_normal),       TYPE_STR},
-{"font_dialog_normal",  PREFS_OFFSET(dialog_font_normal),TYPE_STR},
 {"sounddir",            PREFS_OFFSET(sounddir),          TYPE_STR},
 {"soundcmd",            PREFS_OFFSET(soundcmd),          TYPE_STR},
 {"background_pic",      PREFS_OFFSET(background),        TYPE_STR},
-{"background_dialog_pic",PREFS_OFFSET(background_dialog),TYPE_STR},
 {"doubleclickuser",     PREFS_OFFSET(doubleclickuser),   TYPE_STR},
 {"bluestring",          PREFS_OFFSET(bluestring),        TYPE_STR},
 {"dnsprogram",          PREFS_OFFSET(dnsprogram),        TYPE_STR},
@@ -438,9 +434,8 @@ load_config (void)
       strcpy (prefs.username, username);
       strcpy (prefs.doubleclickuser, "/QUOTE WHOIS %s");
       strcpy (prefs.awayreason, "I'm busy");
-      strcpy (prefs.quitreason, "[x]chat");
+      strcpy (prefs.quitreason, "[nf]chat by NetForce (www.netforce.be)");
       strcpy (prefs.font_normal, "-b&h-lucidatypewriter-medium-r-normal-*-*-120-*-*-m-*-*-*");
-      strcpy (prefs.dialog_font_normal, prefs.font_normal);
       strcpy (prefs.sounddir, g_get_home_dir ());
       strcpy (prefs.soundcmd, "play");
       strcpy (prefs.dnsprogram, "host");
