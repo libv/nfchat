@@ -91,7 +91,7 @@ ignore_add (char *mask, int priv, int noti, int chan, int ctcp, int invi, int un
 
    if (!change_only)
       ignore_list = g_slist_prepend (ignore_list, ig);
-   fe_ignore_update (1);
+   /* fe_ignore_update (1); */
 
    if (change_only)
       return 2;
@@ -179,7 +179,7 @@ ignore_del (char *mask, struct ignore *ig)
       ignore_list = g_slist_remove (ignore_list, ig);
       free (ig->mask);
       free (ig);
-      fe_ignore_update (1);
+      /* fe_ignore_update (1); Removed cos the fe function was scrapped*/
       return TRUE;
    }
    return FALSE;
@@ -240,7 +240,7 @@ ignore_check (char *host, int priv, int noti, int chan, int ctcp, int invi)
                ignored_ctcp++;
             if (invi)
                ignored_invi++;
-            fe_ignore_update (2);
+            /* fe_ignore_update (2); */
             return TRUE;
          }
       }

@@ -978,7 +978,6 @@ static struct mymenu mymenu[] =
    {M_MENU, N_ ("Raw Log Window.."), (menucallback)menu_rawlog, 0, 1},
    {M_MENU, N_ ("URL Grabber Window.."), (menucallback)url_opengui, 0, 1},
    {M_MENU, N_ ("Notify List Window.."), (menucallback) notify_opengui, 0, 1},
-   {M_MENU, N_ ("Ignore Window.."), (menucallback)ignore_gui_open, 0, 1},
    {M_SEP, 0, 0, 0, 0},
    {M_MENU, N_ ("Flush Buffer"), (menucallback)menu_flushbuffer, 0, 1},
    {M_MENU, N_ ("Save Buffer.."), (menucallback)menu_savebuffer, 0, 1},  /* 23 */

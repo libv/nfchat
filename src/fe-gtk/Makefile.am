@@ -11,7 +11,7 @@ nfchat_LDADD = ../common/libnfchatmain.a
 
 nfchat_SOURCES =	ascii.c chanlist.c dccgui.c dialog.c \
 			editlist.c fe-gtk.c fkeys.c \
-			gtkutil.c ignoregui.c \
+			gtkutil.c \
 			maingui.c \
 			menu.c notifygui.c palette.c \
 			plugingui.c rawlog.c \

@@ -2,9 +2,22 @@ NF-chat;
 
 
 start gtk strip
+
+
+0.1.3;
+""""""
+  - removed ignoregui.c
+  - removed search_open/menu_search from menu.c
+  - removed fe_ignore_update from src/common/fe.h & ignore.c
+  - removed ignore_gui_open from src/fe-gtk/menu.c
+  - edited Makefile.am
+### ignore should still work np, only the graphical front end got lost
+
 0.1.2;
 """"""
-
+  - removed search.c
+  - removed search_open/menu_search from menu.c
+  - edited Makefile.am
 
 0.1.1;
 """"""
