@@ -45,7 +45,6 @@ extern void search_open (session *sess);
 extern void my_system (char *cmd);
 extern void show_and_unfocus (GtkWidget * wid);
 extern char *default_file (void);
-extern void menu_about (GtkWidget * wid, gpointer sess);
 extern void connect_server (struct session *sess, char *server, int port, int quiet);
 extern void userlist_hide (GtkWidget * igad, struct session *sess);
 extern void palette_edit (void);
@@ -1052,9 +1051,6 @@ static struct mymenu mymenu[] =
    {M_SEP, 0, 0, 0, 0},
    {M_MENU, N_ ("X-Chat Homepage.."), (menucallback) menu_webpage, 0, 1},
    {M_MENU, N_ ("Online Docs.."), (menucallback) menu_docs, 0, 1},
-   {M_SEP, 0, 0, 0, 0},
-   {M_MENU, N_ ("About X-Chat.."), (menucallback) menu_about, 0, 1},
-
    {M_END, 0, 0, 0, 0},
 };
 
