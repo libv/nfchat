@@ -44,7 +44,7 @@ void check_special_chars (char *cmd);
 extern GSList *sess_list;
 extern GSList *serv_list;
 extern GSList *command_list;
-extern GSList *button_list;
+/*extern GSList *button_list; */
 extern struct xchatprefs prefs;
 extern struct session *current_tab;
 
@@ -222,7 +222,6 @@ process_data_init (unsigned char *buf, char *cmd, char *word[], char *word_eol[]
    }
 }
 
-static int cmd_addbutton (struct session *sess, char *tbuf, char *word[], char *word_eol[]); 
 static int cmd_away (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_ban (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_clear (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -231,7 +230,6 @@ static int cmd_ctcp (struct session *sess, char *tbuf, char *word[], char *word_
 static int cmd_country (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_cycle (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_delbutton (struct session *sess, char *tbuf, char *word[], char *word_eol[]); 
 static int cmd_deop (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_devoice (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_discon (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -287,7 +285,6 @@ static int cmd_voice (struct session *sess, char *tbuf, char *word[], char *word
 
 struct commands cmds[] =
 {
-   {"ADDBUTTON", cmd_addbutton, 0, 0, "/ADDBUTTON <name> <action>, adds a button under the user-list\n"},
    {"AWAY", cmd_away, 1, 0, "/AWAY [<reason>], sets you away\n"},
    {"BAN", cmd_ban, 1, 1, "/BAN <mask> [<bantype>], bans everyone matching the mask from the current channel. If they are already on the channel this doesn't kick them (needs chanop)\n"},
    {"CLEAR", cmd_clear, 0, 0, "/CLEAR, Clears the current text window\n"},
@@ -296,7 +293,6 @@ struct commands cmds[] =
    {"COUNTRY", cmd_country,0,0, "/COUNTRY <code>, finds a country code, eg: au = australia\n"},
    {"CYCLE", cmd_cycle, 1, 1, "/CYCLE, parts current channel and immediately rejoins\n"},
    {"DEBUG", cmd_debug, 0, 0, 0},
-   {"DELBUTTON", cmd_delbutton, 0, 0, "/DELBUTTON <name>, deletes a button from under the user-list\n"},
    {"DEOP", cmd_deop, 1, 1, "/DEOP <nick>, removes chanop status from the nick on the current channel (needs chanop)\n"},
    {"DEVOICE", cmd_devoice, 1, 1, "/DEVOICE <nick>, removes voice status from the nick on the current channel (needs chanop)\n"},
    {"DISCON", cmd_discon, 0, 0, "/DISCON, Disconnects from server\n"},
@@ -428,18 +424,6 @@ send_channel_modes (struct session *sess, char *tbuf,
 
 #define find_word_to_end(a, b) word_eol[b]
 #define find_word(a, b) word[b]
-
-int
-cmd_addbutton (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-   if (*word[2] && *word_eol[3])
-   {
-      list_addentry (&button_list, word_eol[3], word[2]);
-      /* fe_buttons_update (sess); removed from maingui.c - this whole structure should go */
-      return TRUE;
-   }
-   return FALSE;
-} 
 
 int
 cmd_away (struct session *sess, char *tbuf, char *word[], char *word_eol[])
@@ -731,18 +715,6 @@ cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 #endif /* MEMORY_DEBUG */
 
    return TRUE;
-}
-
-int
-cmd_delbutton (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-   if (*word[2])
-   {
-      if (list_delentry (&button_list, word[2]))
-         /* fe_buttons_update (sess); remove this whole structure please*/
-      return TRUE;
-   }
-   return FALSE;
 }
 
 int

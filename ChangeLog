@@ -1,4 +1,53 @@
 NF-chat;
+
+0.3.1;
+""""""
+    a) - deleted python.c
+       - removing ignore
+         - removed functions from
+            - ignore.c
+              ignore_save, ignore_load, ignore_read_next_entry, ignore_check, ignore_del,
+              ignore_showlist, ignore_add, ignored_ctcp, ignored_priv, ignored_chan,
+              ignored_noti, ignored_invi, ignored_total, deleted, edited Makefile
+            - ignore.h
+              ignore_save, ignore_load, ignore_check, ignore_del, ignore_showlist, 
+              ignore_add, ignore_gui_open, ignore_gui_update, deleted
+            - xchat.c
+              ignore_save from xchat_cleanup, ignore_load, include, *ignore_list 
+            - inbound.c
+              ignore_check from process_line (5x), include, 
+            - outbound.c
+              ignore_del from cmd_unignore, removed cmd_unignore, ignore_showlist 
+              from cmd_ignore, ignore_add from cmd_ignore, removed cmd_ignore, include,
+            - perl.c
+              include, removed XS_IRC_ignore_list
+            - text.c
+              *pevt_ignorelist_help, *pevt_ignoreaddremove_help
+            - xchat.h 
+              ignore_date, ignore_mode, ignore_names
+        
+    b)
+	-cleaning up the conf files
+	    - we dont need buttons.conf so...
+		- xchat.c 
+		  define defaultconf_buttons, list_loadconf, button_list
+		- outbound.c
+		  button_list, cmd_addbutton, cmd_delbutton, definitions
+		  of them & from commands struct.
+		- removed  nouserlistbuttons from cfgfiles.c & xchat.h
+### fe_buttons_update <-- channel or userlist, remove when channelbuttons
+	    - we dont need popup.conf
+		- xchat.c
+		  *popup_list, defaultconf define, xchat_init (list_load_)
+	    - we dont need replace.conf
+		- xchat.c
+		  *replace_list, defaultconf, xchat_init
+	    - we dont need urlhandler_list
+      		- xchat.c
+		  *urlhandler_list, *url_list, defaultconf, xchat_init
+		- removed autosave_url from cfgfiles.c & xchat.h
+		
+
 0.3.0; Starting work on the actual client
 """"""
    a) small cleanup

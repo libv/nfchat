@@ -112,7 +112,6 @@ struct xchatprefs
    unsigned int use_trans;
    unsigned int autosave;
    unsigned int autodialog;
-   unsigned int autosave_url;
    unsigned int autoreconnect;
    unsigned int autoreconnectonfail;
    unsigned int invisible;
@@ -123,7 +122,6 @@ struct xchatprefs
    unsigned int autorejoin;
    unsigned int colorednicks;
    unsigned int nochanmodebuttons;
-   unsigned int nouserlistbuttons;
    unsigned int nickcompletion;
    unsigned int tabchannels;
    unsigned int nopaned;

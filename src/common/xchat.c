@@ -35,25 +35,17 @@
 #include "plugin.h"
 
 
-GSList *popup_list = 0;
-GSList *button_list = 0;
 GSList *command_list = 0;
 GSList *ctcp_list = 0;
-GSList *replace_list = 0;
 GSList *sess_list = 0;
 GSList *serv_list = 0;
-GSList *url_list = 0;
 GSList *away_list = 0;
-GSList *urlhandler_list = 0;
 
 int notify_tag = -1;
 int xchat_is_quitting = 0;
 
 extern GSList *ctcp_list;
-extern GSList *popup_list;
-extern GSList *button_list;
 extern GSList *command_list;
-extern GSList *replace_list;
 
 #ifdef USE_PERL
 extern struct session *perl_sess;
@@ -840,53 +832,6 @@ xchat_misc_checks (void) /* this gets called every 2 seconds */
 #define defaultconf_ctcp  "NAME TIME\nCMD /nctcp %s TIME %t\n\n"\
                           "NAME PING\nCMD /nctcp %s PING %d\n\n"
 
-#define defaultconf_popup  "NAME SUB\nCMD CTCP\n\n"\
-                           "NAME Version\nCMD /ctcp %s VERSION\n\n"\
-                           "NAME Userinfo\nCMD /ctcp %s USERINFO\n\n"\
-                           "NAME Clientinfo\nCMD /ctcp %s CLIENTINFO\n\n"\
-                           "NAME Ping\nCMD /ping %s\n\n"\
-                           "NAME Time\nCMD /ctcp %s TIME\n\n"\
-                           "NAME Finger\nCMD /ctcp %s FINGER\n\n"\
-                           "NAME ENDSUB\nCMD \n\n"\
-                           "NAME ENDSUB\nCMD \n\n"\
-                           "NAME SUB\nCMD Oper\n\n"\
-                           "NAME Kill\nCMD /quote KILL %s :die!\n\n"\
-                           "NAME ENDSUB\nCMD \n\n"\
-                           "NAME SUB\nCMD Mode\n\n"\
-                           "NAME Give Voice\nCMD /voice %s\n\n"\
-                           "NAME Take Voice\nCMD /devoice %s\n"\
-                           "NAME SEP\nCMD \n\n"\
-                           "NAME Give Ops\nCMD /op %s\n\n"\
-                           "NAME Take Ops\nCMD /deop %s\n\n"\
-                           "NAME ENDSUB\nCMD \n\n"\
-                           "NAME SUB\nCMD Ignore\n\n"\
-                           "NAME ENDSUB\nCMD \n\n"\
-                           "NAME SUB\nCMD Kick/Ban\n\n"\
-                           "NAME Kick\nCMD /kick %s\n\n"\
-                           "NAME Ban\nCMD /ban %s\n\n"\
-                           "NAME Kick&Ban\nCMD /kickban %s\n\n"\
-                           "NAME ENDSUB\nCMD \n\n"\
-                           "NAME SUB\nCMD Info\n\n"\
-                           "NAME Who\nCMD /quote WHO %s\n\n"\
-                           "NAME Whois\nCMD /quote WHOIS %s\n\n"\
-                           "NAME DNS Lookup\nCMD /dns %s\n\n"\
-                           "NAME Trace\nCMD /quote TRACE %s\n\n"\
-                           "NAME UserHost\nCMD /quote USERHOST %s\n\n"\
-                           "NAME ENDSUB\nCMD \n\n"\
-                           "NAME Open Query\nCMD /query %s\n\n"
-
-#define defaultconf_buttons   "NAME Op\nCMD /op %a\n\n"\
-                              "NAME DeOp\nCMD /deop %a\n\n"\
-                              "NAME Ban\nCMD /ban %s\n\n"\
-                              "NAME Kick\nCMD /kick %s\n\n"\
-                              "NAME Dialog\nCMD /query %s\n\n"\
-                              "NAME Lookup\nCMD /dns %s\n\n"\
-                              "NAME Whois\nCMD /whois %s\n"
-
-#define defaultconf_replace "NAME teh\nCMD the\n\n"\
-                            "NAME r\nCMD are\n\n"\
-                            "NAME u\nCMD you\n\n"
-
 #define defaultconf_commands \
    "NAME ACTION\nCMD /me &2\n\n"\
    "NAME ALIAS\nCMD /echo See \002User Commands\002 in the Settings menu.\n\n"\
@@ -909,17 +854,6 @@ xchat_misc_checks (void) /* this gets called every 2 seconds */
    "NAME WALLOPS\nCMD /quote WALLOPS :&2\n\n"\
    "NAME WII\nCMD /quote WHOIS %2 %2\n\n"
 
-#define defaultconf_urlhandlers \
-   "NAME -> Netscape (Existing)" "\n" "CMD !netscape -remote 'openURL(%s)'" "\n\n"\
-   "NAME -> Netscape (New Window)" "\n" "CMD !netscape -remote 'openURL(%s,new-window)'" "\n\n"\
-   "NAME -> Netscape (Run New)" "\n" "CMD !netscape %s" "\n\n"\
-   "NAME -> Lynx" "\n" "CMD !xterm -e lynx %s" "\n\n"\
-   "NAME -> NcFTP" "\n" "CMD !xterm -e ncftp %s" "\n\n"\
-   "NAME -> gFTP" "\n" "CMD !gftp %s" "\n\n"\
-   "NAME -> Mozilla" "\n" "CMD !mozilla %s" "\n\n"\
-   "NAME -> KFM" "\n" "CMD !kfmclient openURL %s" "\n\n"\
-   "NAME -> Connect as IRC Server" "\n" "CMD /newserver %s" "\n\n"
-
 static void
 xchat_init (void)
 {
@@ -935,12 +869,8 @@ xchat_init (void)
    signal_setup ();
    load_text_events ();
    notify_load ();
-   list_loadconf ("popup.conf", &popup_list, defaultconf_popup);
    list_loadconf ("ctcpreply.conf", &ctcp_list, defaultconf_ctcp);
-   list_loadconf ("buttons.conf", &button_list, defaultconf_buttons);
    list_loadconf ("commands.conf", &command_list, defaultconf_commands);
-   list_loadconf ("replace.conf", &replace_list, defaultconf_replace);
-   list_loadconf ("urlhandlers.conf", &urlhandler_list, defaultconf_urlhandlers);
 
    if (prefs.use_trans)
    {
