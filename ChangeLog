@@ -1,5 +1,28 @@
 NF-chat;
 
+0.3.2;
+""""""
+    cleanin up the commands (outbound.c)
+
+    a) cleanin out all the unneccessary ones from outbound.c
+	- cmd_away;cmd_ban;cmd_clear: clears textwindow
+	  cmd_close: closes window;cmd_country;cmd_deop
+	  cmd_devoice;cmd_dns;cmd_echo;cmd_exec*;cmd_invite
+	  cmd_kick*;cmd_lastlog;cmd_mdeop;cmd_mkick*
+	  cmd_nctcp;cmd_notice;cmd_op;cmd_ping;cmd_query
+	  cmd_say;cmd_set/settab;cmd_servchan;cmd_topic
+	  cmd_unban;cmd_wall*;cmd_voice;cmd_ctcp;cmd_discon
+	  cmd_gate;cmd_names;cmd_newserver;cmd_quote
+	- lastlog + call; ban; exec_check_process; exec_data
+	  exec_handle_colors; insert_color; esc; color_data[]
+	  color_data_bold[]; send_channel_modes; cmd_set;
+	- removin user defined commands from xchat.c
+		-command_list, defaultconf_commands
+	- removed command_list from outbound.c + user_command, pop
+
+????XP_USERCOMMAND?????
+    b) removin unneccessary output
+
 0.3.1;
 """"""
     a) - deleted python.c

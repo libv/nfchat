@@ -35,7 +35,6 @@
 #include "signals.h"
 
 
-GSList *command_list = 0;
 GSList *ctcp_list = 0;
 GSList *sess_list = 0;
 GSList *serv_list = 0;
@@ -44,7 +43,6 @@ GSList *away_list = 0;
 int xchat_is_quitting = 0;
 
 extern GSList *ctcp_list;
-extern GSList *command_list;
 
 struct session *current_tab;
 struct session *menu_sess = 0;
@@ -783,28 +781,6 @@ xchat_misc_checks (void) /* this gets called every 2 seconds */
 #define defaultconf_ctcp  "NAME TIME\nCMD /nctcp %s TIME %t\n\n"\
                           "NAME PING\nCMD /nctcp %s PING %d\n\n"
 
-#define defaultconf_commands \
-   "NAME ACTION\nCMD /me &2\n\n"\
-   "NAME ALIAS\nCMD /echo See \002User Commands\002 in the Settings menu.\n\n"\
-   "NAME BANLIST\nCMD /quote MODE %c +b\n\n"\
-   "NAME DIALOG\nCMD /query %2\n\n"\
-   "NAME DMSG\nCMD /msg =%2 &3\n\n"\
-   "NAME EXIT\nCMD /quit\n\n"\
-   "NAME J\nCMD /join &2\n\n"\
-   "NAME KILL\nCMD /quote KILL %2 :&3\n\n"\
-   "NAME LEAVE\nCMD /part &2\n\n"\
-   "NAME M\nCMD /msg &2\n\n"\
-   "NAME ONOTICE\nCMD /notice @%c &2\n\n"\
-   "NAME RAW\nCMD /quote &2\n\n"\
-   "NAME SERVHELP\nCMD /quote HELP\n\n"\
-   "NAME SV\nCMD /echo X-Chat %v\n\n"\
-   "NAME UMODE\nCMD /mode %n &2\n\n"\
-   "NAME UPTIME\nCMD /quote STATS u\n\n"\
-   "NAME VER\nCMD /ctcp %2 VERSION\n\n"\
-   "NAME VERSION\nCMD /ctcp %2 VERSION\n\n"\
-   "NAME WALLOPS\nCMD /quote WALLOPS :&2\n\n"\
-   "NAME WII\nCMD /quote WHOIS %2 %2\n\n"
-
 static void
 xchat_init (void)
 {
@@ -820,8 +796,7 @@ xchat_init (void)
    signal_setup ();
    load_text_events ();
    list_loadconf ("ctcpreply.conf", &ctcp_list, defaultconf_ctcp);
-   list_loadconf ("commands.conf", &command_list, defaultconf_commands);
-
+   
    if (prefs.use_trans)
    {
       if (load_trans_table (prefs.trans_file) == 0)
