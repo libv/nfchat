@@ -12,6 +12,8 @@ NF-chat;
   - removed toolbox and confmode from struct session_gui in fe-gtk.h
   - edited the logo
 
+  b) 
+  - removed *menu from session_gui in fe-gtk.h
 0.1.13;
 """""""
 

@@ -76,8 +76,7 @@
 struct session_gui
 {
    GtkWidget *window;
-   GtkWidget *vbox;
-   GtkWidget *menu; 
+   GtkWidget *vbox;   
    GtkWidget *tbox;
    GtkWidget *changad;
    GtkWidget *topicgad;         /* FIXME: Pseudo union with ipgad --AGL */

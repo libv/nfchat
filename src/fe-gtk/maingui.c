@@ -1395,13 +1395,7 @@ relink_window (GtkWidget * w, struct session *sess)
          gui_make_tab_window (sess);
          need = TRUE;
       }
-      if (sess->gui->menu)
-      {
-         /* this will destroy the HandleBox and its children */
-         gtk_widget_destroy (sess->gui->menu->parent);
-
-         sess->gui->menu = NULL;
-      }
+      
       sess->is_tab = 1;
       old = sess->gui->window;
       gtk_signal_disconnect_by_data (GTK_OBJECT (old), sess);
