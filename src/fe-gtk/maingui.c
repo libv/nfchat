@@ -64,9 +64,9 @@ extern int handle_multiline (struct session *sess, char *cmd, int history, int n
 extern int kill_session_callback (struct session *sess);
 extern gint gtk_kill_session_callback (GtkWidget *, struct session *sess);
 extern void palette_alloc (GtkWidget * widget);
-extern void menu_urlmenu (struct session *sess, GdkEventButton * event, char *url);
+/* extern void menu_urlmenu (struct session *sess, GdkEventButton * event, char *url);
 extern void menu_hostmenu (struct session *sess, GdkEventButton * event, char *url);
-extern void menu_chanmenu (struct session *sess, GdkEventButton * event, char *url);
+extern void menu_chanmenu (struct session *sess, GdkEventButton * event, char *url); */
 extern void userlist_dnd_drop (GtkWidget *, GdkDragContext *, gint, gint, GtkSelectionData *, guint, guint32, struct session *);
 extern int userlist_dnd_motion (GtkWidget *, GdkDragContext *, gint, gint, guint);
 extern int userlist_dnd_leave (GtkWidget *, GdkDragContext *, guint time);
@@ -185,77 +185,6 @@ fe_set_nick (struct server *serv, char *newnick)
    }
 }
 
-static void
-handle_topicgad (GtkWidget * igad, struct session *sess)
-{
-   char *topic = gtk_entry_get_text (GTK_ENTRY (igad));
-   if (sess->channel[0] && sess->server->connected)
-   {
-      char *fmt = "TOPIC %s :%s\r\n";
-      char *tbuf;
-      int len = strlen(fmt)-3 + strlen(sess->channel) + strlen(topic);
-      tbuf = malloc (len);
-      snprintf (tbuf, len, "TOPIC %s :%s\r\n", sess->channel, topic);
-      tcp_send (sess->server, tbuf);
-      free(tbuf);
-   } else
-      gtk_entry_set_text (GTK_ENTRY (igad), "");
-}
-
-static char *
-find_selected_nick (struct session *sess)
-{
-   int row;
-   struct user *user;
-
-   row = gtkutil_clist_selection (sess->gui->namelistgad);
-   if (row == -1)
-      return 0;
-
-   user = gtk_clist_get_row_data (GTK_CLIST (sess->gui->namelistgad), row);
-   if (!user)
-      return 0;
-   return user->nick;
-}
-
-static void
-ul_button_rel (GtkWidget * widget, GdkEventButton * even, struct session *sess)
-{
-   char *nick;
-   int row, col;
-   char buf[67];
-
-   if (!even)
-      return;
-   if (even->button == 3)
-   {
-      if (gtk_clist_get_selection_info (GTK_CLIST (widget), even->x, even->y, &row, &col) < 0)
-         return;
-      gtk_clist_unselect_all (GTK_CLIST (widget));
-      gtk_clist_select_row (GTK_CLIST (widget), row, 0);
-      nick = find_selected_nick (sess);
-      if (nick)
-      {
-         menu_popup (sess, even, nick);
-      }
-      return;
-   }
-   if (even->button == 2)
-   {
-      if (gtk_clist_get_selection_info (GTK_CLIST (widget), even->x, even->y, &row, &col) != -1)
-      {
-         gtk_clist_select_row (GTK_CLIST (widget), row, col);
-         nick = find_selected_nick (sess);
-         if (nick)
-         {
-            snprintf (buf, sizeof (buf), "%s: ", nick);
-            gtk_entry_set_text (GTK_ENTRY (sess->gui->inputgad), buf);
-            gtk_widget_grab_focus (sess->gui->inputgad);
-         }
-      }
-   }
-}
-
 void
 add_tip (GtkWidget * wid, char *text)
 {
@@ -363,158 +292,6 @@ textgad_get_focus_cb (GtkWidget * wid, GdkEventKey * event, struct session *sess
    return TRUE;
 }
 
-#define WORD_URL     1
-#define WORD_NICK    2
-#define WORD_CHANNEL 3
-#define WORD_HOST    4
-#define WORD_EMAIL   5
-#define WORD_DIALOG  -1
-
-/* check if a word is clickable */
-
-int
-maingui_word_check (GtkXText *xtext, char *word)
-{
-   session *sess;
-   char *at, *dot;
-   int i, dots;
-   int len = strlen (word);
-
-   if ((word[0] == '@' || word[0] == '+') && word[1] == '#')
-      return WORD_CHANNEL;
-
-   if (word[0] == '#' && word[1] != '#' && word[1] != 0)
-      return WORD_CHANNEL;
-
-   if (!strncasecmp (word, "irc://", 6))
-      return WORD_URL;
-
-   if (!strncasecmp (word, "irc.", 4))
-      return WORD_URL;
-
-   if (!strncasecmp (word, "ftp.", 4))
-      return WORD_URL;
-
-   if (!strncasecmp (word, "ftp:", 4))
-      return WORD_URL;
-
-   if (!strncasecmp (word, "www.", 4))
-      return WORD_URL;
-
-   if (!strncasecmp (word, "http:", 5))
-      return WORD_URL;
-
-   if (!strncasecmp (word, "https:", 6))
-      return WORD_URL;
-
-   sess = gtk_object_get_user_data (GTK_OBJECT (xtext));
-
-   if (find_name (sess, word))
-      return WORD_NICK;
-
-   at = strchr (word, '@');  /* check for email addy */
-   dot = strrchr (word, '.');
-   if (at && dot)
-   {
-      if ((unsigned long) at < (unsigned long) dot)
-      {
-         if (strchr (word, '*'))
-            return WORD_HOST;
-         else
-            return WORD_EMAIL;
-      }
-   }
-
-   /* check if it's an IP number */
-   dots = 0;
-   for (i = 0; i < len; i++)
-   {
-      if (word[i] == '.')
-         dots++;
-   }
-   if (dots == 3)
-   {
-      if (inet_addr (word) != -1)
-         return WORD_HOST;
-   }
-
-   if (!strncasecmp (word + len - 5, ".html", 5))
-      return WORD_HOST;
-
-   if (!strncasecmp (word + len - 4, ".org", 4))
-      return WORD_HOST;
-
-   if (!strncasecmp (word + len - 4, ".net", 4))
-      return WORD_HOST;
-
-   if (!strncasecmp (word + len - 4, ".com", 4))
-      return WORD_HOST;
-
-   if (!strncasecmp (word + len - 4, ".edu", 4))
-      return WORD_HOST;
-
-   if (len > 5)
-   {
-      if (word[len-3] == '.' &&
-          isalpha(word[len-2]) &&
-          isalpha(word[len-1])
-         )
-         return WORD_HOST;
-   }
-
-   return 0;
-}
-
-/* mouse click inside text area */
-
-void
-maingui_word_clicked (GtkXText *xtext, char *word, GdkEventButton *even, session *sess)
-{
-
-   if (even->button == 1)  /* left button */
-   {
-      if (even->state & GDK_CONTROL_MASK)
-      {
-         switch (maingui_word_check (xtext, word))
-         {
-         case WORD_URL:
-         case WORD_HOST:
-            goto_url (0, word);
-         }
-      }
-      return;
-   }
-
-   switch (maingui_word_check (xtext, word))
-   {
-   case WORD_URL:
-   case WORD_HOST:
-      menu_urlmenu (sess, even, word);
-      break;
-   case WORD_NICK:
-      menu_popup (sess, even, word);
-      break;
-   case WORD_CHANNEL:
-      if (*word == '@' || *word == '+')
-         word++;
-      menu_chanmenu (sess, even, word);
-      break;
-   case WORD_EMAIL:
-      {
-         char *newword = malloc (strlen (word) + 10);
-         if (*word == '~')
-            word++;
-         sprintf (newword, "mailto:%s", word);
-         menu_urlmenu (sess, even, newword);
-         free (newword);
-      }
-      break;
-   case WORD_DIALOG:
-      menu_popup (sess, even, sess->channel);
-      break;
-   }
-}
-
 void
 maingui_configure (GtkWidget *unused)
 {
@@ -537,14 +314,13 @@ maingui_create_textlist (struct session *sess, GtkWidget *leftpane)
    ((GtkXText*)sess->gui->textgad)->thinline = prefs.thin_separator;
    ((GtkXText*)sess->gui->textgad)->max_lines = prefs.max_lines;
    ((GtkXText*)sess->gui->textgad)->error_function = gtkutil_simpledialog;
-   ((GtkXText*)sess->gui->textgad)->urlcheck_function = maingui_word_check;
-
+  
    ((GtkXText*)sess->gui->textgad)->tint_red = prefs.tint_red;
    ((GtkXText*)sess->gui->textgad)->tint_green = prefs.tint_green;
    ((GtkXText*)sess->gui->textgad)->tint_blue = prefs.tint_blue;
 
-   if (prefs.timestamp && prefs.indent_nicks)
-      ((GtkXText*)sess->gui->textgad)->time_stamp = TRUE;
+  /* if (prefs.timestamp && prefs.indent_nicks)
+      ((GtkXText*)sess->gui->textgad)->time_stamp = TRUE; */
 
    gtk_xtext_set_palette (GTK_XTEXT (sess->gui->textgad), colors);
    gtk_xtext_set_font (GTK_XTEXT (sess->gui->textgad), font_normal, 0);
@@ -568,9 +344,6 @@ maingui_create_textlist (struct session *sess, GtkWidget *leftpane)
                                  "configure_event",
                                  GTK_SIGNAL_FUNC (maingui_configure),
                                  GTK_OBJECT (sess->gui->textgad));
-
-   gtk_signal_connect (GTK_OBJECT (sess->gui->textgad), "word_click",
-                       GTK_SIGNAL_FUNC (maingui_word_clicked), sess);
 }
 
 static void
@@ -659,32 +432,7 @@ static void
 maingui_userlist_selected (GtkWidget *clist, gint row, gint column,
                            GdkEventButton *even)
 {
-   char *nick;
-   void *unused;
-
-   if (even)
-   {
-      if (even->type == GDK_2BUTTON_PRESS)
-      {
-         if (prefs.doubleclickuser[0])
-         {
-
-            if (gtk_clist_get_cell_type (GTK_CLIST (clist), row, column) == GTK_CELL_PIXTEXT)
-            {
-               gtk_clist_get_pixtext (GTK_CLIST (clist), row, column, &nick, (guint8 *) & unused, (GdkPixmap **) & unused, (GdkBitmap **) & unused);
-            } else
-               gtk_clist_get_text (GTK_CLIST (clist), row, column, &nick);
-            nick_command_parse (menu_sess, prefs.doubleclickuser, nick, nick);
-         }
-      } else
-      {
-         if (!(even->state & GDK_SHIFT_MASK))
-         {
-            gtk_clist_unselect_all (GTK_CLIST (clist));
-            gtk_clist_select_row (GTK_CLIST (clist), row, column);
-         }
-      }
-   }
+gtk_clist_unselect_all (GTK_CLIST (clist));
 }
 
 void
@@ -834,13 +582,10 @@ create_window (struct session *sess)
    }
 
    sess->gui->topicgad = gtk_entry_new ();
-   gtk_signal_connect (GTK_OBJECT (sess->gui->topicgad), "activate",
-                       GTK_SIGNAL_FUNC (handle_topicgad), sess);
+   gtk_entry_set_editable (GTK_ENTRY (sess->gui->topicgad), FALSE);
    gtk_container_add (GTK_CONTAINER (tbox), sess->gui->topicgad);
    gtk_widget_show (sess->gui->topicgad);
-
-   add_tip (sess->gui->topicgad, "The channel topic");
-
+   
    leftpane = gtk_hbox_new (FALSE, 0);
    gtk_widget_show (leftpane);
 
@@ -871,14 +616,10 @@ create_window (struct session *sess)
 
    sess->gui->namelistgad = gtkutil_clist_new (1, 0, nlbox, GTK_POLICY_AUTOMATIC,
                maingui_userlist_selected, sess, 0, 0, GTK_SELECTION_MULTIPLE);
-
-   gtk_clist_set_selection_mode (GTK_CLIST (sess->gui->namelistgad),
-              GTK_SELECTION_MULTIPLE);
+   
    gtk_clist_set_column_width (GTK_CLIST (sess->gui->namelistgad), 0, 10);
    gtk_widget_set_usize (sess->gui->namelistgad->parent, 115, 0);
-   gtk_signal_connect (GTK_OBJECT (sess->gui->namelistgad), "button_press_event",
-                       GTK_SIGNAL_FUNC (ul_button_rel), sess);
-
+ 
    bbox = gtk_hbox_new (FALSE, 0);
    gtk_container_set_border_width (GTK_CONTAINER (bbox), 0);
    gtk_box_pack_end (GTK_BOX (vbox), bbox, FALSE, TRUE, 2);

@@ -2,7 +2,7 @@
 
 AC_INIT(src)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(NF-chat, 0.2.3)
+AM_INIT_AUTOMAKE(NF-chat, 0.2.4)
 AC_PROG_CC
 
 ALL_LINGUAS="fr nl"

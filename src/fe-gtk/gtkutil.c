@@ -268,15 +268,18 @@ gtkutil_clist_new (int columns, char *titles[],
       clist = gtk_clist_new_with_titles (columns, titles);
    else
       clist = gtk_clist_new (columns);
-
-   gtk_clist_set_selection_mode (GTK_CLIST (clist), selection_mode);
+   if (selection_mode)
+      gtk_clist_set_selection_mode (GTK_CLIST (clist), selection_mode);
+   
    gtk_clist_column_titles_passive (GTK_CLIST (clist));
    gtk_container_add (GTK_CONTAINER (win), clist);
+
    if (select_callback)
    {
       gtk_signal_connect (GTK_OBJECT (clist), "select_row",
                           GTK_SIGNAL_FUNC (select_callback), select_userdata);
    }
+
    if (unselect_callback)
    {
       gtk_signal_connect (GTK_OBJECT (clist), "unselect_row",

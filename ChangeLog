@@ -1,8 +1,33 @@
 NF-chat;
 
+0.2.4;
+""""""
+   - made topic uneditable
+### should make it scrolling around
+   - removed handle_topicgad from maingui.c
+
+   - removed ul_button_rel from maingui.c and from create_window
+   - removed adjacent find_selected_nick from maingui.c
+
+   - removed maingui_word_check, maingui_word_clicked
+   - removed calls from maingui_create_textlist,
+### prefs.timestamp
+   - removed menu_urlmenu, menu_popup, menu_chanmenu
+     from menu.c & maingui.c
+   - removed adjacent functions and calls from menu.c
+       menu_quick_sub, menu_quick_endsub, nick_copy
+       url_copy, menu_chan_cycle, menu_chan_part
+       menu_chan_join, submenu_list,  
+   - rewritten maingui_userlist_selected to only call
+       gtk_clist_unselect_all
+   - removed gtk_clist_set_selection_mode from maingui.c
+
+- i should strip out menu.c
+
+
 0.2.3;
 """"""
- a) removing themes support
+  removing themes support
   - removed menu_themehandler from menu.c & themes.c 
   - removed from themes.c
      done_button, notheme_button, close_themelist, row_selected, 
