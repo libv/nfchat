@@ -28,16 +28,36 @@ NF-chat;
          my_window_set_title
      - removed my_widget_get_style externs from 
         fkeys.c, palette.c, textgui.c
-          
+   c)
+     - found a redundant function in textgui.c
+        - pevent_dialog_show, pevent_dialog_close, pevent_dialog_update_sound,
+          pevent_dialog_update, pevent_save_cb, pevent_load_cb,pevent_ok_cb,
+          pevent_test_cb, pevent_dialog, pevent_dialog_twid, pevent_save_req_cb
+          pevent_load_req_cb, `pevent_dialog_select, pevent_dialog_fill
+          pevent_dialog_list, pevent_dialog_unselect, pevent_dialog_hfill
+          pevent_dialog_entry, pevent_dialog_sound_entry, pevent_dialog_hlist
+          gui_entry
+     - removed externs;
+        - colors, *font_normal, *dialog_font_normal, *normaltab_style,
+          *redtab_style, *channelwin_style, text_event, pevent_make_pntevts,
+          pevent_load, pevent_dialog_save, check_special_chars, buf_get_line,
+          show_and_unfocus, *my_widget_get_style, perl_print, struct text_event
+          te[], **pntevts_text, **pntevts, pevt_build_string 
+     - removed includes 
+        - <ctype.h>, <time.h>, <sys/types.h>, <sys/stat.h>, <fcntl.h>,
+          "../common/cfgfiles.h", "../common/plugin.h", "fe-gtk.h", "gtkutil.h"
+     - removed from gtkutil.c
+        - gtkutil_file_req, *filereqcallback, gtkutil_file_req_cancel, 
+          gtkutil_file_req_done, gtkutil_file_req, last_dir
+   d)
+
 0.2.4;
 """"""
    - made topic uneditable
 ### should make it scrolling around
    - removed handle_topicgad from maingui.c
-
    - removed ul_button_rel from maingui.c and from create_window
    - removed adjacent find_selected_nick from maingui.c
-
    - removed maingui_word_check, maingui_word_clicked
    - removed calls from maingui_create_textlist,
 ### prefs.timestamp
@@ -50,9 +70,6 @@ NF-chat;
    - rewritten maingui_userlist_selected to only call
        gtk_clist_unselect_all
    - removed gtk_clist_set_selection_mode from maingui.c
-
-- i should strip out menu.c
-
 
 0.2.3;
 """"""

@@ -1,5 +1,4 @@
 
-void gtkutil_file_req (char *title, void *callback, void *userdata, void *userdata2, int write);
 GtkWidget *gtkutil_window_new (char *title, char *wmclass, int x, int y, void *callback, gpointer userdata, int);
 GtkWidget *gtkutil_dialog_new (char *title, char *wmclass, void *callback, gpointer userdata);
 void gtkutil_destroy (GtkWidget * igad, GtkWidget * dgad);
