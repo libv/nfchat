@@ -73,16 +73,6 @@ GdkFont *my_font_load (char *fontname);
 int
 fe_args (int argc, char *argv[])
 {
-#ifdef USE_GNOME
-   struct poptOption options[] =
-   {
-      {"connect", 'c', POPT_ARG_NONE, 0, 0, "Auto connect", 0},
-      {"cfgdir", 'd', POPT_ARG_STRING, 0, 0, "Config dir", 0},
-      POPT_AUTOHELP
-      {0, '\0', 0, 0}
-   };
-#endif
-
    if (argc > 1)
    {
       if (!strcasecmp (argv[1], "-v") || !strcasecmp (argv[1], "--version"))
@@ -90,7 +80,6 @@ fe_args (int argc, char *argv[])
          puts ("X-Chat " VERSION "");
          return 0;
       }
-#ifndef USE_GNOME
 #ifdef ENABLE_NLS
       bindtextdomain (PACKAGE, LOCALEDIR);
       textdomain (PACKAGE);
@@ -104,14 +93,7 @@ fe_args (int argc, char *argv[])
             );
          return 0;
       }
-#endif
    }
-#ifdef ENABLE_NLS
-#ifdef USE_GNOME
-   bindtextdomain (PACKAGE, LOCALEDIR);
-   textdomain (PACKAGE);
-#endif
-#endif
 
    if (argc > 1)
    {
@@ -131,16 +113,10 @@ fe_args (int argc, char *argv[])
 
    gtk_set_locale ();
 
-#ifdef USE_GNOME
-   gnome_init_with_popt_table (argv[0], VERSION, argc, argv, options, 0, 0);
-#else
    gtk_init (&argc, &argv);
-#endif
 
-#ifndef USE_GNOME
 #ifdef USE_IMLIB
    gdk_imlib_init ();
-#endif
 #endif
 
    return 1;
@@ -204,9 +180,6 @@ init_sess (void)
    strcpy (buf, "   \00310Features\0032: \017");
 #ifdef USE_IMLIB
    strcat (buf, "Imlib ");
-#endif
-#ifdef USE_GNOME
-   strcat (buf, "Gnome ");
 #endif
 #ifdef USE_PERL
    strcat (buf, "Perl ");

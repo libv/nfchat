@@ -12,11 +12,34 @@ removing all gnome/panel/python stuff
      src/common/xchat.c
      src/fe-gtk/fe-gtk.c
      src/fe-gtk/menu.c
+ -USE_PANEL
+    src/common/cfgfiles.c
+    src/common/xchat.panel
+    src/fe-gtk/dialog.c
+    src/fe-gtk/fe-gtk.c
+    src/fe-gtk/fe-gtk.h
+    src/fe-gtk/maingui.c
+    src/fe-gtk/settings.c
+    configure.in
  -USE_GNOME
-
-
-
-              -USE_PANEL
+    src/common/xchat.c
+    src/fe-gtk/about.c
+    src/fe-gtk/chanlist.c
+    src/fe-gtk/dccgui.c
+    src/fe-gtk/dialog.c
+    src/fe-gtk/fe-gtk.c
+    src/fe-gtk/fe-gtk.h
+    src/fe-gtk/gtkutil.c
+    src/fe-gtk/maingui.c
+    src/fe-gtk/menu.c
+    src/fe-gtk/plugingui.c
+    src/fe-gtk/serverlist.c
+    src/fe-gtk/settings.c
+    src/fe-gtk/textgui.c
+    src/fe-gtk/userlistgui.c
+    src/fe-gtk/usermenu.c
+ - removed fake_gnome.c
+   and edited the following files
 
 0.0.1;
 """"""

@@ -61,12 +61,7 @@ usermenu_destroy (GtkWidget *menu)
    GList *items = ((GtkMenuShell*)menu)->children;
    GList *next;
 
-   /* under gnome, the tearoff is also an item */
-#ifdef USE_GNOME
-   items = items->next->next->next; /* don't destroy the 1st 3 items */
-#else
    items = items->next->next; /* don't destroy the 1st 2 items */
-#endif
 
    while (items)
    {

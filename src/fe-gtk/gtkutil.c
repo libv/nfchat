@@ -176,11 +176,6 @@ gtkutil_destroy (GtkWidget * igad, GtkWidget * dgad)
 GtkWidget *
 gtkutil_simpledialog (char *msg)
 {
-#ifdef USE_GNOME
-   GtkWidget *dialog = gnome_message_box_new (msg, GNOME_MESSAGE_BOX_INFO, _ ("Ok"), 0);
-   gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_MOUSE);
-   gtk_widget_show (dialog);
-#else
    GtkWidget *label, *button, *dialog;
 
    dialog = gtk_dialog_new ();
@@ -201,7 +196,7 @@ gtkutil_simpledialog (char *msg)
    gtk_widget_show (button);
 
    gtk_widget_show (dialog);
-#endif
+
    return dialog;
 }
 
@@ -210,9 +205,6 @@ gtkutil_button (GtkWidget * win, char *stock, char *labeltext,
                 void *callback, gpointer userdata, GtkWidget * box)
 {
    GtkWidget *button, *label, *hbox;
-#ifdef USE_GNOME
-   GtkWidget *pixmap;
-#endif
 
    hbox = gtk_hbox_new (0, 0);
    gtk_widget_show (hbox);
@@ -221,15 +213,6 @@ gtkutil_button (GtkWidget * win, char *stock, char *labeltext,
    gtk_signal_connect (GTK_OBJECT (button), "clicked",
                        GTK_SIGNAL_FUNC (callback), userdata);
    gtk_widget_show (button);
-
-#ifdef USE_GNOME
-   if (stock)
-   {
-      pixmap = gnome_stock_pixmap_widget_at_size (win, stock, 12, 14);
-      gtk_container_add (GTK_CONTAINER (hbox), pixmap);
-      gtk_widget_show (pixmap);
-   }
-#endif
 
    if (labeltext)
    {

@@ -2,14 +2,6 @@
 #include "../../config.h"
 #endif
 
-#ifdef USE_GNOME
-
-#include <gnome.h>
-#undef GNOME_APP
-#define GNOME_APP(n) ((GnomeApp*)n)
-
-#else
-
 #include <gtk/gtk.h>
 #include "fake_gnome.h"
 #ifdef ENABLE_NLS
@@ -23,8 +15,6 @@
 #else
 #  define N_(String) (String)
 #  define _(x) (x)
-#endif
-
 #endif
 
 #undef GTK_BIN

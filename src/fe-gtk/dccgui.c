@@ -145,10 +145,6 @@ fe_dcc_update_recv (struct DCC *dcc)
    if (dccstat[(int) dcc->dccstat].color != 1)
       gtk_clist_set_foreground
          (GTK_CLIST (dccrwin.list), row, colors + dccstat[(int) dcc->dccstat].color);
-#ifdef USE_GNOME
-   if (dcc->dccstat == STAT_DONE)
-      gtk_clist_set_text (GTK_CLIST (dccrwin.list), row, 8, (char *) gnome_mime_type_of_file (dcc->destfile));
-#endif
    gtk_clist_thaw (GTK_CLIST (dccrwin.list));
 }
 
@@ -254,12 +250,7 @@ fe_dcc_update_recv_win (void)
          nnew[0] = dccstat[(int) dcc->dccstat].name;
          nnew[1] = dcc->file;
          nnew[7] = dcc->nick;
-#ifdef USE_GNOME
-         if (dcc->dccstat == STAT_DONE)
-            nnew[8] = (char *) gnome_mime_type_of_file (dcc->destfile);
-         else
-            nnew[8] = "";
-#endif
+
          sprintf (size, "%lu", dcc->size);
          if (dcc->dccstat == STAT_QUEUED)
             sprintf (pos, "%lu", dcc->resumable);
@@ -365,55 +356,6 @@ info_clicked (GtkWidget * wid, gpointer none)
    }
 }
 
-#ifdef USE_GNOME
-
-static void
-open_clicked (void)
-{
-   int row;
-   struct DCC *dcc;
-   char *mime_type;
-   char *mime_prog;
-   char *tmp;
-   int pid;
-
-   row = gtkutil_clist_selection (dccrwin.list);
-   if (row != -1)
-   {
-      dcc = gtk_clist_get_row_data (GTK_CLIST (dccrwin.list), row);
-      if (dcc && dcc->dccstat == STAT_DONE)
-      {
-         mime_type = (char *)gnome_mime_type (dcc->destfile);
-         if (mime_type)
-         {
-            mime_prog = (char *)gnome_mime_program (mime_type);
-            if (mime_prog)
-            {
-               mime_prog = strdup (mime_prog);
-               tmp = strstr (mime_prog, "%f");
-               if (tmp)
-               {
-                  tmp[1] = 's';
-                  tmp = malloc (strlen (dcc->destfile) + strlen (mime_prog));
-                  sprintf (tmp, mime_prog, dcc->destfile);
-
-                  pid = fork ();
-                  if (pid == 0)
-                     execl ("/bin/sh", "sh", "-c", tmp, 0);
-                  else
-                     fe_timeout_add (1000, child_handler, (void *)pid);
-
-                  free (tmp);
-               }
-               free (mime_prog);
-            }
-         }
-      }
-   }
-}
-
-#endif
-
 static void
 recv_row_selected (GtkWidget * clist, gint row, gint column,
                 GdkEventButton * even)
@@ -426,13 +368,8 @@ void
 fe_dcc_open_recv_win (void)
 {
    GtkWidget *vbox, *bbox;
-#ifdef USE_GNOME
-   static gchar *titles[] =
-   {"Status", "File", "Size", "Position", "%", "CPS", "ETA", "From", "MIME Type"};
-#else
    static gchar *titles[] =
    {"Status", "File", "Size", "Position", "%", "CPS", "ETA", "From"};
-#endif
 
    if (dccrwin.window)
    {
@@ -447,15 +384,9 @@ fe_dcc_open_recv_win (void)
    gtk_container_add (GTK_CONTAINER (dccrwin.window), vbox);
    gtk_widget_show (vbox);
 
-#ifdef USE_GNOME
-   dccrwin.list = gtkutil_clist_new (9, titles, vbox, GTK_POLICY_ALWAYS,
-                 recv_row_selected, 0,
-          0, 0, GTK_SELECTION_SINGLE);
-#else
    dccrwin.list = gtkutil_clist_new (8, titles, vbox, GTK_POLICY_ALWAYS,
                  recv_row_selected, 0,
           0, 0, GTK_SELECTION_SINGLE);
-#endif
    gtk_widget_set_usize (dccrwin.list, MIN (620, prefs.mainwindow_width), 0);
    gtk_clist_set_column_width (GTK_CLIST (dccrwin.list), 0, 65);
    gtk_clist_set_column_width (GTK_CLIST (dccrwin.list), 1, 100);
@@ -478,9 +409,6 @@ fe_dcc_open_recv_win (void)
    gtkutil_button (dccrwin.window, 0, "Abort", abort_clicked, 0, bbox);
 
    gtkutil_button (dccrwin.window, 0, "Info", info_clicked, 0, bbox);
-#ifdef USE_GNOME
-   gtkutil_button (dccrwin.window, 0, "Open", open_clicked, 0, bbox);
-#endif
    gtk_widget_show (dccrwin.window);
    fe_dcc_update_recv_win ();
 }

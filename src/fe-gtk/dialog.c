@@ -74,29 +74,6 @@ extern GtkStyle *my_widget_get_style (char *bg_pic);
 int key_handle_key_press (GtkWidget, GdkEventKey, gpointer);
 
 
-#ifdef USE_GNOME
-void
-dialog_dnd_drop (GtkWidget *widget, GdkDragContext *context, gint x,
-                 gint y, GtkSelectionData *selection_data, guint info,
-                 guint32 time, struct session *sess)
-{
-   GList *list;
-   char *file, tbuf[1024];
-
-   if (!sess->channel[0])
-      return;
-
-   list = gnome_uri_list_extract_filenames (selection_data->data);
-   while (list)
-   {
-      file = (char *) (list->data);
-      dcc_send (sess, tbuf, sess->channel, file);
-      list = list->next;
-   }
-   gnome_uri_list_free_strings (list);
-}
-#endif
-
 void
 fe_change_nick (struct server *serv, char *nick, char *newnick)
 {
@@ -145,13 +122,6 @@ dialog_clear (GtkWidget *wid, struct session *sess)
    fe_text_clear (sess);
 }
 
-#ifdef USE_GNOME
-extern GtkTargetEntry dnd_targets[];  /* =
-                                         {
-                                         {"text/uri-list", 0, 1}
-                                         }; */
-#endif
-
 void
 open_dialog_window (struct session *sess)
 {
@@ -163,14 +133,8 @@ open_dialog_window (struct session *sess)
       page = 0;
    if (!page)
    {
-#ifdef USE_GNOME
-      sess->gui->window = gnome_app_new ("X-Chat", sess->channel);
-      gtk_signal_connect ((GtkObject *) sess->gui->window, "destroy",
-                          GTK_SIGNAL_FUNC (gtk_kill_session_callback), sess);
-#else
-      sess->gui->window = gtkutil_window_new (sess->channel, "X-Chat", 300, 100,
+      sess->gui->window = gtkutil_window_new (sess->channel, "NF-Chat", 300, 100,
                                               gtk_kill_session_callback, sess, FALSE);
-#endif
       gtk_signal_connect ((GtkObject *) sess->gui->window, "focus_in_event",
                           GTK_SIGNAL_FUNC (focus_in), sess);
       gtk_window_set_policy ((GtkWindow *) sess->gui->window, TRUE, TRUE, FALSE);
@@ -186,11 +150,7 @@ open_dialog_window (struct session *sess)
 
    if (!page)
    {
-#ifdef USE_GNOME
-      gnome_app_set_contents (GNOME_APP (sess->gui->window), vbox);
-#else
       gtk_container_add (GTK_CONTAINER (sess->gui->window), vbox);
-#endif
    } else
       gtk_container_add (GTK_CONTAINER (sess->gui->window), vbox);
    if (page)
@@ -211,45 +171,21 @@ open_dialog_window (struct session *sess)
    gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 2);
    gtk_widget_show (hbox);
 
-#ifdef USE_GNOME
-   wid = gtkutil_button (sess->gui->window, GNOME_STOCK_BUTTON_CANCEL,
-               0, X_session, sess, 0);
-   gtk_box_pack_start (GTK_BOX (hbox), wid, 0, 0, 0);
-   gtk_widget_show (wid);
-#else
    wid = gtk_button_new_with_label ("X");
    gtk_box_pack_start (GTK_BOX (hbox), wid, 0, 0, 0);
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
    GTK_SIGNAL_FUNC (X_session), sess);
    gtk_widget_show (wid);
-#endif
+
    add_tip (wid, "Close Dialog");
-#ifdef USE_GNOME
-   wid = gtkutil_button (sess->gui->window, GNOME_STOCK_BUTTON_UP,
-           0, relink_window, sess, 0);
-   gtk_box_pack_start (GTK_BOX (hbox), wid, 0, 0, 0);
-#else
    wid = gtk_button_new_with_label ("^");
    gtk_box_pack_start (GTK_BOX (hbox), wid, 0, 0, 0);
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
                        GTK_SIGNAL_FUNC (relink_window), sess);
-#endif
+
    add_tip (wid, "Link/DeLink this tab");
    gtk_widget_show (wid);
 
-#ifdef USE_GNOME
-   wid = gtkutil_button (sess->gui->window, GNOME_STOCK_PIXMAP_BACK,
-                         0, maingui_moveleft, 0, 0);
-   gtk_box_pack_start (GTK_BOX (hbox), wid, 0, 0, 0);
-   gtk_widget_show (wid);
-   add_tip (wid, "Move tab left");
-   
-   wid = gtkutil_button (sess->gui->window, GNOME_STOCK_PIXMAP_FORWARD,
-                         0, maingui_moveright, 0, 0);
-   gtk_box_pack_start (GTK_BOX (hbox), wid, 0, 0, 0);
-   gtk_widget_show (wid);
-   add_tip (wid, "Move tab right");
-#else
    wid = gtk_button_new_with_label ("<");
    gtk_box_pack_start (GTK_BOX (hbox), wid, 0, 0, 0);
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
@@ -263,7 +199,6 @@ open_dialog_window (struct session *sess)
 			     GTK_SIGNAL_FUNC (maingui_moveright), 0);
    gtk_widget_show (wid);
    add_tip (wid, "Move tab right");
-#endif
 
    sess->gui->topicgad = gtk_entry_new ();
    gtk_entry_set_editable ((GtkEntry *) sess->gui->topicgad, FALSE);
@@ -335,13 +270,6 @@ open_dialog_window (struct session *sess)
 
    gtk_container_add (GTK_CONTAINER (hbox), sess->gui->textgad);
    show_and_unfocus (sess->gui->textgad);
-
-#ifdef USE_GNOME
-   gtk_drag_dest_set (sess->gui->textgad, GTK_DEST_DEFAULT_ALL, dnd_targets, 1,
-                      GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK);
-   gtk_signal_connect (GTK_OBJECT (sess->gui->textgad), "drag_data_received",
-                       GTK_SIGNAL_FUNC (dialog_dnd_drop), sess);
-#endif
 
    sess->gui->vscrollbar = gtk_vscrollbar_new (GTK_XTEXT (sess->gui->textgad)->adj);
    gtk_box_pack_start (GTK_BOX (hbox), sess->gui->vscrollbar, FALSE, FALSE, 1);

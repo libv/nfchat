@@ -77,11 +77,7 @@ extern int tcp_send_len (struct server *serv, char *buf, int len);
 extern int tcp_send (struct server *serv, char *buf);
 extern void menu_popup (struct session *sess, GdkEventButton * event, char *nick);
 extern void clear_user_list (struct session *sess);
-#ifdef USE_GNOME
-extern void createmenus (void *app, struct session *sess);
-#else
 extern GtkWidget *createmenus (struct session *sess);
-#endif
 extern void handle_inputgad (GtkWidget * igad, struct session *sess);
 extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, struct session *sess);
 extern struct session *new_dialog (struct session *sess);
@@ -933,27 +929,6 @@ gui_main_window_kill (GtkWidget * win, struct session *sess)
 void
 userlist_hide (GtkWidget * igad, struct session *sess)
 {
-#ifdef USE_GNOME
-   if (sess->userlisthidden)
-   {
-      if (sess->gui->paned)
-         gtk_paned_set_position (GTK_PANED (sess->gui->paned), sess->userlisthidden);
-      else
-         gtk_widget_show (sess->gui->userlistbox);
-      sess->userlisthidden = FALSE;
-   } else
-   {
-      if (sess->gui->paned)
-      {
-         sess->userlisthidden = GTK_PANED (sess->gui->paned)->handle_xpos;
-         gtk_paned_set_position (GTK_PANED (sess->gui->paned), 1200);
-      } else
-      {
-         sess->userlisthidden = TRUE;
-         gtk_widget_hide (sess->gui->userlistbox);
-      }
-   }
-#else
    if (sess->userlisthidden)
    {
       if (igad)
@@ -977,7 +952,6 @@ userlist_hide (GtkWidget * igad, struct session *sess)
          gtk_widget_hide (sess->gui->userlistbox);
       }
    }
-#endif
 }
 
 static void
@@ -1302,18 +1276,12 @@ static void
 gui_make_tab_window (struct session *sess)
 {
    GtkWidget *main_box, *main_hbox = NULL, *trees;
-#ifndef USE_GNOME
    GtkWidget *wid;
-#endif
 
    if (!main_window)
    {
       current_tab = 0;
-#ifdef USE_GNOME
-      main_window = gnome_app_new ("X-Chat", "X-Chat");
-#else
       main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-#endif
 
       gtk_widget_realize (main_window);
       maingui_set_icon (main_window);
@@ -1326,17 +1294,11 @@ gui_make_tab_window (struct session *sess)
       gtk_window_set_policy ((GtkWindow *) main_window, TRUE, TRUE, FALSE);
 
       main_box = gtk_vbox_new (0, 0);
-#ifdef USE_GNOME
-      gnome_app_set_contents (GNOME_APP (main_window), main_box);
-#else
+
       gtk_container_add (GTK_CONTAINER (main_window), main_box);
-#endif
+
       gtk_widget_show (main_box);
 
-#ifdef USE_GNOME
-      createmenus (main_window, sess);
-      main_menu = GNOME_APP (main_window) -> menubar;
-#else
       main_menu = createmenus (sess);
       gtk_widget_show (main_menu);
 
@@ -1344,7 +1306,7 @@ gui_make_tab_window (struct session *sess)
       gtk_container_add (GTK_CONTAINER (wid), main_menu);
       gtk_box_pack_start (GTK_BOX (main_box), wid, FALSE, TRUE, 0);
       gtk_widget_show (wid);
-#endif
+
       if (prefs.treeview) {
 	 main_hbox = gtk_hpaned_new ();
 	 trees = new_tree_view ();
@@ -1403,19 +1365,13 @@ relink_window (GtkWidget * w, struct session *sess)
       sess->is_tab = 0;
       old = sess->gui->window;
       gtk_signal_disconnect_by_data (GTK_OBJECT (old), sess);
-#ifdef USE_GNOME
-      sess->gui->window = gnome_app_new ("X-Chat", "X-Chat");
-#else
+
       sess->gui->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-#endif
+
       gtk_widget_realize (sess->gui->window);
       maingui_set_icon (sess->gui->window);
       if (!sess->is_dialog)
       {
-#ifdef USE_GNOME
-         createmenus (GNOME_APP (sess->gui->window), sess);
-         sess->gui->menu = GNOME_APP (sess->gui->window)->menubar;
-#else
          wid = gtk_handle_box_new ();
          gtk_box_pack_start (GTK_BOX (sess->gui->vbox), wid, FALSE, FALSE, 0);
          gtk_box_reorder_child (GTK_BOX (sess->gui->vbox), wid, 0);
@@ -1424,7 +1380,6 @@ relink_window (GtkWidget * w, struct session *sess)
          sess->gui->menu = createmenus (sess);
          gtk_container_add (GTK_CONTAINER (wid), sess->gui->menu);
          gtk_widget_show (sess->gui->menu);
-#endif
       }
       fe_set_title (sess);
       gtk_signal_connect ((GtkObject *) sess->gui->window, "destroy",
@@ -1432,13 +1387,9 @@ relink_window (GtkWidget * w, struct session *sess)
       gtk_signal_connect ((GtkObject *) sess->gui->window, "focus_in_event",
                           GTK_SIGNAL_FUNC (focus_in), sess);
       gtk_window_set_policy ((GtkWindow *) sess->gui->window, TRUE, TRUE, FALSE);
-#ifdef USE_GNOME
-      wid = gtk_hbox_new (0, 0);
-      gtk_widget_reparent (sess->gui->vbox, wid);
-      gnome_app_set_contents (GNOME_APP (sess->gui->window), wid);
-#else
+
       gtk_widget_reparent (sess->gui->vbox, sess->gui->window);
-#endif
+
       if (!sess->is_dialog)
       {
          if (sess->channel[0] == 0)
@@ -1474,12 +1425,9 @@ relink_window (GtkWidget * w, struct session *sess)
       }
       if (sess->gui->menu)
       {
-#ifndef USE_GNOME
          /* this will destroy the HandleBox and its children */
          gtk_widget_destroy (sess->gui->menu->parent);
-#else
-         gtk_widget_destroy (sess->gui->menu);
-#endif
+
          sess->gui->menu = NULL;
       }
       sess->is_tab = 1;
@@ -1525,28 +1473,11 @@ relink_window (GtkWidget * w, struct session *sess)
    }
 }
 
-#ifdef USE_GNOME
-GtkTargetEntry dnd_targets[] =
-{
-   {"text/uri-list", 0, 1}
-};
-#endif
-
 /* 'X' button pressed */
 
 void
 X_session (GtkWidget * button, struct session *sess)
 {
-/*   GtkWidget *mbox;
-
-   if (!sess_list->next)
-   {
-	   mbox = gnome_message_box_new ("DCCs still active, quit?",
-				                     GNOME_MESSAGE_BOX_QUESTION,
-                                 GNOME_STOCK_BUTTON_YES,
-                                 GNOME_STOCK_BUTTON_CANCEL, NULL);
-      gtk_widget_show (mbox);
-   } else*/
    gtk_widget_destroy (sess->gui->window);
 }
 
@@ -1684,11 +1615,8 @@ create_window (struct session *sess)
    } else
    {
 
-#ifdef USE_GNOME
-      sess->gui->window = gnome_app_new ("X-Chat", "X-Chat");
-#else
       sess->gui->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-#endif
+
       fe_set_title (sess);
       gtk_widget_realize (sess->gui->window);
       maingui_set_icon (sess->gui->window);
@@ -1706,21 +1634,14 @@ create_window (struct session *sess)
    gtk_container_set_border_width ((GtkContainer *) vbox, 2);
    if (!prefs.tabchannels)
    {
-#ifdef USE_GNOME
-      gnome_app_set_contents (GNOME_APP (sess->gui->window), vbox);
-#else
       gtk_container_add (GTK_CONTAINER (sess->gui->window), vbox);
-#endif
+
    } else
       gtk_container_add ((GtkContainer *) sess->gui->window, vbox);
    gtk_widget_show (vbox);
 
    if (!prefs.tabchannels)
    {
-#ifdef USE_GNOME
-      createmenus (sess->gui->window, sess);
-      sess->gui->menu = GNOME_APP (sess->gui->window)->menubar;
-#else
       sess->gui->menu = createmenus (sess);
       gtk_widget_show (sess->gui->menu);
 
@@ -1728,7 +1649,6 @@ create_window (struct session *sess)
       gtk_container_add (GTK_CONTAINER (wid), sess->gui->menu);
       gtk_box_pack_start (GTK_BOX (vbox), wid, FALSE, TRUE, 0);
       gtk_widget_show (wid);
-#endif
    }
    tbox = gtk_hbox_new (FALSE, 0);
    sess->gui->tbox = tbox;
@@ -1736,20 +1656,6 @@ create_window (struct session *sess)
    gtk_box_pack_start (GTK_BOX (vbox), tbox, FALSE, TRUE, 2);
    gtk_widget_show (tbox);
 
-#ifdef USE_GNOME
-   wid = gtkutil_button (sess->gui->window, GNOME_STOCK_BUTTON_CANCEL,
-               0, X_session, sess, 0);
-   GTK_WIDGET_UNSET_FLAGS (wid, GTK_CAN_FOCUS);
-   gtk_box_pack_start (GTK_BOX (tbox), wid, 0, 0, 0);
-   gtk_widget_show (wid);
-   add_tip (wid, "Close Channel");
-
-   sess->gui->delink_button = wid = gtkutil_button (sess->gui->window, GNOME_STOCK_BUTTON_UP,
-           0, relink_window, sess, 0);
-   gtk_box_pack_start (GTK_BOX (tbox), wid, 0, 0, 0);
-   gtk_widget_show (wid);
-   add_tip (wid, "Link/DeLink this tab");
-#else
    wid = gtk_button_new_with_label ("X");
    GTK_WIDGET_UNSET_FLAGS (wid, GTK_CAN_FOCUS);
    gtk_box_pack_start (GTK_BOX (tbox), wid, 0, 0, 0);
@@ -1764,21 +1670,7 @@ create_window (struct session *sess)
                        GTK_SIGNAL_FUNC (relink_window), sess);
    gtk_widget_show (wid);
    add_tip (wid, "Link/DeLink this tab");
-#endif
 
-#ifdef USE_GNOME
-   wid = gtkutil_button (sess->gui->window, GNOME_STOCK_PIXMAP_BACK,
-                         0, maingui_moveleft, 0, 0);
-   gtk_box_pack_start (GTK_BOX (tbox), wid, 0, 0, 0);
-   gtk_widget_show (wid);
-   add_tip (wid, "Move tab left");
-   
-   wid = gtkutil_button (sess->gui->window, GNOME_STOCK_PIXMAP_FORWARD,
-                         0, maingui_moveright, 0, 0);
-   gtk_box_pack_start (GTK_BOX (tbox), wid, 0, 0, 0);
-   gtk_widget_show (wid);
-   add_tip (wid, "Move tab right");
-#else
    wid = gtk_button_new_with_label ("<");
    gtk_box_pack_start (GTK_BOX (tbox), wid, 0, 0, 0);
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
@@ -1792,7 +1684,6 @@ create_window (struct session *sess)
 			     GTK_SIGNAL_FUNC (maingui_moveright), 0);
    gtk_widget_show (wid);
    add_tip (wid, "Move tab right");
-#endif
 
    if (!prefs.tabchannels)
    {
@@ -1809,20 +1700,10 @@ create_window (struct session *sess)
 
    add_tip (sess->gui->topicgad, "The channel topic");
 
-#ifdef USE_GNOME
-   if (sess->is_tab)
-      wid = gtkutil_button (main_window, GNOME_STOCK_PIXMAP_FORWARD, 0,
-                            userlist_hide, sess, 0);
-   else
-      wid = gtkutil_button (sess->gui->window, GNOME_STOCK_PIXMAP_FORWARD, 0,
-                            userlist_hide, sess, 0);
-   gtk_box_pack_end (GTK_BOX (tbox), wid, 0, 0, 0);
-#else
    wid = gtk_button_new_with_label (">");
    gtk_box_pack_end (GTK_BOX (tbox), wid, 0, 0, 0);
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
                        GTK_SIGNAL_FUNC (userlist_hide), (gpointer) sess);
-#endif
    show_and_unfocus (wid);
    add_tip (wid, "Hide/Show Userlist");
 
@@ -1905,17 +1786,6 @@ create_window (struct session *sess)
 
    sess->gui->namelistgad = gtkutil_clist_new (1, 0, nlbox, GTK_POLICY_AUTOMATIC,
                maingui_userlist_selected, sess, 0, 0, GTK_SELECTION_MULTIPLE);
-#ifdef USE_GNOME
-   /* set up drops */
-   gtk_drag_dest_set (sess->gui->namelistgad, GTK_DEST_DEFAULT_ALL,
-                      dnd_targets, 1, GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK);
-   gtk_signal_connect (GTK_OBJECT (sess->gui->namelistgad), "drag_motion",
-                       GTK_SIGNAL_FUNC (userlist_dnd_motion), 0);
-   gtk_signal_connect (GTK_OBJECT (sess->gui->namelistgad), "drag_leave",
-                       GTK_SIGNAL_FUNC (userlist_dnd_leave), 0);
-   gtk_signal_connect (GTK_OBJECT (sess->gui->namelistgad), "drag_data_received",
-                       GTK_SIGNAL_FUNC (userlist_dnd_drop), sess);
-#endif
 
    gtk_clist_set_selection_mode (GTK_CLIST (sess->gui->namelistgad),
               GTK_SELECTION_MULTIPLE);
@@ -2148,18 +2018,6 @@ maingui_new_tab (char *title, char *name, void *close_callback, void *userdata)
    gtk_box_pack_start (GTK_BOX(box), topbox, 0, 0, 0);
    gtk_widget_show (box);
 
-#ifdef USE_GNOME
-   wid = gtkutil_button (main_book, GNOME_STOCK_BUTTON_CANCEL,
-                         0, gtkutil_destroy, box, 0);
-   gtk_box_pack_start (GTK_BOX (topbox), wid, 0, 0, 0);
-   gtk_widget_show (wid);
-   add_tip (wid, "Close Tab");
-   wid = gtkutil_button (main_book, GNOME_STOCK_BUTTON_UP,
-			 0, maingui_delink_nontab, box, 0);
-   gtk_box_pack_start (GTK_BOX (topbox), wid, 0, 0, 0);
-   gtk_widget_show (wid);
-   add_tip (wid, "Relink");
-#else
    wid = gtk_button_new_with_label ("X");
    gtk_box_pack_start (GTK_BOX (topbox), wid, 0, 0, 0);
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
@@ -2172,7 +2030,6 @@ maingui_new_tab (char *title, char *name, void *close_callback, void *userdata)
    gtk_box_pack_start (GTK_BOX (topbox), wid, 0, 0, 0);
    gtk_widget_show (wid);
    add_tip (wid, "Relink");
-#endif
 
    wid = gtk_label_new (title);
    gtk_container_add (GTK_CONTAINER(topbox), wid);

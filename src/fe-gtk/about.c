@@ -30,37 +30,6 @@ extern GdkColor colors[];
 
 extern char *get_cpu_str (int color);
 
-#ifdef USE_GNOME
-
-void
-menu_about (GtkWidget *wid, gpointer sess)
-{
-   const gchar *author[] = {"Peter Zelezny <zed@linux.com>", 0};
-   char buf[512];
-
-   snprintf (buf, sizeof buf,
-             "This software comes with NO WARRANTY.\n"
-             "X-Chat Project Started: Jul 27 1998\n"
-             "This Binary Compiled:   "__DATE__"\n"
-             "GTK+ Version:           %d.%d.%d\n"
-             "Currently Running on:   %s\n"
-             "Author EMail:           zed@linux.com\n"
-             "X-Chat Web Page:        http://xchat.org",
-             gtk_major_version, gtk_minor_version, gtk_micro_version,
-             get_cpu_str (0));
-
-   gtk_widget_show (
-           gnome_about_new ("X-Chat",
-                            VERSION,
-                            "(C) 1998-2000 Peter Zelezny",
-                            author,
-                            buf,
-                            0)
-                     );
-}
-
-#else
-
 static GtkWidget *about = 0;
 
 static int
@@ -159,4 +128,3 @@ menu_about (GtkWidget *wid, gpointer sess)
 
    gtk_widget_show (about);
 }
-#endif

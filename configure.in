@@ -46,7 +46,6 @@ AC_ARG_ENABLE(gtkfe,
         gtkfe=$enableval, gtkfe=yes)
 
 textfe=no
-gnome=no
 
 AC_ARG_ENABLE(imlib,
 [  --disable-imlib         disable use of imlib],
@@ -126,70 +125,35 @@ if test "$gtkfe" = yes; then
   gtkfe=yes
   imlib=yes
 else
-  gnome=no
   imlib=no
   LIBS="$LIBS $GLIB_LIBS"
   CFLAGS="$CFLAGS $GLIB_CFLAGS"
 fi
 
 
-dnl *********************************************************************
-dnl ** GNOME ************************************************************
-dnl *********************************************************************
-
-if test "$gnome" = yes; then
-  AC_PATH_PROG(gnomepath, gnome-config)
-  AC_MSG_CHECKING(for Gnome compile flags)
-  GNOME_CFLAGS=`$gnomepath zvt gnomeui --cflags 2>/dev/null`
-  if test "_$GNOME_CFLAGS" = _ ; then
-    gnome=no
-    AC_MSG_RESULT([Gnome not found, building without it.])
-    GUI_LIBS="$LIBS $GTK_LIBS"
-    GUI_CFLAGS="$CFLAGS $GTK_CFLAGS"
-  else
-    GNOME_VER=`$gnomepath --version |$sedpath 's/gnome-libs //' 2>/dev/null`
-    GNOME_MAJOR=`echo $GNOME_VER |$sedpath 's/\([[0-9]*]*\).\([[0-9]*]*\).\([[0-9]*]*\)/\1/' 2>/dev/null`
-    if test "_$GNOME_MAJOR" = "_0"; then
-      gnome=no
-      AC_MSG_RESULT([old Gnome found, building without it.])
-      GUI_LIBS="$GUI_LIBS $GTK_LIBS"
-      GUI_CFLAGS="$GUI_CFLAGS $GTK_CFLAGS"
-    else
-      AC_MSG_RESULT(ok)
-      GUI_LIBS="$GUI_LIBS `$gnomepath zvt gnomeui --libs 2>/dev/null`"
-      GUI_CFLAGS="$GUI_CFLAGS $GNOME_CFLAGS"
-      AC_DEFINE(USE_GNOME)
-      if test "$imlib" = yes; then
-        AC_DEFINE(USE_IMLIB)
-      fi
-    fi
-  fi
-else
-  GUI_LIBS="$GUI_LIBS $GTK_LIBS"
-  GUI_CFLAGS="$GUI_CFLAGS $GTK_CFLAGS"
-fi
+GUI_LIBS="$GUI_LIBS $GTK_LIBS"
+GUI_CFLAGS="$GUI_CFLAGS $GTK_CFLAGS"
 
 dnl *********************************************************************
 dnl ** IMLIB ************************************************************
 dnl *********************************************************************
 
-if test "$gnome" = no; then
-  if test "$imlib" = yes; then
-    AC_PATH_PROG(imlibpath, imlib-config)
-    AC_MSG_CHECKING(for gdk_imlib)
-    IMLIB_CFLAGS=`$imlibpath --cflags-gdk 2>/dev/null`
-    IMLIB_LDFLAGS=`$imlibpath --libs-gdk 2>/dev/null`
-    if test "_$IMLIB_CFLAGS" = _ ; then
-      AC_MSG_RESULT([not found, building without imlib.])
-      imlib=no
-    else
-      AC_MSG_RESULT(ok)
-      GUI_LIBS="$GUI_LIBS $IMLIB_LDFLAGS"
-      GUI_CFLAGS="$GUI_CFLAGS $IMLIB_CFLAGS"
-      AC_DEFINE(USE_IMLIB)
-    fi
+if test "$imlib" = yes; then
+  AC_PATH_PROG(imlibpath, imlib-config)
+  AC_MSG_CHECKING(for gdk_imlib)
+  IMLIB_CFLAGS=`$imlibpath --cflags-gdk 2>/dev/null`
+  IMLIB_LDFLAGS=`$imlibpath --libs-gdk 2>/dev/null`
+  if test "_$IMLIB_CFLAGS" = _ ; then
+    AC_MSG_RESULT([not found, building without imlib.])
+    imlib=no
+  else
+    AC_MSG_RESULT(ok)
+    GUI_LIBS="$GUI_LIBS $IMLIB_LDFLAGS"
+    GUI_CFLAGS="$GUI_CFLAGS $IMLIB_CFLAGS"
+    AC_DEFINE(USE_IMLIB)
   fi
 fi
+
 
 
 dnl *********************************************************************
@@ -224,12 +188,9 @@ dnl *********************************************************************
 dnl ** CONDITIONALS *****************************************************
 dnl *********************************************************************
 
-AM_CONDITIONAL(USE_GNOME, test "x$gnome" = "xyes")
-
 AM_CONDITIONAL(USE_MYGLIB, test "x$glibreplace" = "xyes")
 AM_CONDITIONAL(DO_GTK, test "x$gtkfe" = "xyes")
 AM_CONDITIONAL(DO_PERL, test "x$perl" = "xyes")
-
 
 
 dnl *********************************************************************
@@ -344,12 +305,6 @@ if test "$gtkfe" = "yes"; then
   echo Building GTK FrontEnd ........... : yes \(`gtk-config --version`\)
 else
   echo Building GTK FrontEnd ........... : no \!\!\!\!\!\!
-fi
-
-if test "$gnome" = "yes"; then
-  echo Building with Gnome ............. : $gnome \($GNOME_VER\)
-else
-  echo Building with Gnome ............. : no
 fi
 
 if test "$imlib" = "yes"; then

@@ -508,11 +508,9 @@ pevent_dialog_show ()
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
                        GTK_SIGNAL_FUNC (pevent_test_cb), pevent_dialog_twid);
    gtk_widget_show (wid);
-#ifdef USE_GNOME
-   wid = gnome_stock_button (GNOME_STOCK_BUTTON_OK);
-#else
+
    wid = gtk_button_new_with_label ("Ok");
-#endif
+
    gtk_box_pack_start (GTK_BOX (hbox), wid, 0, 0, 0);
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
                        GTK_SIGNAL_FUNC (pevent_ok_cb), NULL);

@@ -958,7 +958,6 @@ xchat_misc_checks (void) /* this gets called every 2 seconds */
    "NAME -> gFTP" "\n" "CMD !gftp %s" "\n\n"\
    "NAME -> Mozilla" "\n" "CMD !mozilla %s" "\n\n"\
    "NAME -> KFM" "\n" "CMD !kfmclient openURL %s" "\n\n"\
-   "NAME -> Gnome URL Handler" "\n" "CMD !gnome-moz-remote %s" "\n\n"\
    "NAME -> Connect as IRC Server" "\n" "CMD /newserver %s" "\n\n"
 
 static void

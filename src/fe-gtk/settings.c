@@ -1416,31 +1416,23 @@ settings_opengui (struct session *sess)
    gtk_widget_show (hbbox);
 
    /* i love buttons */
-#ifdef USE_GNOME
-   wid = gnome_stock_button (GNOME_STOCK_BUTTON_OK);
-#else
+
    wid = gtk_button_new_with_label (_ ("Ok"));
-#endif
+
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
                        GTK_SIGNAL_FUNC (settings_ok_clicked), sess);
    gtk_box_pack_start (GTK_BOX (hbbox), wid, FALSE, FALSE, 0);
    gtk_widget_show (wid);
 
-#ifdef USE_GNOME
-   wid = gnome_stock_button (GNOME_STOCK_BUTTON_APPLY);
-#else
    wid = gtk_button_new_with_label (_ ("Apply"));
-#endif
+
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
                        GTK_SIGNAL_FUNC (settings_apply_clicked), sess);
    gtk_box_pack_start (GTK_BOX (hbbox), wid, FALSE, FALSE, 0);
    gtk_widget_show (wid);
 
-#ifdef USE_GNOME
-   wid = gnome_stock_button (GNOME_STOCK_BUTTON_CANCEL);
-#else
    wid = gtk_button_new_with_label (_ ("Cancel"));
-#endif
+
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
     GTK_SIGNAL_FUNC (gtkutil_destroy),
         sess->setup->settings_window);

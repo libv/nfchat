@@ -60,7 +60,7 @@ static GdkPixmap *
 create_pixmap_from_file (GtkWidget *window, GdkBitmap **mask, GtkWidget *style_widget, char *filename)
 {
   GdkPixmap *pixmap = 0;
-  #ifndef USE_IMLIB
+#ifndef USE_IMLIB
   GtkStyle *style;
   if (!style_widget)
     style = gtk_widget_get_default_style ();
@@ -68,9 +68,9 @@ create_pixmap_from_file (GtkWidget *window, GdkBitmap **mask, GtkWidget *style_w
     style = gtk_widget_get_style (style_widget);
   pixmap = gdk_pixmap_create_from_xpm (window->window, mask,
 				       &style->bg[GTK_STATE_NORMAL], filename);
-  #else
+#else
   gdk_imlib_load_file_to_pixmap(filename, &pixmap, mask);
-  #endif /*USE_IMLIB*/
+#endif /*USE_IMLIB*/
   return(pixmap);
 }
 

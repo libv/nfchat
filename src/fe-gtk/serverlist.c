@@ -1125,45 +1125,8 @@ open_server_list (GtkWidget * widd, struct session *sess)
       gtkutil_button (slwin, GNOME_STOCK_PIXMAP_REFRESH, "Connect New",
       connectnew_clicked, sess, wid1);
 
-#ifdef USE_GNOME
-   /* VERY NICE GRAPHICAL BUTTON 1 */
-   wid4 = gtk_hbox_new (0, 0);
-   gtk_widget_show (wid4);
-   wid3 = gtk_button_new ();
-   gtk_signal_connect (GTK_OBJECT (wid3), "clicked",
-                       GTK_SIGNAL_FUNC (new_server_clicked), sess);
-   gtk_widget_show (wid3);
-   scroll = gtk_pixmap_new (pixmap_server, mask_server);
-   gtk_container_add (GTK_CONTAINER (wid4), scroll);
-   gtk_widget_show (scroll);
-   scroll = gtk_label_new ("New Server");
-   gtk_widget_show (scroll);
-   gtk_container_add (GTK_CONTAINER (wid4), scroll);
-   gtk_container_add (GTK_CONTAINER (wid3), wid4);
-   gtk_container_add (GTK_CONTAINER (wid1), wid3);
-
-   /* VERY NICE GRAPHICAL BUTTON 2 */
-   wid4 = gtk_hbox_new (0, 0);
-   gtk_widget_show (wid4);
-   wid3 = gtk_button_new ();
-   gtk_signal_connect (GTK_OBJECT (wid3), "clicked",
-                       GTK_SIGNAL_FUNC (new_group_clicked), sess);
-   gtk_widget_show (wid3);
-   scroll = gtk_pixmap_new (pixmap_group, mask_group);
-   gtk_container_add (GTK_CONTAINER (wid4), scroll);
-   gtk_widget_show (scroll);
-   scroll = gtk_label_new ("New Group");
-   gtk_widget_show (scroll);
-   gtk_container_add (GTK_CONTAINER (wid4), scroll);
-   gtk_container_add (GTK_CONTAINER (wid3), wid4);
-   gtk_container_add (GTK_CONTAINER (wid1), wid3);
-
-#else
-
    gtkutil_button (slwin, 0, "New Server", new_server_clicked, 0, wid1);
    gtkutil_button (slwin, 0, "New Group", new_group_clicked, 0, wid1);
-
-#endif
 
    /* 2 MORE "NORMAL" BUTTONS */
    gtkutil_button (slwin, GNOME_STOCK_PIXMAP_CUT, "Delete",

@@ -119,11 +119,8 @@ module_glist (struct session *sess)
 
    gtk_clist_set_column_width (GTK_CLIST (modclist), 0, 40);
 
-#ifdef	USE_GNOME
-   okb = gnome_stock_button (GNOME_STOCK_BUTTON_OK);
-#else
    okb = gtk_button_new_with_label ("Ok");
-#endif
+
    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (modlist)->action_area), okb, 1, 1, 10);
    gtk_signal_connect (GTK_OBJECT (okb), "clicked",
                        GTK_SIGNAL_FUNC (module_glist_close), (gpointer) modlist);
