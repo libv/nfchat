@@ -1159,28 +1159,15 @@ process_line (struct session *sess, struct server *serv, char *buf)
                EMIT_SIGNAL (XP_TE_WHOIS2, serv->front_session, word[4], word_eol[5] + 1, NULL, NULL, 0);
                break;
             case 321:
-               if (!fe_is_chanwindow (sess->server))
-                  PrintText (sess, "\037Channel          Users   Topic\017\n");
-               break;
+                break;
             case 322:
-               if (fe_is_chanwindow (sess->server))
-               {
-                  fe_add_chan_list (sess->server, find_word (pdibuf, 4),
-                                    find_word (pdibuf, 5),
-                                    find_word_to_end (buf, 6) + 1);
-               } else
-               {
-                  sprintf (outbuf, "%-16.16s %-7d %s\017\n",
-                           find_word (pdibuf, 4),
-                           atoi (find_word (pdibuf, 5)),
-                           find_word_to_end (buf, 6) + 1);
-                  PrintText (sess, outbuf);
-               }
+               sprintf (outbuf, "%-16.16s %-7d %s\017\n",
+                        find_word (pdibuf, 4),
+                        atoi (find_word (pdibuf, 5)),
+                        find_word_to_end (buf, 6) + 1);
+               PrintText (sess, outbuf);
                break;
             case 323:
-               if (!fe_is_chanwindow (sess->server))
-                  goto def;
-               fe_chan_list_end (sess->server);
                break;
             case 324:
                sess = find_session_from_channel (word[4], serv);

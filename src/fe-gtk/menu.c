@@ -55,7 +55,6 @@ extern void ctcp_gui_load (GtkWidget * list);
 extern void ctcp_gui_save (GtkWidget * igad);
 extern void editlist_gui_open (GSList * list, char *, char *, char *, char *help);
 extern void ctcp_gui_open (void);
-extern void chanlist_opengui (struct server *serv);
 extern void url_opengui (GtkWidget *, gpointer);
 extern void cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 extern void xchat_cleanup (GtkWidget * wid, gpointer sess);
@@ -751,12 +750,6 @@ menu_themes (GtkWidget * wid, gpointer sess)
   menu_themehandler ();
 }
 
-static void
-menu_chanlist (GtkWidget * wid, gpointer sess)
-{
-   chanlist_opengui (menu_sess->server);
-}
-
 #ifdef USE_PERL
 
 static void
@@ -970,7 +963,6 @@ static struct mymenu mymenu[] =
    {M_MENU, N_ ("Quit"), (menucallback)xchat_cleanup, 0, 1},  /* 10 */
 
    {M_NEWMENU, N_ ("Windows"), 0, 0, 1},
-   {M_MENU, N_ ("Channel List Window.."), (menucallback)menu_chanlist, 0, 1},
    {M_MENU, N_ ("DCC Send Window.."), (menucallback)fe_dcc_open_send_win, 0, 1},
    {M_MENU, N_ ("DCC Receive Window.."), (menucallback)fe_dcc_open_recv_win, 0, 1},
    {M_MENU, N_ ("DCC Chat Window.."), (menucallback)fe_dcc_open_chat_win, 0, 1},

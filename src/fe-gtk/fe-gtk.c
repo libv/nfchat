@@ -365,20 +365,6 @@ fe_update_channel_limit (struct session *sess)
    my_gtk_entry_set_text (sess->gui->limit_entry, tmp, sess);
 }
 
-int
-fe_is_chanwindow (struct server *serv)
-{
-   if (!serv->gui->chanlist_window)
-      return 0;
-   return 1;
-}
-
-void
-fe_chan_list_end (struct server *serv)
-{
-   gtk_widget_set_sensitive (serv->gui->chanlist_refresh, TRUE);
-}
-
 void
 fe_text_clear (struct session *sess)
 {

@@ -1,5 +1,4 @@
 src/common/cfgfiles.c
-src/fe-gtk/chanlist.c
 src/common/ctcp.c
 src/common/dcc.c
 src/fe-gtk/dialog.c

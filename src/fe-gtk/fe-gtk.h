@@ -78,12 +78,6 @@ struct server_gui
    GtkWidget *rawlog_window;
    GtkWidget *rawlog_textlist;
 
-   GtkWidget *chanlist_wild;
-   GtkWidget *chanlist_window;
-   GtkWidget *chanlist_list;
-   GtkWidget *chanlist_refresh;
-
-   int chanlist_minusers;
 };
 
 struct session_gui
