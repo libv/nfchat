@@ -361,7 +361,7 @@ sub_name (char *name)
 }
 
 int
-add_name (char *name, char *hostname)
+add_name (char *name)
 {
    struct user *user;
    int row;
@@ -385,8 +385,7 @@ add_name (char *name, char *hostname)
       name++;
       user->voice = TRUE;
    }
-   if (hostname)
-      user->hostname = strdup (hostname);
+
    strcpy (user->nick, name);
    row = userlist_insertname_sorted (user);
 

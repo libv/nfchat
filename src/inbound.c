@@ -58,9 +58,9 @@ clear_channel (void)
 }
 
 static void
-private_msg (char *tbuf, char *from, char *ip, char *text)
+private_msg (char *tbuf, char *from, char *text)
 {
-  if (fire_signal (XP_PRIVMSG, from, ip, text, NULL, 0) == 1)
+  if (fire_signal (XP_PRIVMSG, from, text, NULL, NULL, 0) == 1)
     return;
   fire_signal (XP_TE_PRIVMSG, from, text, NULL, NULL, 0);
 }
@@ -190,7 +190,7 @@ user_new_nick (char *outbuf, char *nick, char *newnick, int quiet)
 }
 
 static void
-you_joined (char *outbuf, char *nick, char *ip)
+you_joined (char *outbuf, char *nick)
 {
   strncpy (session->channel, session->waitchannel, 200);
   fe_set_channel ();
@@ -200,7 +200,7 @@ you_joined (char *outbuf, char *nick, char *ip)
   sprintf (outbuf, "MODE %s\r\n", session->channel);
   tcp_send (outbuf);
   clear_user_list ();
-  fire_signal (XP_TE_UJOIN, nick, session->channel, ip, NULL, 0);
+  fire_signal (XP_TE_JOIN, nick, session->channel, NULL, NULL, 0);
 }
 
 static void
@@ -218,17 +218,6 @@ you_kicked (char *tbuf, char *kicker, char *reason)
       strcpy (session->waitchannel, session->channel);
     }
 }
-
-static void
-you_parted (char *tbuf, char *ip, char *reason)
-{
-  if (*reason)
-    fire_signal (XP_TE_UPARTREASON, server->nick, ip, session->channel, reason, 0);
-  else
-    fire_signal (XP_TE_UPART, server->nick, ip, session->channel, NULL, 0);
-  clear_channel ();
-}
-
 
 static void
 names_list (char *tbuf, char *names)
@@ -251,12 +240,12 @@ names_list (char *tbuf, char *names)
       case 0:
          name[pos] = 0;
          if (pos != 0)
-            add_name (name, 0);
+            add_name (name);
          return;
       case ' ':
          name[pos] = 0;
          pos = 0;
-         add_name (name, 0);
+         add_name (name);
          break;
       default:
          name[pos] = *names;
@@ -291,13 +280,13 @@ new_topic (char *tbuf, char *nick, char *topic)
 }
 
 static void
-user_joined (char *outbuf, char *user, char *ip)
+user_joined (char *outbuf, char *user)
 {
-   if (fire_signal (XP_JOIN, session->channel, user, ip, NULL, 0) == 1)
+   if (fire_signal (XP_JOIN, session->channel, user, NULL, NULL, 0) == 1)
       return;
 
-   fire_signal (XP_TE_JOIN, user, session->channel, ip, NULL, 0);
-   add_name (user, ip);
+   fire_signal (XP_TE_JOIN, user, session->channel, NULL, NULL, 0);
+   add_name (user);
 }
 
 static void
@@ -308,12 +297,12 @@ user_kicked (char *outbuf, char *user, char *kicker, char *reason)
 }
 
 static void
-user_parted (char *user, char *ip, char *reason)
+user_parted (char *user, char *reason)
 {
   if (*reason)
-    fire_signal (XP_TE_PARTREASON, user, ip, session->channel, reason, 0);
+    fire_signal (XP_TE_PARTREASON, user, session->channel, reason, NULL, 0);
   else
-    fire_signal (XP_TE_PART, user, ip, session->channel, NULL, 0);
+    fire_signal (XP_TE_PART, user, session->channel, NULL, NULL, 0);
   sub_name (user);
 }
 
@@ -364,27 +353,7 @@ user_quit (char *outbuf, char *nick, char *reason)
 }
 
 static void
-got_ping_reply (char *outbuf, char *timestring, char *from)
-{
-   struct timeval timev;
-   unsigned long tim, nowtim, dif;
-
-   gettimeofday (&timev, 0);
-   sscanf (timestring, "%lu", &tim);
-   nowtim = (timev.tv_sec - 50000) * 1000000 + timev.tv_usec;
-   dif = nowtim - tim;
-
-   if (atol (timestring) == 0)
-      fire_signal (XP_TE_PINGREP, from, "?", NULL, NULL, 0);
-   else
-   {
-      sprintf (outbuf, "%ld.%ld", dif / 1000000, (dif / 100000) % 10);
-      fire_signal (XP_TE_PINGREP, from, outbuf, NULL, NULL, 0);
-   }
-}
-
-static void
-notice (char *outbuf, char *to, char *nick, char *msg, char *ip)
+notice (char *outbuf, char *to, char *nick, char *msg)
 {
    char *po;
 
@@ -392,10 +361,7 @@ notice (char *outbuf, char *to, char *nick, char *msg, char *ip)
    {
       msg++;
       if (!strncmp (msg, "PING", 4))
-      {
-         got_ping_reply (outbuf, msg + 5, nick);
          return;
-      }
    }
    po = strchr (msg, '\001');
    if (po)
@@ -411,7 +377,7 @@ handle_away (char *outbuf, char *nick, char *msg)
   if (away && !strcmp (msg, away->message))  /* Seen the msg before? */
     save_away_message (nick, msg);
   
-  fire_signal (XP_TE_WHOIS5, nick, msg, NULL, NULL, 0);
+  fire_signal (XP_TE_AWAY, nick, msg, NULL, NULL, 0);
 }
 
 static void
@@ -440,6 +406,7 @@ channel_mode (char *outbuf, char *nick, char sign, char mode, char *extra, int q
 	  if (fire_signal (XP_CHANOP, session->channel, nick, extra, NULL, 0) == 1)
 	    return;
 	  ul_op_name (extra);
+	  fprintf(stderr, "XP_TE_chanop: nick: %s, extra: %s\n", nick, extra);
 	  if (!quiet)
 	    fire_signal (XP_TE_CHANOP, nick, extra, NULL, NULL, 0);
 	  return;
@@ -692,48 +659,19 @@ process_line (void)
 		    goto def;
 		  case 301:
 		    handle_away (outbuf, find_word (pdibuf, 4), find_word_to_end (buf, 5) + 1);
-		    break;
 		  case 303:
-		    break;
 		  case 312:
-		    fire_signal (XP_TE_WHOIS3, word[4], word_eol[5], NULL, NULL, 0);
-		    break;
 		  case 311:
-		    server->inside_whois = 1;
-		    /* FALL THROUGH */
 		  case 314:
-		    fire_signal (XP_TE_WHOIS1, find_word (pdibuf, 4), find_word (pdibuf, 5), find_word (pdibuf, 6), find_word_to_end (buf, 8) + 1, 0);
-		    break;
 		  case 317:
-		    {
-		      long n = atol (find_word (pdibuf, 6));
-		      long idle = atol (find_word (pdibuf, 5));
-		      char *po, *tim = ctime (&n);
-		      sprintf (outbuf, "%02ld:%02ld:%02ld", idle / 3600, (idle / 60) % 60, idle % 60);
-		      if (n == 0)
-			fire_signal (XP_TE_WHOIS4, find_word (pdibuf, 4), outbuf, NULL, NULL, 0);
-		      else
-			{
-			  if ((po = strchr (tim, '\n')))
-			    *po = 0;
-			fire_signal (XP_TE_WHOIS4T, find_word (pdibuf, 4), outbuf, tim, NULL, 0);
-			}
-		    }
-		    break;
 		  case 318:
-		    server->inside_whois = 0;
-		    fire_signal (XP_TE_WHOIS6, word[4], NULL, NULL, NULL, 0);
-		    break;
 		  case 313:
 		  case 319:
-		    fire_signal (XP_TE_WHOIS2, word[4], word_eol[5] + 1, NULL, NULL, 0);
-		    break;
 		  case 321:
 		    break;
 		  case 322:
 		    sprintf (outbuf, "%-16.16s %-7d %s\017\n", find_word (pdibuf, 4), atoi (find_word (pdibuf, 5)), find_word_to_end (buf, 6) + 1);
 		    PrintText (outbuf);
-		    break;
 		  case 323:
 		    break;
 		  case 324:
@@ -847,7 +785,7 @@ process_line (void)
 	  } else
 	    {
 	      char t;
-	      char nick[64], ip[128];
+	      char nick[64];
 	      char *po2, *po = strchr (buf, '!');
 	      
 	      if (po)
@@ -858,7 +796,6 @@ process_line (void)
 		}
 	      if (!po)               /* SERVER Message */
 		{
-		  strcpy (ip, pdibuf);
 		  strcpy (nick, pdibuf);
 		  goto j2;
 		}
@@ -874,22 +811,18 @@ process_line (void)
 		      char *cmd;
 		      t = *po2;
 		      *po2 = 0;
-		      strcpy (ip, po + 1);
 		      *po2 = t;
 		    j2:
 		      cmd = find_word (pdibuf, 2);
 		      
 		      if (!strcmp ("INVITE", cmd))
-			{
-			  fire_signal (XP_TE_INVITED, session->channel, nick, NULL, NULL, 0);
 			  return;
-			}
 		      if (!strcmp ("JOIN", cmd))
 			{
 			  if (!strcasecmp (nick, server->nick))
-			    you_joined (outbuf, nick, ip);
+			    you_joined (outbuf, nick);
 			  else 
-			    user_joined (outbuf, nick, ip);
+			    user_joined (outbuf, nick);
 			  return;
 			}
 		      if (!strcmp ("MODE", cmd))
@@ -911,7 +844,7 @@ process_line (void)
 			      if (strcmp (nick, server->servername) == 0 || strchr (nick, '.'))
 				fire_signal (XP_TE_SERVERGENMESSAGE, msg, NULL, NULL, NULL, 0);
 			      else
-				notice (outbuf, to, nick, msg, ip);
+				notice (outbuf, to, nick, msg);
 			      return;
 			    }
 			}
@@ -921,10 +854,8 @@ process_line (void)
 			  
 			  if (*reason == ':')
 			    reason++;
-			  if (!strcmp (nick, server->nick))
-			    you_parted (outbuf, ip, reason);
-			  else
-			    user_parted (nick, ip, reason);
+			  if (strcmp (nick, server->nick))
+			    user_parted (nick, reason);
 			  return;
 			}
 		      if (!strcmp ("PRIVMSG", cmd))
@@ -938,15 +869,12 @@ process_line (void)
 			      else if (is_channel (to))
 				channel_msg (outbuf, nick, msg, FALSE);
 			      else
-				private_msg (outbuf, nick, ip, msg);	      
+				private_msg (outbuf, nick, msg);	      
 			      return;
 			    }
 			}
 		      if (!strcmp ("PONG", cmd))
-			{
-			  got_ping_reply (outbuf, find_word (pdibuf, 4) + 1, find_word (pdibuf, 3));
-			  return;
-			}
+			return;
 		      if (!strcmp ("QUIT", cmd))
 			{
 			  user_quit (outbuf, nick, find_word_to_end (buf, 3) + 1);
@@ -974,16 +902,8 @@ process_line (void)
 			  fire_signal (XP_TE_KILL, nick, word_eol[5], NULL,NULL, 0);
 			  return;
 			}
-		      if (!strcmp ("WALLOPS", cmd))
-			{
-			  char *msg = word_eol[3];
-			  if (*msg == ':')
-			    msg++;
-			  fire_signal (XP_TE_WALLOPS, nick, msg, NULL, NULL, 0);
-			  return;
-			}
-		      sprintf (outbuf, "(%s/%s) %s\n", nick, ip, find_word_to_end (buf, 2));
-		      PrintText (outbuf);
+		      /* sprintf (outbuf, "(%s/%s) %s\n", nick, ip, find_word_to_end (buf, 2));
+			 PrintText (outbuf); */
 		      return;
 		    }
 		}

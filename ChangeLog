@@ -28,9 +28,55 @@ NF-chat;
 	- removed odl definition from fkeys.c
 	- adapted alot of code in outbound.c
 	- removed nocommand from handle_command, handle_multiline 
-    b)
-
-### make sure it dusnt send unknown commands to the server4
+    b) cleaning up signals
+	- removed help from te, & related functions
+	- removed XP_TE_ALREADYJ/41
+		  82
+		XP_TE_DELNOTIFY 83
+		XP_TE_ADDNOTIFY 84
+		XP_TE_WINTYPE   85
+		89 - 108
+		XP_TE_NOTIFYONLINE 109
+		XP_TE_NOTIFYNUMBER 110
+		XP_TE_NOTIFYEMPTY 111
+		XP_TE_NOCHILD  112
+		XP_TE_ALREADYPROCESS 113
+		XP_TE_FOUNDIP 118
+		119
+		XP_TE_CTCPSEND 120
+		XP_TE_NOTICESEND 122
+	- removed wallops from inbound.c
+	- removed XP_TE_WALLOPS      123
+		XP_TE_IGNOREHEADER 125
+		XP_TE_IGNORELIST   126
+		XP_TE_IGNOREFOOTER 127
+		XP_TE_IGNOREADD 128
+		XP_TE_IGNOREREMOVE 129
+		XP_TE_RESOLVINGUSER 130
+		XP_TE_IGNOREEMPTY 131
+		XP_TE_IGNORECHANGE 132
+		XP_TE_NOTIFYOFFLINE 133
+		XP_TE_MALFORMED_FROM 134
+		XP_TE_MALFORMED_PACKET 135
+	- edited XP_TE_JOIN
+	- removed you_parted
+	- removed XP_TE_UPARTREASON, XP_TE_UPART
+	- removed XP_TE_DPRIVMSG, XP_TE_PINGREP
+	- removed got_ping_reply from inbound.c
+	- removed XP_TE_WHOIS1, WHOIS2, 3, 4, 4T,6
+	- removed doing_whois from server struct
+	- moved WHOIS5 to AWAY
+	- removed XP_TE_INVITED; no user should get any invite
+	- moved PARTREASON to 33
+	- moved AWAY to 37
+	- moved CTCPGEN/GENC to end of te struct
+	- cleaned up signal.h & text.c
+	- removed UJOIN, it equals join
+	- edited private_msg, you_joined, user_joined, user_parted, notice
+	- removed sprintf at the end of processline
+	- edited add_name
+    c)
+### make it rejoin a channel on reconnect
 ### make sure it uses the conf file specified port
 ### move send_quit_or_part to send_quit
 ### make sure the editbox always has focus	
@@ -40,14 +86,12 @@ NF-chat;
 ### clean up *tbuf
 ### is_channel, is_server
 ### userlist dusnt need all that inf, nickname should suffise
-### *ip
 ### remove key_action_page_switch
 ### main_window
 ### ctcpreply.conf
 ### clean up fe
 ### struct user
 ### clean up fkeys.c
-### clean up signals
 ### find another method to check whether the server is still connected
     in timeout_auto_reconnect
 *** gtk_xtext_append??? <-- think this becomes obsolete

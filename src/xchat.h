@@ -140,7 +140,6 @@ struct server_t
    int connecting:1;
    int no_login:1;
    int skip_next_who:1;         /* used for "get my ip from server" */
-   int inside_whois:1;
    int doing_who:1;             /* /dns has been done */
    int end_of_motd:1;		/* end of motd reached (logged in) */
    int sent_quit:1;        /* sent a QUIT already? */

@@ -131,11 +131,11 @@ static commands_t *
 add_command (char *name, char needserver, char needchannel, char *help)
 {
   commands_t *cmd;
-  fprintf(stderr, "name = %s, needeserver = %c, needchannel = %c, help = %s\n", name, needserver, needchannel, help);
+ 
   cmd = malloc(sizeof(commands_t));
 
   if (name)
-      strcpy(cmd->name = malloc(sizeof(name)), name);
+      strcpy(cmd->name = malloc(strlen(name) + 1), name);
   else
     cmd->name = NULL;
 
@@ -143,7 +143,7 @@ add_command (char *name, char needserver, char needchannel, char *help)
   cmd->needchannel = needchannel;
 
   if (help)
-      strcpy(cmd->help = malloc(sizeof(help)), help);
+      strcpy(cmd->help = malloc(strlen(help) + 1), help);
   else
     cmd->help = NULL;
 
@@ -469,7 +469,7 @@ handle_command (char *cmd, int history)
    unsigned char tbuf[4096];
    char *word[32];
    char *word_eol[32];
-   fprintf(stderr, "handle_command: command: %s, history: %d\n", cmd, history);
+
    if (!session || !*cmd)
       return TRUE;
 
@@ -479,7 +479,6 @@ handle_command (char *cmd, int history)
    if (cmd[0] == '/')
    {
       cmd++;
-      fprintf(stderr, "calling process_data_init\n");
 
       process_data_init (pdibuf, cmd, word, word_eol);
 

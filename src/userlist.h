@@ -19,6 +19,6 @@ extern void voice_name (char *name);
 extern void devoice_name (char *name);
 extern void ul_op_name (char *name);
 extern void deop_name (char *name);
-extern int add_name (char *name, char *hostname);
+extern int add_name (char *name);
 extern int sub_name (char *name);
 
