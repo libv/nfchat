@@ -29,14 +29,11 @@
 #include <unistd.h>
 #include <ctype.h>
 #include "xchat.h"
-#include "fe.h"
 #include "fe-gtk.h"
-#include "gtkutil.h"
 #include <gdk_imlib.h>
 #include <gdk/gdkkeysyms.h>
 #include "xtext.h"
 
-GtkWidget *main_window = 0;
 GtkStyle *inputgad_style;
 
 extern struct xchatprefs prefs;
@@ -49,7 +46,10 @@ extern int kill_session_callback (void);
 extern gint gtk_kill_session_callback (GtkWidget *, void *blah);
 extern void clear_user_list (void);
 extern void handle_inputgad (GtkWidget * igad, void *blah);
+extern void fe_progressbar_end (void);
+
 int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);
+
 
 struct relink_data {
    GtkWidget *win, *hbox;
@@ -182,6 +182,49 @@ maingui_userlist_selected (GtkWidget *clist, gint row, gint column,
                            GdkEventButton *even)
 {
    gtk_clist_unselect_all (GTK_CLIST (clist));
+}
+
+static GtkWidget *
+gtkutil_clist_new (int columns, char *titles[],
+          GtkWidget * box, int policy,
+                   void *select_callback, gpointer select_userdata,
+              void *unselect_callback,
+           gpointer unselect_userdata,
+                   int selection_mode)
+{
+   GtkWidget *clist, *win;
+
+   win = gtk_scrolled_window_new (0, 0);
+   gtk_container_add (GTK_CONTAINER (box), win);
+   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (win),
+                 GTK_POLICY_AUTOMATIC,
+                              policy);
+   gtk_widget_show (win);
+
+   if (titles)
+      clist = gtk_clist_new_with_titles (columns, titles);
+   else
+      clist = gtk_clist_new (columns);
+   if (selection_mode)
+      gtk_clist_set_selection_mode (GTK_CLIST (clist), selection_mode);
+   
+   gtk_clist_column_titles_passive (GTK_CLIST (clist));
+   gtk_container_add (GTK_CONTAINER (win), clist);
+
+   if (select_callback)
+   {
+      gtk_signal_connect (GTK_OBJECT (clist), "select_row",
+                          GTK_SIGNAL_FUNC (select_callback), select_userdata);
+   }
+
+   if (unselect_callback)
+   {
+      gtk_signal_connect (GTK_OBJECT (clist), "unselect_row",
+                          GTK_SIGNAL_FUNC (unselect_callback), unselect_userdata);
+   }
+   gtk_widget_show (clist);
+
+   return clist;
 }
 
 void

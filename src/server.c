@@ -30,7 +30,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "signals.h"
-#include "fe.h"
 
 extern struct xchatprefs prefs;
 
@@ -40,10 +39,60 @@ extern void set_server_name (char *name);
 extern void flush_server_queue (void);
 extern int tcp_send (char *buf);
 extern void read_data (gint sok);
-extern char *errorstring (int err);
-extern int waitline (int sok, char *buf, int bufsize);
 extern void notc_msg (void);
 extern void PrintText (char *text);
+extern int fe_timeout_add (int interval, void *callback, void *userdata);
+extern void fe_new_window (void);
+extern int fe_input_add (int sok, int read, int write, int ex, void *func);
+extern void fe_input_remove (int tag);
+extern void fe_progressbar_start (void);
+extern void fe_progressbar_end (void);
+
+static int
+waitline (int sok, char *buf, int bufsize)
+{
+   int i = 0;
+
+   while (1)
+   {
+      if (read (sok, &buf[i], 1) < 1)
+         return -1;
+      if (buf[i] == '\n')
+      {
+         buf[i] = 0;
+         return i;
+      }
+      i++;
+      if (i == (bufsize - 1))
+         return 0;
+   }
+}
+
+static char *
+errorstring (int err)
+{
+   static char tbuf[16];
+   switch (err)
+   {
+   case -1:
+      return "";
+   case 0:
+      return "Remote host closed socket";
+   case ECONNREFUSED:
+      return "Connection refused";
+   case ENETUNREACH:
+   case EHOSTUNREACH:
+      return "No route to host";
+   case ETIMEDOUT:
+      return "Connection timed out";
+   case EADDRNOTAVAIL:
+      return "Cannot assign that address";
+   case ECONNRESET:
+      return "Connection reset by peer";
+   }
+   sprintf (tbuf, "%d", err);
+   return tbuf;
+}
 
 static void
 server_cleanup (void)

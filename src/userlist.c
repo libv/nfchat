@@ -23,14 +23,12 @@
 #include "fe-gtk.h"
 #include "util.h"
 #include "userlist.h"
-#include "gtkutil.h"
 #include <gdk_imlib.h>
 
 #include "op.xpm"
 #include "voice.xpm"
 
 extern GdkColor colors[]; 
-extern struct xchatprefs prefs;
 GdkPixmap *op_pixmap, *voice_pixmap;
 GdkBitmap *op_mask_bmp, *voice_mask_bmp;
 
@@ -129,19 +127,24 @@ fe_userlist_insert (struct user *newuser, int row)
       }
    }
    if (newuser->op)
-   {
-      gtk_clist_set_pixtext ((GtkCList *) session->gui->namelistgad, row, 0,
-                             newuser->nick, 3, op_pixmap, op_mask_bmp);
-   } else if (newuser->voice)
-   {
-         gtk_clist_set_pixtext ((GtkCList *) session->gui->namelistgad, row, 0,
-                                newuser->nick, 3, voice_pixmap, voice_mask_bmp);
-   }
+      gtk_clist_set_pixtext ((GtkCList *) session->gui->namelistgad, row, 0, newuser->nick, 3, op_pixmap, op_mask_bmp);
+   else if (newuser->voice)
+         gtk_clist_set_pixtext ((GtkCList *) session->gui->namelistgad, row, 0, newuser->nick, 3, voice_pixmap, voice_mask_bmp);
 
    gtk_adjustment_set_value (adj, val);
 
    return row;
 }
+
+static int
+gtkutil_clist_selection (GtkWidget * clist)
+{
+   if (GTK_CLIST (clist)->selection)
+      return (int) GTK_CLIST (clist)->selection->data;
+   else
+      return -1;
+}
+
 
 static void
 fe_userlist_move (struct user *user, int new_row)
@@ -167,25 +170,7 @@ fe_userlist_clear (void)
    gtk_clist_clear (GTK_CLIST (session->gui->namelistgad));
 }
 
-int
-userlist_add_hostname (char *nick, char *hostname, char *realname, char *servername)
-{
-   struct user *user;
-
-   user = find_name (nick);
-   if (user && !user->hostname)
-   {
-      user->hostname = strdup (hostname);
-      if (!user->realname)
-         user->realname = strdup (realname);
-      if (!user->servername)
-         user->servername = strdup (servername);
-      return 1;
-   }
-   return 0;
-}
-
-int
+static int
 nick_cmp_az_ops (struct user *user1, struct user *user2)
 {
    if (user1->op && !user2->op)
@@ -211,12 +196,6 @@ clear_user_list (void)
    while (list)
    {
       user = (struct user *)list->data;
-      if (user->realname)
-         free (user->realname);
-      if (user->hostname)
-         free (user->hostname);
-      if (user->servername);
-         free (user->servername);
       free (user);
       list = g_slist_remove (list, user);
    }
@@ -348,12 +327,6 @@ sub_name (char *name)
    fe_userlist_numbers ();
    fe_userlist_remove (user);
 
-   if (user->realname)
-      free (user->realname);
-   if (user->hostname)
-      free (user->hostname);
-   if (user->servername)
-      free (user->servername);
    free (user);
    session->userlist = g_slist_remove (session->userlist, user);
 

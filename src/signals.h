@@ -84,12 +84,10 @@
 #define XP_TE_SERVERGENMESSAGE 76
 #define XP_HIGHLIGHT       77
 #define XP_TE_MOTD 78
-#define XP_TE_CTCPGEN   79
-#define XP_TE_CTCPGENC  80
-#define XP_IF_SEND 81
-#define XP_IF_RECV 82
+#define XP_IF_SEND 79
+#define XP_IF_RECV 80
 
-#define NUM_XP		   83
+#define NUM_XP		   81
 
 extern int current_signal;
 

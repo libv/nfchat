@@ -29,18 +29,19 @@
 #include "xchat.h"
 #include "util.h"
 #include "signals.h"
-#include "fe.h"
+#include "userlist.h"
 
 extern int tcp_send (char *buf);
-struct away_msg *find_away_message (char *nick);
-void save_away_message (char *nick, char *msg);
 extern unsigned char *strip_color (unsigned char *text);
 extern void PrintText(char *text);
 extern void change_nick (char *oldnick, char *newnick);
 extern void process_data_init (unsigned char *buf, char *cmd, char *word[], char *word_eol[]);
-extern void handle_ctcp (char *outbuf, char *to, char *nick, char *msg, char *word[], char *word_eol[]);
 extern struct xchatprefs prefs;
-
+extern void fe_set_topic (char *topic);
+extern void fe_clear_channel (void);
+extern void fe_set_channel (void);
+extern void fe_set_title (void);
+extern void fe_set_nick (char *newnick);
 
 #define find_word_to_end(a, b) word_eol[b]
 #define find_word(a, b) word[b]
@@ -49,12 +50,27 @@ extern struct xchatprefs prefs;
 /* also light/dark gray (14/15) */
 /* 5,7,8 are all shades of yellow which happen to look dman near the same */
 
+
 void
 clear_channel (void)
 {
    session->channel[0] = 0;
    fe_clear_channel ();
    fe_set_title ();
+}
+
+static int
+is_channel (char *string)
+{
+   switch (*string)
+   {
+      case '#': /* normal channel */
+      case '&': /* normal channel */
+      case '+': /* modeless channel */
+      case '!': /* some obscure IRC RFC breaking channel */
+         return 1;
+   }
+   return 0;
 }
 
 static void
@@ -80,6 +96,26 @@ channel_action (char *tbuf, char *from, char *text, int fromme)
      strcpy (tbuf, from);
    
    fire_signal (XP_TE_CHANACTION, tbuf, text, NULL, NULL, 0);
+}
+static char *
+nocasestrstr (char *text, char *tofind)  /* like strstr(), but nocase */
+{
+   char *ret = text, *find = tofind;
+
+   while (1)
+   {
+      if (*find == 0)
+         return ret;
+      if (*text == 0)
+         return 0;
+      if (toupper (*find) != toupper (*text))
+      {
+         ret = text + 1;
+         find = tofind;
+      } else
+         find++;
+      text++;
+   }
 }
 
 static int
@@ -123,7 +159,6 @@ channel_msg (char *outbuf, char *from, char *text, char fromme)
       return;
 
    user = find_name (from);
-   if (user) user->lasttalk = time (0);
 
    if (fire_signal (XP_CHANMSG, session->channel, from, text, NULL, fromme) == 1)
       return;
@@ -370,14 +405,15 @@ notice (char *outbuf, char *to, char *nick, char *msg)
 }
 
 static void
-handle_away (char *outbuf, char *nick, char *msg)
+handle_ctcp (char *outbuf, char *nick, char *msg, char *word_eol[])
 {
-  struct away_msg *away = find_away_message (nick);
+  if (!strncasecmp (msg, "VERSION", 7))
+    sprintf (outbuf, "NOTICE %s :\001VERSION NF-Chat "VERSION" : http://www.netforce.be\001\r\n", nick);
+  else if (!strncasecmp (msg, "PING", 4))
+    sprintf (outbuf, "NOTICE %s :\001PING %s\001\r\n", nick, word_eol[5]);
   
-  if (away && !strcmp (msg, away->message))  /* Seen the msg before? */
-    save_away_message (nick, msg);
-  
-  fire_signal (XP_TE_AWAY, nick, msg, NULL, NULL, 0);
+  tcp_send (outbuf);
+  return;
 }
 
 static void
@@ -489,6 +525,19 @@ channel_mode (char *outbuf, char *nick, char sign, char mode, char *extra, int q
 	}
       break;
     }
+  if (!quiet)
+    {
+      char tbuf[2][2];
+      
+      tbuf[0][0] = sign;
+      tbuf[0][1] = 0;
+      tbuf[1][0] = mode;
+      tbuf[1][1] = 0;
+      if (extra && *extra)
+	fire_signal(XP_TE_CHANMODEGEN, nick, tbuf[0], tbuf[1], extra, 0);
+      else
+	fire_signal (XP_TE_CHANMODEGEN, nick, tbuf[0], tbuf[1], extra, 0);
+    }
 }
 
 static void
@@ -526,6 +575,8 @@ channel_modes (char *outbuf, char *word[], char *nick, int displacement)
 		  channel_mode (outbuf, nick, sign, modes[0], word[i], displacement);
 		  i++;
 		  break;
+		default:
+                  channel_mode (outbuf, nick, sign, modes[0], "", displacement);
 		}
 	    } else
 	      {
@@ -541,6 +592,9 @@ channel_modes (char *outbuf, char *word[], char *nick, int displacement)
 		    channel_mode (outbuf, nick, sign, modes[0], word[i], displacement);
 		    i++;
 		    break;
+		    default:
+                  channel_mode (outbuf, nick, sign, modes[0], "", displacement);
+
 		  }
 	      }
 	  modes++;
@@ -658,7 +712,7 @@ process_line (void)
 		    set_server_name (pdibuf);
 		    goto def;
 		  case 301:
-		    handle_away (outbuf, find_word (pdibuf, 4), find_word_to_end (buf, 5) + 1);
+		    fire_signal (XP_TE_AWAY, find_word (pdibuf, 4), find_word_to_end (buf, 5) + 1, NULL, NULL, 0);
 		  case 303:
 		  case 312:
 		  case 311:
@@ -691,7 +745,7 @@ process_line (void)
 		    if (!server->skip_next_who)
 		      {
 			sprintf (outbuf, "%s@%s", word[5], word[6]);
-			if (!userlist_add_hostname (word[8], outbuf, word_eol[11], word[7]) && !session->doing_who)
+			if (!find_name (word[8]) && !session->doing_who)
 			  goto def;
 		      } else
 			if (!server->doing_who)
@@ -865,7 +919,7 @@ process_line (void)
 			    {
 			      char *msg = find_word_to_end (buf, 4) + 1;
 			      if (msg[0] == 1 && msg[strlen (msg) - 1] == 1)  /* ctcp */
-				handle_ctcp (outbuf, to, nick, msg + 1, word, word_eol);
+				handle_ctcp (outbuf, nick, msg + 1, word_eol);
 			      else if (is_channel (to))
 				channel_msg (outbuf, nick, msg, FALSE);
 			      else

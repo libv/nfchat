@@ -21,7 +21,6 @@
 #include <string.h>
 #include <unistd.h>
 #include "xchat.h"
-#include "fe.h"
 #include "util.h"
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -34,8 +33,6 @@
 #include <sys/stat.h>
 #include "signals.h"
 
-
-GSList *ctcp_list = 0;
 server_t *server = NULL;
 session_t *session = NULL;
 GSList *away_list = 0;
@@ -44,20 +41,27 @@ int xchat_is_quitting = 0;
 
 struct xchatprefs prefs;
 
-void xchat_cleanup (void);
+extern int fe_args (int argc, char *argv[]);
+extern void fe_init (void);
+extern void fe_main (void);
+extern void fe_exit (void);
+extern int fe_timeout_add (int interval, void *callback, void *userdata);
+extern void fe_new_window (void);
+extern void fe_input_remove (int tag);
+extern void fe_session_callback (void);
+
 extern void process_line (void);
 extern void signal_setup (void);
 extern int close_socket (int sok);
 extern void connect_server (char *server, int port, int quiet);
 extern void disconnect_server (int sendquit, int err);
-extern void list_loadconf (char *, GSList **, char *);
 extern unsigned char *strip_color (unsigned char *text);
 extern void load_text_events (void);
 void auto_reconnect (int send_quit, int err);
 void init_commands (void);
 
 /* anything above SEND_MAX bytes in 1 second is
-   queued and sent QUEUE_TIMEOUT milliseconds later */
+   queued & sent QUEUE_TIMEOUT milliseconds later */
 
 #define SEND_MAX 256
 #define QUEUE_TIMEOUT 2500
@@ -141,14 +145,17 @@ timeout_auto_reconnect (void)
 {
   if (!server->connected && !server->connecting)
       connect_server (server->hostname, server->port, FALSE);
-  return 0;         /* returning 0 should remove the timeout handler */
+  return 0;         /* returning 0 should remove timeout handler */
 }
 
 void
 auto_reconnect (int send_quit, int err)
 {
   disconnect_server (send_quit, err);
-  
+
+  if (prefs.channel)
+    strcpy (session->willjoinchannel, prefs.channel);
+
   if (prefs.recon_delay)
     fe_timeout_add (prefs.recon_delay * 1000, timeout_auto_reconnect, server);
   else
@@ -279,6 +286,18 @@ kill_server_callback (void)
   free (server);
 }
 
+static void
+history_free (struct history *his)
+{
+  int i;
+  for (i = 0; i < HISTORY_SIZE; i++)
+    if (his->lines[i])
+      {
+	free (his->lines[i]);
+	his->lines[i] = 0;
+      }
+}
+
 void
 kill_session_callback (void)
 {
@@ -308,47 +327,6 @@ kill_session_callback (void)
   kill_server_callback ();
 }
 
-struct away_msg *
-find_away_message (char *nick)
-{
-   struct away_msg *away;
-   GSList *list = away_list;
-   while (list)
-   {
-      away = (struct away_msg *) list->data;
-      if (!strcasecmp (nick, away->nick))
-         return away;
-      list = list->next;
-   }
-   return 0;
-}
-
-void
-save_away_message (char *nick, char *msg)
-{
-   struct away_msg *away = find_away_message (nick);
-
-   if (away)                    /* Change message for known user */
-   {
-      if (away->message)
-         free (away->message);
-      away->message = strdup (msg);
-   } else
-      /* Create brand new entry */
-   {
-      away = malloc (sizeof (struct away_msg));
-      if (away)
-      {
-         strcpy (away->nick, nick);
-         away->message = strdup (msg);
-         away_list = g_slist_prepend (away_list, away);
-      }
-   }
-}
-
-#define defaultconf_ctcp  "NAME TIME\nCMD /nctcp %s TIME %t\n\n"\
-                          "NAME PING\nCMD /nctcp %s PING %d\n\n"
-
 static void
 xchat_init (void)
 {
@@ -361,7 +339,6 @@ xchat_init (void)
   
   signal_setup ();
   load_text_events ();
-  list_loadconf ("ctcpreply.conf", &ctcp_list, defaultconf_ctcp);
 
   init_commands ();
   init_server ();
@@ -381,15 +358,6 @@ xchat_init (void)
 
   connect_server(prefs.server, prefs.port, FALSE);
   
-}
-
-void
-xchat_cleanup (void)
-{
-  xchat_is_quitting = TRUE;
-  
-  /* free (session); */
-  fe_exit ();
 }
 
 int

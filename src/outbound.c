@@ -23,7 +23,7 @@
 #include "xchat.h"
 #include "signals.h"
 #include "util.h"
-#include "fe.h"
+#include "userlist.h"
 #include <sys/time.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -460,6 +460,17 @@ check_nick_completion (char *cmd, char *tbuf)
    }
    tbuf[0] = 0;
 }
+static void
+history_add (struct history *his, char *text)
+{
+   if (his->lines[his->realpos])
+      free (his->lines[his->realpos]);
+   his->lines[his->realpos] = strdup (text);
+   his->realpos++;
+   if (his->realpos == HISTORY_SIZE)
+      his->realpos = 0;
+   his->pos = his->realpos;
+}
 
 int
 handle_command (char *cmd, int history)
@@ -571,7 +582,7 @@ void
 handle_multiline (char *cmd, int history)
 {
   char *cr;
-  fprintf(stderr, "handle_multiline: command: %s, history: %d\n", cmd, history);
+
   cr = strchr (cmd, '\n');
   if (cr)
     while (1)

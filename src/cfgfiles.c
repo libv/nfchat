@@ -27,85 +27,10 @@
 #include <sys/stat.h>
 #include "xchat.h"
 #include "cfgfiles.h"
-#include "popup.h" 
-#include "fe.h"
-
 
 extern struct xchatprefs prefs;
 
 extern int buf_get_line (char *, char **, int *, int len);
-
-static void
-list_addentry (GSList ** list, char *cmd, char *name)
-{
-   struct popup *pop = malloc (sizeof (struct popup));
-   if (!pop)
-      return;
-   strncpy (pop->name, name, 81);
-   if (!cmd)
-      pop->cmd[0] = 0;
-   else
-      strncpy (pop->cmd, cmd, 255);
-   *list = g_slist_append (*list, pop);
-} 
-
-void
-list_loadconf (char *file, GSList ** list, char *defaultconf)
-{
-   char cmd[256];
-   char name[82];
-   char *buf, *ibuf;
-   int fh, pnt = 0;
-   struct stat st;
-
-   buf = malloc (1000);
-   snprintf (buf, 1000, "%s/%s", get_xdir (), file);
-   fh = open (buf, O_RDONLY | OFLAGS);
-   if (fh == -1)
-   {
-      fh = open (buf, O_TRUNC | O_WRONLY | O_CREAT | OFLAGS, 0600);
-      if (fh != -1)
-      {
-         write (fh, defaultconf, strlen (defaultconf));
-         close (fh);
-         free (buf);
-         list_loadconf (file, list, defaultconf);
-      }
-      return;
-   }
-   free (buf);
-   if (fstat (fh, &st) != 0)
-   {
-      perror ("fstat");
-      abort ();
-   }
-   ibuf = malloc (st.st_size);
-   read (fh, ibuf, st.st_size);
-   close (fh);
-
-   cmd[0] = 0;
-   name[0] = 0;
-
-   while (buf_get_line (ibuf, &buf, &pnt, st.st_size))
-   {
-      if (*buf != '#')
-      {
-         if (!strncasecmp (buf, "NAME ", 5))
-            strncpy (name, buf + 5, 81);
-         if (!strncasecmp (buf, "CMD ", 4))
-         {
-            strncpy (cmd, buf + 4, 255);
-            if (*name)
-            {
-               list_addentry (list, cmd, name);
-               cmd[0] = 0;
-               name[0] = 0;
-            }
-         }
-      }
-   }
-   free (ibuf);
-}
 
 static char *
 cfg_get_str (char *cfg, char *var, char *dest)
@@ -235,7 +160,7 @@ static struct prefs vars[] = {
 {"transparent",         PREFS_OFFINT(transparent),         TYPE_BOOL},
 {"tint",                PREFS_OFFINT(tint),                TYPE_BOOL},
 {"use_fontset",         PREFS_OFFINT(use_fontset),         TYPE_BOOL},
-{"port",                PREFS_OFFSET(port),                 TYPE_INT},
+{"port",                PREFS_OFFINT(port),                 TYPE_INT},
 {"mainwindow_left",     PREFS_OFFINT(mainwindow_left),      TYPE_INT},
 {"mainwindow_top",      PREFS_OFFINT(mainwindow_top),       TYPE_INT},
 {"mainwindow_width",    PREFS_OFFINT(mainwindow_width),     TYPE_INT},
@@ -252,7 +177,7 @@ static struct prefs vars[] = {
 {0, 0, 0},
 };
 
-int
+static int
 save_config (void)
 {
    int fh, i;

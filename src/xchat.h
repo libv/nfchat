@@ -19,8 +19,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "history.h"
-
 #ifndef HAVE_SNPRINTF
 #define snprintf g_snprintf 
 #endif
@@ -93,6 +91,15 @@ struct xchatprefs
   unsigned int allow_nick;
 };
 
+#define HISTORY_SIZE 100
+
+struct history
+{
+   char *lines[HISTORY_SIZE];
+   int pos;
+   int realpos;
+};
+
 struct session_t
 {
    GSList *userlist;
@@ -162,9 +169,3 @@ typedef struct commands_t
 } commands_t;
 
 extern commands_t **cmds;
-
-struct away_msg
-{
-   char nick[64];
-   char *message;
-};

@@ -27,11 +27,8 @@
 #include "cfgfiles.h"
 #include "userlist.h"
 #include "fe-gtk.h"
-#include "gtkutil.h"
 #include "xtext.h"
 
-extern GtkWidget *main_window;
-extern int waitline (int sok, char *buf, int bufsize);
 extern int handle_multiline (char *cmd, int history);
 
 extern void PrintText (char *text);
@@ -932,8 +929,6 @@ key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2)
    int len, i, num;
 
    if (!d1)
-      return 1;
-   if (!main_window)
       return 1;
 
    len = strlen (d1);

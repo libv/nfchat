@@ -21,9 +21,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "xchat.h"
-#include "fe.h"
 #include "fe-gtk.h"
-#include "gtkutil.h"
 #include "xtext.h"
 #include <gdk_imlib.h>
 
@@ -38,7 +36,6 @@ GtkStyle *channelwin_style;
 extern char *xdir;
 extern struct xchatprefs prefs;
 
-extern char *get_cpu_str (int color);
 extern void PrintText (char *text);
 extern void notify_gui_update (void);
 extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, session_t *sess);
@@ -123,12 +120,6 @@ int
 fe_timeout_add (int interval, void *callback, void *userdata)
 {
    return gtk_timeout_add (interval, (GtkFunction) callback, userdata);
-}
-
-void
-fe_timeout_remove (int tag)
-{
-   gtk_timeout_remove (tag);
 }
 
 void

@@ -29,7 +29,6 @@
 #include <sys/wait.h>
 #include "cfgfiles.h"
 #include "signals.h"
-#include "fe.h"
 #include "util.h"
 #include "xtext.h"
 
@@ -204,10 +203,8 @@ struct text_event te[] =
 /*076*/   {"Server Generic Message", "-%C10-%C11-%O$t$1%O", 1},
 /*077*/   {NULL, NULL, 0},  /* XP_HIGHLIGHT */
 /*078*/   {"Motd", "-%C10-%C11-%O$t$1%O", 1},
-/*079*/   {"CTCP Generic", "-%C10-%C11-%O$tReceived a CTCP $1 from $2", 2},
-/*080*/   {"CTCP Generic to Channel", "-%C10-%C11-%O$tReceived a CTCP $1 from $2 (to $3)", 3},
-/*081*/   {NULL, NULL, 0},	/* XP_IF_SEND */
-/*082*/   {NULL, NULL, 0},	/* XP_IF_RECV */
+/*079*/   {NULL, NULL, 0},	/* XP_IF_SEND */
+/*080*/   {NULL, NULL, 0},	/* XP_IF_RECV */
 };
 
 int
@@ -309,8 +306,7 @@ display_event (char *i, int numargs, char **args)
    char o[4096], d, a, done_all = FALSE;
 
    oi = ii = len = d = a = 0;
-   fprintf(stderr, "signal = %d, numargs = %d, args = %s\n", *i, numargs, *args);
-
+ 
    if (i == NULL)
       return;
 
@@ -562,8 +558,6 @@ textsignal_handler (void *b, void *c, void *d, void *e, char f)
    args[1] = c;
    args[2] = d;
    args[3] = e;
-   fprintf  (stderr, "current signal: %d\n", current_signal);
-   fprintf  (stderr, "pntevts currentsignal = %s, numargs = %d, args = %s\n", pntevts[(int) current_signal], numargs, *args);
 
    display_event (pntevts[(int) current_signal], numargs, args);
    return 0;

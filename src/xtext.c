@@ -56,7 +56,6 @@ enum
 };
 static guint xtext_signals[LAST_SIGNAL] = { 0 };
 
-char *nocasestrstr (char *text, char *tofind);  /* util.c */
 static void gtk_xtext_render_page (GtkXText *xtext, int startline);
 static void gtk_xtext_calc_lines (GtkXText *xtext, int);
 static void gtk_xtext_load_trans (GtkXText *xtext);

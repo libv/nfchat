@@ -76,21 +76,39 @@ NF-chat;
 	- removed sprintf at the end of processline
 	- edited add_name
     c)
+	- edited handle_ctcp to only handle version & ping
+	- moved handle_ctcp to inbound.c
+	- deleted ctcp.c & edited Makefile.am
+	- edited xchat.c & removed ctcp conffile
+	- removed the 2 ctcp signals - client will not echo ctcps
+	- removed hostname, servername, realname, lasttalk from struct
+	  user
+	- removed userlist_add_hostname
+	- removed popup.h
+	- moved is_channel to inbound.c
+	- removing is_channel, get_cpu_str, country, for_files, file_part
+	  path_part, match, tolowerStr, toupperStr, expand_homedir
+	  tolowertab from util.c
+	- moved waitline, errorstring to server.c
+	- moved nocasestrstr to inbound.c
+	- removed gtkutil_destroy from gtkutil.c
+	- moved gtkutil_clist_new to maingui.c
+	- moved gtkutil_clist_selection to userlist.c
+	- moved history_add to outbound.c
+	- moved history_free to xchat.c
+	- removed history.* & edited Makefile.am
+	- removed list_loadconf from cfgfiles.c
+	- removed fe_timeout_remove
+	- removed fe.h
+	- removed xchat_cleanup
+	- removed handle_away, find_away_message, save_away_message,
+	  struct away_msg
+    d)
+
 ### make it rejoin a channel on reconnect
-### make sure it uses the conf file specified port
-### move send_quit_or_part to send_quit
 ### make sure the editbox always has focus	
-### add the generic modes again
 ### make it rejoin the set channel on a prefs specified time interval
-### clean up debug stuff
-### clean up *tbuf
-### is_channel, is_server
-### userlist dusnt need all that inf, nickname should suffise
 ### remove key_action_page_switch
-### main_window
-### ctcpreply.conf
-### clean up fe
-### struct user
 ### clean up fkeys.c
 ### find another method to check whether the server is still connected
     in timeout_auto_reconnect
@@ -104,7 +122,6 @@ NF-chat;
 *** add some extra prefs & code for my_widget_get_style(maingui.c)
 *** for/background - base colours!!!! -> seems to only affect inputbox
 *** remember to check for fprintf uniformication
-*** clean up ctcp.c
 *** make it send a quit to the server upon kill.
 ### Add decent file headers
 
