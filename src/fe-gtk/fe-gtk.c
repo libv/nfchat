@@ -234,9 +234,6 @@ init_sess (void)
 #ifdef USE_PERL
    strcat (buf, "Perl ");
 #endif
-#ifdef USE_PYTHON
-   strcat (buf, "Python ");
-#endif
 #ifdef USE_PLUGIN
    strcat (buf, "Plugin ");
 #endif

@@ -83,12 +83,6 @@ extern int module_command (char *cmd, struct session *sess, char *tbuf, char *wo
 extern int module_load (char *name, struct session *sess);
 extern int module_list (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 extern int module_unload (char *name, struct session *sess);
-#ifdef USE_PYTHON
-extern int pys_load (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-extern int pys_cmd_handle (char *cmd, struct session *sess, char **word);
-extern int pys_pkill (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-extern int pys_plist (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-#endif
 
 #ifdef MEMORY_DEBUG
 extern int current_mem_usage;
@@ -365,11 +359,6 @@ struct commands cmds[] =
    {"OP", cmd_op, 1, 1, "/OP <nick>, gives chanop status to the nick (needs chanop)\n"},
    {"PART", cmd_part, 1, 1, "/PART [<channel>] [<reason>], leaves the channel, by default the current one\n"},
    {"PING", cmd_ping, 1, 0, "/PING <nick | channel>, CTCP pings nick or channel\n"},
-#ifdef USE_PYTHON
-   {"PKILL", pys_pkill, 0, 0, "/PLOAD <name>, kills the script of the given name\n"},
-   {"PLIST", pys_plist, 0, 0, "/PLIST, lists the current python scripts\n"},
-   {"PLOAD", pys_load, 0, 0, "/PLOAD loads a python script\n"},
-#endif
    {"QUERY", cmd_query, 0, 0, "/QUERY <nick>, opens up a new privmsg window to someone\n"},
    {"QUIT", cmd_quit, 0, 0, "/QUIT [<reason>], disconnects from the current server\n"},
    {"QUOTE", cmd_quote, 1, 0, "/QUOTE <text>, sends the text in raw form to the server\n"},
@@ -2485,10 +2474,6 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
 #ifdef USE_PLUGIN
       if (module_command (pdibuf, sess, tbuf, word, word_eol) == 0)
          return TRUE;
-#endif
-#ifdef USE_PYTHON
-      if (pys_cmd_handle (pdibuf, sess, word))
-	      return TRUE;
 #endif
 
       while (list)

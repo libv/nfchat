@@ -111,11 +111,6 @@ void perl_end (void);
 int perl_inbound (struct session *sess, struct server *serv, char *buf);
 #endif
 
-/* python.c */
-
-extern void pys_init ();
-extern void pys_kill ();
-
 /* editlist.c */
 
 extern void list_loadconf (char *, GSList **, char *);
@@ -1002,9 +997,6 @@ xchat_init (void)
    else
       sess = new_session (serv, 0);
 
-#ifdef USE_PYTHON
-   pys_init ();
-#endif
 #ifdef USE_PLUGIN
    module_setup ();
 #endif
@@ -1085,9 +1077,6 @@ main (int argc, char *argv[])
 
    fe_main ();
 
-#ifdef USE_PYTHON
-   pys_kill();          /* this never returns! */
-#endif
 
    return 0;
 }

@@ -1,0 +1,8 @@
+rm aclocal.m4
+rm config.h.in
+rm configure
+rm Makefile.in
+rm src/Makefile.in
+rm src/common/Makefile.in
+rm src/fe-gtk/
+

@@ -990,44 +990,6 @@ menu_unloadallplugins (void)
 
 #endif
 
-
-#ifdef USE_PYTHON
-
-static void
-menu_loadpython_callback (struct session *sess, void *data2, char *file)
-{
-   if (file)
-   {
-      char *buf = malloc (strlen (file) + 8);
-
-      sprintf (buf, "/pload %s", file);
-      free (file);
-      handle_command (buf, sess, FALSE, FALSE);
-      free (buf);
-   }
-}
-
-static void
-menu_loadpython (void)
-{
-   gtkutil_file_req ("Select a Python script to load", menu_loadpython_callback,
-                     menu_sess, 0, FALSE);
-}
-
-static void
-menu_pythonlist (void)
-{
-   handle_command ("/plist", menu_sess, FALSE, FALSE);
-}
-
-#else
-
-#define menu_pythonlist 0
-#define menu_loadpython 0
-
-#endif
-
-
 #define usercommands_help  "User Commands - Special codes:\n\n"\
                            "%c  =  current channel\n"\
                            "%v  =  x-chat version ("VERSION")\n"\
@@ -1470,11 +1432,6 @@ static GnomeUIInfo loadmenu[] =
    },
    {
       GNOME_APP_UI_ITEM,
-      N_ ("Python Script.."), 0,
-      menu_loadpython, 0, 0, 0, 0, 0, 0, 0
-   },
-   {
-      GNOME_APP_UI_ITEM,
       N_ ("Plugin.."), 0,
       menu_loadplugin, 0, 0, 0, 0, 0, 0, 0
    },
@@ -1490,11 +1447,6 @@ static GnomeUIInfo infomenu[] =
    },
    {
       GNOME_APP_UI_ITEM,
-      N_ ("Python List"), 0,
-      menu_pythonlist, 0, 0, 0, 0, 0, 0, 0
-   },
-   {
-      GNOME_APP_UI_ITEM,
       N_ ("Plugin List"), 0,
       menu_pluginlist, 0, 0, 0, 0, 0, 0, 0
    },
@@ -1507,11 +1459,6 @@ static GnomeUIInfo killmenu[] =
       GNOME_APP_UI_ITEM,
       N_ ("All Perl Scripts"), 0,
       menu_unloadall, 0, 0, 0, 0, 0, 0, 0
-   },
-   {
-      GNOME_APP_UI_ITEM,
-      N_ ("All Python Scripts"), 0,
-      0, 0, 0, 0, 0, 0, 0, 0
    },
    {
       GNOME_APP_UI_ITEM,
@@ -1689,19 +1636,9 @@ static struct mymenu mymenu[] =
    {M_MENU, N_ ("Unload All Plugins"), 0, 0, 0},
    {M_MENU, N_ ("Plugin List"), 0, 0, 0},
 #endif
-   {M_SEP, 0, 0, 0, 0},
-#ifdef USE_PYTHON
-   {M_MENU, N_ ("Load Python Script.."), (menucallback) menu_loadpython, 0, 1},
-   {M_MENU, N_ ("Python List"), (menucallback) menu_pythonlist, 0, 1},
-#else
-   {M_MENU, N_ ("Load Python Script.."), 0, 0, 0},
-   {M_MENU, N_ ("Python List"), 0, 0, 0},
-#endif
-
    {M_NEWMENU, N_ ("User Menu"), (menucallback)-1, 0, 1},
    {M_MENU, N_ ("Edit User Menu"), (menucallback) menu_usermenu, 0, 1},
    {M_SEP, 0, 0, 0, 0},
-
    {M_NEWMENURIGHT, N_ ("Help"), 0, 0, 1},
    {M_MENU, N_ ("Help.."), (menucallback) menu_help, 0, 1},
    {M_SEP, 0, 0, 0, 0},

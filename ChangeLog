@@ -5,8 +5,17 @@ start gtk strip
 0.0.2;
 """"""
 removing all gnome/panel/python stuff
-     notably; -USE_PYTHON
-              -USE_GNOME
+     notably; 
+ -USE_PYTHON from
+     src/common/outbound.c
+     src/common/python.c (+ 2 prototypes)
+     src/common/xchat.c
+     src/fe-gtk/fe-gtk.c
+     src/fe-gtk/menu.c
+ -USE_GNOME
+
+
+
               -USE_PANEL
 
 0.0.1;
