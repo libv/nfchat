@@ -17,12 +17,18 @@
  */
 
 #include <stdio.h>
-#include "themes.h"
+/* #include "themes.h" */
 #include "../common/xchat.h"
 #include "fe-gtk.h"
 #include "../common/util.h"
 #include "../common/userlist.h"
 #include "gtkutil.h"
+#ifdef USE_IMLIB
+#include <gdk_imlib.h>
+#endif
+
+#include "../pixmaps/op.xpm"
+#include "../pixmaps/voice.xpm"
 
 extern GdkColor colors[];
 extern struct xchatprefs prefs;
@@ -32,6 +38,52 @@ extern GdkPixmap *theme_pixmap (GtkWidget *window, GdkBitmap **mask, GtkWidget *
 
 GdkPixmap *op_pixmap, *voice_pixmap;
 GdkBitmap *op_mask_bmp, *voice_mask_bmp;
+
+#define THEME_OP_ICON 1
+#define THEME_VOICE_ICON 2
+
+/*
+ * create_pixmap_from_data [STATIC]
+ *
+ * Called from theme_pixmap and uses IMLIB or Gtk functions to render images
+ *
+ */
+static GdkPixmap *
+create_pixmap_from_data (GtkWidget *window, GdkBitmap **mask, GtkWidget *style_widget, char **data)
+{
+  GdkPixmap *pixmap = 0;
+#ifndef USE_IMLIB
+  GtkStyle *style;
+  if (!style_widget)
+    style = gtk_widget_get_default_style ();
+  else
+    style = gtk_widget_get_style (style_widget);
+  pixmap = gdk_pixmap_create_from_xpm_d (window->window, mask,
+                                         &style->bg[GTK_STATE_NORMAL], data);
+#else
+  gdk_imlib_data_to_pixmap (data, &pixmap, mask);
+#endif 
+  return(pixmap);
+}
+
+/*
+ * theme_pixmap [PUBLIC]
+ *
+ * Called from each function which has themeable pixmaps
+ *
+ */
+GdkPixmap *
+theme_pixmap (GtkWidget *window, GdkBitmap **mask, GtkWidget *style_widget, int theme)
+{
+  switch(theme) {
+  case THEME_OP_ICON:
+    return (create_pixmap_from_data (window, mask, style_widget, op_xpm));
+  case THEME_VOICE_ICON:
+    return (create_pixmap_from_data (window, mask, style_widget, voice_xpm));
+  default:
+    return (NULL);
+  }
+}
 
 
 void

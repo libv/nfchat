@@ -12,4 +12,4 @@ nfchat_LDADD = ../common/libnfchatmain.a
 nfchat_SOURCES =	fe-gtk.c fkeys.c \
 			gtkutil.c maingui.c \
 			menu.c palette.c \
-			textgui.c themes.c userlistgui.c xtext.c
+			textgui.c userlistgui.c xtext.c

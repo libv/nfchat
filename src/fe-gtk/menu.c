@@ -63,7 +63,7 @@ extern int module_unload (char *name, struct session *sess);
 extern void module_glist (struct session *sess);
 extern void pevent_dialog_show ();
 extern void key_dialog_show ();
-extern void menu_themehandler ();
+/*extern void menu_themehandler (); */
 
 extern struct session *menu_sess;
 extern GSList *popup_list;

@@ -1,5 +1,20 @@
 NF-chat;
 
+0.2.3;
+""""""
+ a) removing themes support
+  - removed menu_themehandler from menu.c & themes.c 
+  - removed from themes.c
+     done_button, notheme_button, close_themelist, row_selected, 
+     row_unselected, select_clicked, copy_clicked, notheme_clicked,
+     remove_clicked, select_button, copy_button, remove_button,
+     selected_row, load_themelist, clear_themelist, theme_win
+     themeicon_mask, themeicon_pixmap, themelist.
+  - removed theme.xpm, globe.xpm, server.xpm, xchat.xpm
+  - dumped the rest of the themes files
+  - moved adapted theme_pixmap & create_pixmap to userlistgui.c
+  - adapted Makefile.am
+
 0.2.2; removing buttonbox & tree 
 """"""
  a) removing buttonbox
