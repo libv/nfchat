@@ -33,7 +33,7 @@
 
 extern GdkColor colors[];
 extern GdkFont *font_normal;
-extern GdkFont *dialog_font_normal;
+/* extern GdkFont *dialog_font_normal; */
 extern GtkStyle *normaltab_style;
 extern GtkStyle *redtab_style;
 extern GtkStyle *channelwin_style;
@@ -86,12 +86,7 @@ PrintTextLine (GtkWidget *textwidget, unsigned char *text, int len)
       len = 1;
 
    sess = gtk_object_get_user_data (GTK_OBJECT (textwidget));
-   if (sess)
-   {
-      if (sess->is_dialog)
-         indent = prefs.dialog_indent_nicks;
-   }
-
+   
    if (!indent)
    {
       if (prefs.timestamp)

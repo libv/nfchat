@@ -43,8 +43,8 @@ extern GSList *replace_list;
 extern GdkColor colors[];
 extern GdkFont *font_normal;
 extern GdkFont *font_bold;
-extern GdkFont *dialog_font_normal;
-extern GdkFont *dialog_font_bold;
+/* extern GdkFont *dialog_font_normal; */
+/* extern GdkFont *dialog_font_bold; */
 extern GtkStyle *normaltab_style;
 extern GtkStyle *redtab_style;
 extern GtkStyle *channelwin_style;
@@ -1631,8 +1631,7 @@ tab_nick_comp (GtkWidget * t, int shift)
    text = gtk_entry_get_text (GTK_ENTRY (t));
 
    sess = find_session_from_inputgad (t);
-   if (sess->is_dialog)
-      return 0; 
+   
    if (sess == NULL)
       return 0;
 

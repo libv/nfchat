@@ -53,7 +53,7 @@ extern GSList *sess_list;
 extern GSList *button_list;
 extern GSList *serv_list;
 extern GtkStyle *channelwin_style;
-extern GdkFont *dialog_font_normal;
+/* extern GdkFont *dialog_font_normal; */
 extern GdkFont *font_normal;
 extern gint xchat_is_quitting;
 
@@ -178,14 +178,14 @@ void
 fe_set_title (struct session *sess)
 {
    char tbuf[200];
-   if (!sess->server->connected && !sess->is_dialog) 
-      strcpy (tbuf, "X-Chat [" VERSION "]");
+   if (!sess->server->connected)
+      strcpy (tbuf, "NF-Chat [" VERSION "]");
    else
    {
       if (sess->channel[0] == 0 || sess->is_server)
-         snprintf (tbuf, sizeof tbuf, "X-Chat [" VERSION "]: %s", sess->server->servername);
+         snprintf (tbuf, sizeof tbuf, "NF-Chat [" VERSION "]: %s", sess->server->servername);
       else
-         snprintf (tbuf, sizeof tbuf, "X-Chat [" VERSION "]: %s / %s", sess->server->servername, sess->channel);
+         snprintf (tbuf, sizeof tbuf, "NF-Chat [" VERSION "]: %s / %s", sess->server->servername, sess->channel);
    }
    if (sess->is_tab)
    {
@@ -200,8 +200,6 @@ fe_set_title (struct session *sess)
 void
 fe_set_channel (struct session *sess)
 {
-   if (!sess->is_tab && sess->is_dialog)
-      return;
    gtk_label_set_text (GTK_LABEL (sess->gui->changad), sess->channel);
 
    if (prefs.treeview)
@@ -233,7 +231,7 @@ fe_set_nick (struct server *serv, char *newnick)
    while (list)
    {
       sess = (struct session *) list->data;
-      if (sess->server == serv && !sess->is_dialog)
+      if (sess->server == serv) 
          gtk_label_set_text (GTK_LABEL (sess->gui->nickgad), newnick);
       list = list->next;
    }
@@ -530,9 +528,6 @@ maingui_word_check (GtkXText *xtext, char *word)
          )
          return WORD_HOST;
    }
-
-   if (sess->is_dialog)
-      return WORD_DIALOG; 
 
    return 0;
 }
@@ -1172,25 +1167,14 @@ relink_window (GtkWidget * w, struct session *sess)
 
       gtk_widget_reparent (sess->gui->vbox, sess->gui->window);
 
-      if (!sess->is_dialog)
-      {
-         if (sess->channel[0] == 0)
-            sess->gui->changad = gtk_label_new ("<none>");
-         else
-            sess->gui->changad = gtk_label_new (sess->channel);
-         gtk_box_pack_start (GTK_BOX (sess->gui->tbox), sess->gui->changad, FALSE, FALSE, 5);
-         gtk_box_reorder_child (GTK_BOX (sess->gui->tbox), sess->gui->changad, 4);
-         gtk_widget_show (sess->gui->changad);
-      } else
-         sess->gui->changad = NULL; 
-      gtk_widget_show_all (sess->gui->window);
-      gtk_xtext_refresh (GTK_XTEXT (sess->gui->textgad));
-      num = gtk_notebook_page_num (GTK_NOTEBOOK (main_book), old);
-      gtk_notebook_remove_page (GTK_NOTEBOOK (main_book), num);
-      if (prefs.mainwindow_left || prefs.mainwindow_top)
-         gdk_window_move (sess->gui->window->window,
-                prefs.mainwindow_left,
-                prefs.mainwindow_top);
+      if (sess->channel[0] == 0)
+         sess->gui->changad = gtk_label_new ("<none>");
+      else
+         sess->gui->changad = gtk_label_new (sess->channel);
+      gtk_box_pack_start (GTK_BOX (sess->gui->tbox), sess->gui->changad, FALSE, FALSE, 5);
+      gtk_box_reorder_child (GTK_BOX (sess->gui->tbox), sess->gui->changad, 4);
+      gtk_widget_show (sess->gui->changad);
+   
       if (need)
          gtk_widget_destroy (main_book);
       return 0;
@@ -1234,7 +1218,7 @@ relink_window (GtkWidget * w, struct session *sess)
       gtk_idle_add ((GtkFunction) maingui_refresh, (gpointer) sess);
 
       /* dialog windows don't have this box */
-      if (sess->gui->userlistbox && !sess->is_dialog)
+      if (sess->gui->userlistbox) 
       {
          gtk_widget_realize (sess->gui->userlistbox);
          gdk_window_set_background (sess->gui->userlistbox->window,

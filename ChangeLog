@@ -1,7 +1,12 @@
 NF-chat;
 
+0.2.2; removing tab button and prolly alot of the tab stuff
+""""""
+  -   
+
 0.2.1; removing dialog windows
 """"""
+  a)
   - removed new_dialog from maingui.c
  ### sess->is_dialog
  ### prefs.treeview???           
@@ -15,8 +20,14 @@ NF-chat;
   - removed fe_change_nick from fe.h & inbound.c
   - removed extern ... *new_dialog from outbound.c
   - deleted dialog.c edited makefile, po-file
+ b) specifically gui->if_is_dialog
+   - removed dialog stuff from maingui.c
+      fe_set_title fe_set_channel, fe_set_nick, maingui_word_check,
+      relink_window(2x)
+   - fkeys.c; tab_nick_comp
+   - text_gui.c PrintTextLine
 
- 
+     
 0.2.0;
 """"""
  a)  
