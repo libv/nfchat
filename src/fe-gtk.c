@@ -39,7 +39,6 @@ extern struct xchatprefs prefs;
 extern void PrintText (char *text);
 extern void notify_gui_update (void);
 extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, session_t *sess);
-extern void key_init (void);
 extern void create_window (void);
 extern void init_userlist_xpm (void);
 
@@ -97,8 +96,6 @@ void
 fe_init (void)
 {
    font_normal = my_font_load (prefs.font_normal);
-   key_init ();
-
    channelwin_style = my_widget_get_style (prefs.background);
    inputgad_style = my_widget_get_style ("");
 }
@@ -117,9 +114,9 @@ fe_exit (void)
 }
 
 int
-fe_timeout_add (int interval, void *callback, void *userdata)
+fe_timeout_add (int interval, void *callback)
 {
-   return gtk_timeout_add (interval, (GtkFunction) callback, userdata);
+   return gtk_timeout_add (interval, (GtkFunction) callback, 0);
 }
 
 void
@@ -254,13 +251,14 @@ updatedate_bar (void)
 void
 fe_progressbar_start (void)
 {
-   if (session->gui->op_box)
-   {
+  if (session->gui->op_box)
+    {
       session->gui->bar = gtk_progress_bar_new ();
       gtk_box_pack_start (GTK_BOX (session->gui->op_box), session->gui->bar, 0, 0, 0);
+      gtk_widget_show (session->gui->op_box);
       gtk_widget_show (session->gui->bar);
       server->bartag = gtk_timeout_add (50, (GtkFunction) updatedate_bar, session);
-   }
+    }
 }
 
 void
@@ -272,6 +270,7 @@ fe_progressbar_end (void)
 	gtk_widget_destroy (session->gui->bar);
       session->gui->bar = 0;
       gtk_timeout_remove (server->bartag);
+      gtk_widget_hide(session->gui->op_box);
     }
 }
 

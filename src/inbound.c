@@ -93,68 +93,66 @@ private_msg (char *tbuf, char *from, char *text)
 void
 channel_action (char *tbuf, char *from, char *text, int fromme)
 {
-   if (!session)
-      fprintf (stderr, "*** NFCHAT WARNING: sess = 0x0 in channel_action()\n");
-
-   if (fire_signal (XP_CHANACTION, session->channel, from, text, NULL, fromme) == 1)
-      return;
-
-   if (fromme)
-     strcpy (tbuf, from);
-   else
-     strcpy (tbuf, from);
-   
-   fire_signal (XP_TE_CHANACTION, tbuf, text, NULL, NULL, 0);
+  if (fire_signal (XP_CHANACTION, session->channel, from, text, NULL, fromme) == 1)
+    return;
+  
+  if (fromme)
+    strcpy (tbuf, from);
+  else
+    strcpy (tbuf, from);
+  
+  fire_signal (XP_TE_CHANACTION, tbuf, text, NULL, NULL, 0);
 }
+
 static char *
 nocasestrstr (char *text, char *tofind)  /* like strstr(), but nocase */
 {
-   char *ret = text, *find = tofind;
-
-   while (1)
-   {
+  char *ret = text, *find = tofind;
+  
+  while (1)
+    {
       if (*find == 0)
-         return ret;
+	return ret;
       if (*text == 0)
-         return 0;
+	return 0;
       if (toupper (*find) != toupper (*text))
-      {
-         ret = text + 1;
-         find = tofind;
-      } else
-         find++;
+	{
+	  ret = text + 1;
+	  find = tofind;
+	} else
+	  find++;
       text++;
-   }
+    }
 }
 
 static int
 SearchNick (char *text, char *nicks)
 {
-   char S[64];
-   char *n;
-   char *p;
-   char *t;
-   size_t ns;
-
-   if (nicks == NULL)
-      return 0;
-   strncpy (S, nicks, 63);
-   n = strtok (S, ",");
-   while (n != NULL)
-   {
+  char S[64];
+  char *n;
+  char *p;
+  char *t;
+  size_t ns;
+  
+  if (nicks == NULL)
+    return 0;
+  strncpy (S, nicks, 63);
+  n = strtok (S, ",");
+  while (n != NULL)
+    {
       t = text;
       ns = strlen(n);
       while ((p = nocasestrstr (t, n)))
-      {
-	 if ((p == text || !isalnum(*(p-1))) && !isalnum(*(p+ns)))
-	     return 1;
-
-	 t = p + 1;
-      }
-
+	{
+	  if ((p == text || !isalnum(*(p-1))) && !isalnum(*(p+ns)))
+	    return 1;
+	  
+	  t = p + 1;
+	}
+      
       n = strtok (NULL, ",");
-   }
-   return 0;
+    }
+  return 0;
 }
 
 void
@@ -163,9 +161,6 @@ channel_msg (char *outbuf, char *from, char *text, char fromme)
    struct user *user;
    char *real_outbuf = outbuf;
    int highlight = FALSE;
-
-   if (!session)
-      return;
 
    user = find_name (from);
 
@@ -463,11 +458,20 @@ notice (char *outbuf, char *to, char *nick, char *msg)
 static void
 handle_ctcp (char *outbuf, char *nick, char *msg, char *word_eol[])
 {
+  char *po;
+
   if (!strncasecmp (msg, "VERSION", 7))
     sprintf (outbuf, "NOTICE %s :\001VERSION NF-Chat "VERSION" : http://www.netforce.be\001\r\n", nick);
   else if (!strncasecmp (msg, "PING", 4))
     sprintf (outbuf, "NOTICE %s :\001PING %s\001\r\n", nick, word_eol[5]);
-  
+  else if (!strncasecmp (msg, "ACTION", 6))
+    {
+      po = strchr (msg + 7, '\001');
+      if (po)
+	po[0] = 0;
+      channel_action (outbuf, nick, msg + 7, FALSE);
+    }
+
   tcp_send (outbuf);
   return;
 }
@@ -498,7 +502,6 @@ channel_mode (char *outbuf, char *nick, char sign, char mode, char *extra, int q
 	  if (fire_signal (XP_CHANOP, session->channel, nick, extra, NULL, 0) == 1)
 	    return;
 	  ul_op_name (extra);
-	  fprintf(stderr, "XP_TE_chanop: nick: %s, extra: %s\n", nick, extra);
 	  if (!quiet)
 	    fire_signal (XP_TE_CHANOP, nick, extra, NULL, NULL, 0);
 	  return;
@@ -877,6 +880,10 @@ process_line (void)
 		      }
 		    if (n == 375 || n == 372 || n == 376 || n == 422)
 		      {
+			char *po;
+			po = strchr (text, '\001');
+			if (po)
+			  po[0] = 0;
 			fire_signal (XP_TE_MOTD, text, NULL, NULL, NULL, 0);
 			return;
 		      }

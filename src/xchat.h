@@ -91,15 +91,6 @@ struct xchatprefs
   unsigned int allow_nick;
 };
 
-#define HISTORY_SIZE 100
-
-struct history
-{
-   char *lines[HISTORY_SIZE];
-   int pos;
-   int realpos;
-};
-
 struct session_t
 {
    GSList *userlist;
@@ -110,7 +101,6 @@ struct session_t
    char channelkey[64];         /* XXX correct max length? */
    int limit;			  /* channel user limit */
    char lastnick[64];           /* last nick you /msg'ed */
-   struct history history;
    int ops;                     /* num. of ops in channel */
    int total;                   /* num. of users in channel */
    char *quitreason;

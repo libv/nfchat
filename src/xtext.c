@@ -49,13 +49,6 @@
 
 static GtkWidgetClass *parent_class = NULL;
 
-enum 
-{
-   WORD_CLICK,
-   LAST_SIGNAL
-};
-static guint xtext_signals[LAST_SIGNAL] = { 0 };
-
 static void gtk_xtext_render_page (GtkXText *xtext, int startline);
 static void gtk_xtext_calc_lines (GtkXText *xtext, int);
 static void gtk_xtext_load_trans (GtkXText *xtext);
@@ -67,375 +60,343 @@ static void gtk_xtext_draw_sep (GtkXText *xtext, int height);
 static void gtk_xtext_recalc_widths (GtkXText *xtext, int);
 static void gtk_xtext_fix_indent (GtkXText *xtext);
 
-
 static int
 is_del (char c)
 {
    switch (c)
-   {
-   case ' ':
-   case 0:
-   case '\n':
-   /*case '[':
-   case ']':*/
-   case ')':
-   case '(':
-   case '>':
-   case '<':
-      return 1;
-   }
+     {
+     case ' ':
+     case 0:
+     case '\n':
+       /*case '[':
+	 case ']':*/
+     case ')':
+     case '(':
+     case '>':
+     case '<':
+       return 1;
+     }
    return 0;
 }
 
 static void
 gtk_xtext_init (GtkXText *xtext)
 {
-   xtext->old_value = -1;
-   xtext->pixmap = NULL;
-   xtext->text_first = NULL;
-   xtext->text_last = NULL;
-   xtext->io_tag = -1;
-   xtext->add_io_tag = -1;
-   xtext->scroll_tag = -1;
-/*   xtext->frozen = 0;*/
-   xtext->num_lines = 0;
-   xtext->max_lines = 0;
-   xtext->col_back = 19;
-   xtext->col_fore = 18;
-   xtext->nc = 0;
-   xtext->scrollbar_down = TRUE;
-   xtext->bold = FALSE;
-   xtext->underline = FALSE;
-   xtext->reverse = FALSE;
-   xtext->font = NULL;
-   xtext->xfont = NULL;
-   xtext->color_paste = FALSE;
-   xtext->tint_red = xtext->tint_green = xtext->tint_blue = TINT_VALUE;
-
-   xtext->adj = (GtkAdjustment *) gtk_adjustment_new (0, 0, 0, 1, 0, 0);
-   gtk_object_ref ((GtkObject*)xtext->adj);
-   gtk_object_sink ((GtkObject*)xtext->adj);
-
-   gtk_signal_connect (GTK_OBJECT (xtext->adj), "value_changed",
-   GTK_SIGNAL_FUNC (gtk_xtext_adjustment_changed), xtext);
+  xtext->old_value = -1;
+  xtext->pixmap = NULL;
+  xtext->text_first = NULL;
+  xtext->text_last = NULL;
+  xtext->io_tag = -1;
+  xtext->add_io_tag = -1;
+  xtext->scroll_tag = -1;
+  /*   xtext->frozen = 0;*/
+  xtext->num_lines = 0;
+  xtext->max_lines = 0;
+  xtext->col_back = 19;
+  xtext->col_fore = 18;
+  xtext->nc = 0;
+  xtext->scrollbar_down = TRUE;
+  xtext->bold = FALSE;
+  xtext->underline = FALSE;
+  xtext->reverse = FALSE;
+  xtext->font = NULL;
+  xtext->xfont = NULL;
+  xtext->color_paste = FALSE;
+  xtext->tint_red = xtext->tint_green = xtext->tint_blue = TINT_VALUE;
+  
+  xtext->adj = (GtkAdjustment *) gtk_adjustment_new (0, 0, 0, 1, 0, 0);
+  gtk_object_ref ((GtkObject*)xtext->adj);
+  gtk_object_sink ((GtkObject*)xtext->adj);
+  
+  gtk_signal_connect (GTK_OBJECT (xtext->adj), "value_changed", GTK_SIGNAL_FUNC (gtk_xtext_adjustment_changed), xtext);
 }
 
 static void
 gtk_xtext_adjustment_set (GtkXText *xtext, int fire_signal)
 {
-   GtkAdjustment *adj = xtext->adj;
-
-   adj->lower = 0;
-   adj->upper = xtext->num_lines;
-
-   adj->page_size = (GTK_WIDGET (xtext)->allocation.height - xtext->font->descent) / xtext->fontsize;
-   adj->page_increment = adj->page_size;
-
-   if (adj->value > adj->upper - adj->page_size)
-      adj->value = adj->upper - adj->page_size;
-
-   if (fire_signal)
-      gtk_adjustment_changed (adj);
+  GtkAdjustment *adj = xtext->adj;
+  
+  adj->lower = 0;
+  adj->upper = xtext->num_lines;
+  
+  adj->page_size = (GTK_WIDGET (xtext)->allocation.height - xtext->font->descent) / xtext->fontsize;
+  adj->page_increment = adj->page_size;
+  
+  if (adj->value > adj->upper - adj->page_size)
+    adj->value = adj->upper - adj->page_size;
+  
+  if (fire_signal)
+    gtk_adjustment_changed (adj);
 }
 
 static gint
 gtk_xtext_adjustment_timeout (GtkXText *xtext)
 {
-   gtk_xtext_render_page (xtext, xtext->adj->value);
-   xtext->io_tag = -1;
-   return 0;
+  gtk_xtext_render_page (xtext, xtext->adj->value);
+  xtext->io_tag = -1;
+  return 0;
 }
 
 static void
 gtk_xtext_adjustment_changed (GtkAdjustment *adj, GtkXText *xtext)
 {
-/*   if (xtext->frozen)
-      return;*/
-
-   if ((int)xtext->old_value != (int)xtext->adj->value)
-   {
+  if ((int)xtext->old_value != (int)xtext->adj->value)
+    {
       if (xtext->adj->value >= xtext->adj->upper - xtext->adj->page_size)
-         xtext->scrollbar_down = TRUE;
+	xtext->scrollbar_down = TRUE;
       else
-         xtext->scrollbar_down = FALSE;
-
+	xtext->scrollbar_down = FALSE;
+      
       if (xtext->adj->value+1 == xtext->old_value ||
           xtext->adj->value-1 == xtext->old_value)    /* clicked an arrow? */
-      {
-         if (xtext->io_tag != -1)
-         {
-            gtk_timeout_remove (xtext->io_tag);
-            xtext->io_tag = -1;
-         }
-         gtk_xtext_render_page (xtext, xtext->adj->value);
-      } else
-      {
-         if (xtext->io_tag == -1)
-            xtext->io_tag = gtk_timeout_add (REFRESH_TIMEOUT,
-                                  (GtkFunction)gtk_xtext_adjustment_timeout,
-                                          xtext);
-      }
-   }
-   xtext->old_value = adj->value;
+	{
+	  if (xtext->io_tag != -1)
+	    {
+	      gtk_timeout_remove (xtext->io_tag);
+	      xtext->io_tag = -1;
+	    }
+	  gtk_xtext_render_page (xtext, xtext->adj->value);
+	} else if (xtext->io_tag == -1)
+	  xtext->io_tag = gtk_timeout_add (REFRESH_TIMEOUT, (GtkFunction)gtk_xtext_adjustment_timeout, xtext);
+    }
+  xtext->old_value = adj->value;
 }
 
 GtkWidget*
 gtk_xtext_new (int indent)
 {
-   GtkXText *xtext;
-
-   xtext = gtk_type_new (gtk_xtext_get_type ());
-   xtext->indent = indent;
-
-   return GTK_WIDGET (xtext);
+  GtkXText *xtext;
+  
+  xtext = gtk_type_new (gtk_xtext_get_type ());
+  xtext->indent = indent;
+  
+  return GTK_WIDGET (xtext);
 }
 
 static void
 gtk_xtext_destroy (GtkObject *object)
 {
-   GtkXText *xtext = GTK_XTEXT (object);
-   textentry *ent, *next;
-
-   if (xtext->add_io_tag != -1)
-   {
+  GtkXText *xtext = GTK_XTEXT (object);
+  textentry *ent, *next;
+  
+  if (xtext->add_io_tag != -1)
+    {
       gtk_timeout_remove (xtext->add_io_tag);
       xtext->add_io_tag = -1;
-   }
-
-   if (xtext->scroll_tag != -1)
-   {
+    }
+  
+  if (xtext->scroll_tag != -1)
+    {
       gtk_timeout_remove (xtext->scroll_tag);
       xtext->scroll_tag = -1;
-   }
-
-   if (xtext->io_tag != -1)
-   {
+    }
+  
+  if (xtext->io_tag != -1)
+    {
       gtk_timeout_remove (xtext->io_tag);
       xtext->io_tag = -1;
-   }
-
-   if (xtext->pixmap)
-   {
+    }
+  
+  if (xtext->pixmap)
+    {
       if (xtext->transparent)
-         gtk_xtext_free_trans (xtext);
+	gtk_xtext_free_trans (xtext);
       else
-         gdk_pixmap_unref (xtext->pixmap);
+	gdk_pixmap_unref (xtext->pixmap);
       xtext->pixmap = NULL;
-   }
-
-   if (xtext->font)
-   {
+    }
+  
+  if (xtext->font)
+    {
       gdk_font_unref (xtext->font);
       xtext->font = NULL;
-   }
-
-   if (xtext->adj)
-   {
+    }
+  
+  if (xtext->adj)
+    {
       gtk_signal_disconnect_by_data (GTK_OBJECT (xtext->adj), xtext);
       gtk_object_unref (GTK_OBJECT (xtext->adj));
       xtext->adj = NULL;
-   }
-
-   if (xtext->bgc)
-   {
+    }
+  
+  if (xtext->bgc)
+    {
       gdk_gc_destroy (xtext->bgc);
       xtext->bgc = NULL;
-   }
-
-   if (xtext->fgc)
-   {
+    }
+  
+  if (xtext->fgc)
+    {
       gdk_gc_destroy (xtext->fgc);
       xtext->fgc = NULL;
-   }
-
-   if (xtext->hand_cursor)
-   {
+    }
+  
+  if (xtext->hand_cursor)
+    {
       gdk_cursor_destroy (xtext->hand_cursor);
       xtext->hand_cursor = NULL;
-   }
-
-   ent = xtext->text_first;
-   while (ent)
-   {
+    }
+  
+  ent = xtext->text_first;
+  while (ent)
+    {
       next = ent->next;
       free (ent);
       ent = next;
-   }
-   xtext->text_first = NULL;
-
-   if (GTK_OBJECT_CLASS (parent_class)->destroy)
-      (* GTK_OBJECT_CLASS (parent_class)->destroy) (object);
+    }
+  xtext->text_first = NULL;
+  
+  if (GTK_OBJECT_CLASS (parent_class)->destroy)
+    (* GTK_OBJECT_CLASS (parent_class)->destroy) (object);
 }
 
 static void
 gtk_xtext_realize (GtkWidget *widget)
 {
-   GtkXText *xtext;
-   GdkWindowAttr attributes;
-   GdkGCValues	val;
-   int w, h;
+  GtkXText *xtext;
+  GdkWindowAttr attributes;
+  GdkGCValues	val;
+  int w, h;
+  
+  GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
+  xtext = GTK_XTEXT (widget);
+  
+  attributes.x = widget->allocation.x;
+  attributes.y = widget->allocation.y;
+  attributes.width = widget->allocation.width;
+  attributes.height = widget->allocation.height;
+  attributes.wclass = GDK_INPUT_OUTPUT;
+  attributes.window_type = GDK_WINDOW_CHILD;
+  attributes.event_mask = gtk_widget_get_events (widget) | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK;
+  
+  attributes.visual = gtk_widget_get_visual (widget);
+  attributes.colormap = gtk_widget_get_colormap (widget);
+  
+  widget->window = gdk_window_new (widget->parent->window, &attributes, GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP);
+  
+  gdk_window_set_user_data (widget->window, widget);
+  
+  xtext->depth = gdk_window_get_visual (widget->window)->depth;
+  
+  val.subwindow_mode = GDK_INCLUDE_INFERIORS;
+  val.graphics_exposures = 0;
 
-   GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
-   xtext = GTK_XTEXT (widget);
+  xtext->bgc = gdk_gc_new_with_values (widget->window, &val, GDK_GC_EXPOSURES | GDK_GC_SUBWINDOW);
+  xtext->fgc = gdk_gc_new_with_values (widget->window, &val, GDK_GC_EXPOSURES | GDK_GC_SUBWINDOW);
 
-   attributes.x = widget->allocation.x;
-   attributes.y = widget->allocation.y;
-   attributes.width = widget->allocation.width;
-   attributes.height = widget->allocation.height;
-   attributes.wclass = GDK_INPUT_OUTPUT;
-   attributes.window_type = GDK_WINDOW_CHILD;
-   attributes.event_mask = gtk_widget_get_events (widget) | 
-          GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK
-          | GDK_POINTER_MOTION_MASK;
-
-   attributes.visual = gtk_widget_get_visual (widget);
-   attributes.colormap = gtk_widget_get_colormap (widget);
-
-   widget->window = gdk_window_new (widget->parent->window, &attributes,
-                       GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP);
-
-   gdk_window_set_user_data (widget->window, widget);
-
-   xtext->depth = gdk_window_get_visual (widget->window)->depth;
-
-   val.subwindow_mode = GDK_INCLUDE_INFERIORS;
-   val.graphics_exposures = 0;
-
-   xtext->bgc = gdk_gc_new_with_values (widget->window, &val,
-                                        GDK_GC_EXPOSURES | GDK_GC_SUBWINDOW);
-   xtext->fgc = gdk_gc_new_with_values (widget->window, &val,
-                                        GDK_GC_EXPOSURES | GDK_GC_SUBWINDOW);
-
-   xtext->xbgc = ((GdkGCPrivate *)xtext->bgc)->xgc;
-   xtext->xfgc = ((GdkGCPrivate *)xtext->fgc)->xgc;
-   xtext->drawable = ((GdkWindowPrivate *)widget->window)->xwindow;
-   xtext->display = ((GdkWindowPrivate *)widget->window)->xdisplay;
-
-   if (xtext->fonttype != FONT_SET && xtext->xfont != NULL)
-      XSetFont (xtext->display, xtext->xfgc, xtext->xfont->fid);
-
-   XSetForeground (xtext->display, xtext->xfgc, xtext->palette[18]);
-   XSetBackground (xtext->display, xtext->xfgc, xtext->palette[19]);
-   XSetForeground (xtext->display, xtext->xbgc, xtext->palette[19]);
-
-   if (xtext->transparent)
-      gtk_xtext_load_trans (xtext);
-   else if (xtext->pixmap)
-   {
+  xtext->xbgc = ((GdkGCPrivate *)xtext->bgc)->xgc;
+  xtext->xfgc = ((GdkGCPrivate *)xtext->fgc)->xgc;
+  xtext->drawable = ((GdkWindowPrivate *)widget->window)->xwindow;
+  xtext->display = ((GdkWindowPrivate *)widget->window)->xdisplay;
+  
+  if (xtext->fonttype != FONT_SET && xtext->xfont != NULL)
+    XSetFont (xtext->display, xtext->xfgc, xtext->xfont->fid);
+  
+  XSetForeground (xtext->display, xtext->xfgc, xtext->palette[18]);
+  XSetBackground (xtext->display, xtext->xfgc, xtext->palette[19]);
+  XSetForeground (xtext->display, xtext->xbgc, xtext->palette[19]);
+  
+  if (xtext->transparent)
+    gtk_xtext_load_trans (xtext);
+  else if (xtext->pixmap)
+    {
       gdk_gc_set_tile (xtext->bgc, xtext->pixmap);
       gdk_gc_set_ts_origin (xtext->bgc, 0, 0);
       gdk_gc_set_fill (xtext->bgc, GDK_TILED);
-   }
-
-   xtext->hand_cursor = gdk_cursor_new (GDK_HAND1);
-
-   gdk_window_get_size (widget->window, &w, &h);
-
-   XSetWindowBackgroundPixmap (xtext->display, xtext->drawable, None);
-   XFillRectangle (xtext->display, xtext->drawable, xtext->xbgc, 0, 0, w, h);
- 
-   xtext->draw_buf = xtext->drawable;
-
-   xtext->indent = 1;
+    }
+  
+  xtext->hand_cursor = gdk_cursor_new (GDK_HAND1);
+  
+  gdk_window_get_size (widget->window, &w, &h);
+  
+  XSetWindowBackgroundPixmap (xtext->display, xtext->drawable, None);
+  XFillRectangle (xtext->display, xtext->drawable, xtext->xbgc, 0, 0, w, h);
+  
+  xtext->draw_buf = xtext->drawable;
+  
+  xtext->indent = 1;
 }
 
 static void 
-gtk_xtext_size_request (GtkWidget      *widget,
-                        GtkRequisition *requisition)
+gtk_xtext_size_request (GtkWidget      *widget, GtkRequisition *requisition)
 {
-   requisition->width = GTK_XTEXT (widget)->fontwidth['Z'] * 20;
-   requisition->height = (GTK_XTEXT (widget)->fontsize * 10) + 3;
+  requisition->width = GTK_XTEXT (widget)->fontwidth['Z'] * 20;
+  requisition->height = (GTK_XTEXT (widget)->fontsize * 10) + 3;
 }
 
 static void
-gtk_xtext_size_allocate (GtkWidget     *widget,
-                         GtkAllocation *allocation)
+gtk_xtext_size_allocate (GtkWidget     *widget, GtkAllocation *allocation)
 {
-   GtkXText *xtext = GTK_XTEXT (widget);
-
-   if (allocation->width == widget->allocation.width &&
-       allocation->height == widget->allocation.height &&
-       allocation->x == widget->allocation.x &&
-       allocation->y == widget->allocation.y)
-      return;
-
-   widget->allocation = *allocation;
-   if (GTK_WIDGET_REALIZED (widget))
-   {
-      gdk_window_move_resize (widget->window,
-                              allocation->x, allocation->y,
-                              allocation->width, allocation->height);
+  GtkXText *xtext = GTK_XTEXT (widget);
+  
+  if (allocation->width == widget->allocation.width && allocation->height == widget->allocation.height && allocation->x == widget->allocation.x && allocation->y == widget->allocation.y)
+    return;
+  
+  widget->allocation = *allocation;
+  if (GTK_WIDGET_REALIZED (widget))
+    {
+      gdk_window_move_resize (widget->window, allocation->x, allocation->y, allocation->width, allocation->height);
       gtk_xtext_calc_lines (xtext, FALSE);
-   }
+    }
 }
 
 static gint
 gtk_xtext_expose (GtkWidget *widget, GdkEventExpose *event)
 {
-   GtkXText *xtext = GTK_XTEXT (widget);
-
-   gtk_xtext_render_page (xtext, xtext->adj->value);
-
-   return FALSE;
+  GtkXText *xtext = GTK_XTEXT (widget);
+  
+  gtk_xtext_render_page (xtext, xtext->adj->value);
+  
+  return FALSE;
 }
 
 static void
 gtk_xtext_draw (GtkWidget *widget, GdkRectangle *area)
 {
-   int x, y;
-   GtkXText *xtext = GTK_XTEXT (widget);
-   Window childret;
-
-   if (xtext->transparent)
-   {
-      XTranslateCoordinates (
-         GDK_WINDOW_XDISPLAY (widget->window),
-         GDK_WINDOW_XWINDOW (widget->window),
-         GDK_ROOT_WINDOW (),
-         0, 0,
-         &x, &y,
-         &childret);
+  int x, y;
+  GtkXText *xtext = GTK_XTEXT (widget);
+  Window childret;
+  
+  if (xtext->transparent)
+    {
+      XTranslateCoordinates (GDK_WINDOW_XDISPLAY (widget->window), GDK_WINDOW_XWINDOW (widget->window), GDK_ROOT_WINDOW (), 0, 0, &x, &y, &childret);
       /* update transparency only if it moved */
-      if (xtext->last_win_x != x ||
-          xtext->last_win_y != y)
-      {
-         xtext->last_win_x = x;
-         xtext->last_win_y = y;
-         gtk_xtext_free_trans (xtext);
-         gtk_xtext_load_trans (xtext);
-      }
-   }
+      if (xtext->last_win_x != x || xtext->last_win_y != y)
+	{
+	  xtext->last_win_x = x;
+	  xtext->last_win_y = y;
+	  gtk_xtext_free_trans (xtext);
+	  gtk_xtext_load_trans (xtext);
+	}
+    }
 
-   if (xtext->scrollbar_down)
-      gtk_adjustment_set_value (xtext->adj, xtext->adj->upper - xtext->adj->page_size);
+  if (xtext->scrollbar_down)
+    gtk_adjustment_set_value (xtext->adj, xtext->adj->upper - xtext->adj->page_size);
    gtk_xtext_render_page (xtext, xtext->adj->value);
 }
 
 static void
 gtk_xtext_class_init (GtkXTextClass *class)
 {
-   GtkObjectClass *object_class;
-   GtkWidgetClass *widget_class;
-   GtkXTextClass *xtext_class;
-
-   object_class = (GtkObjectClass*) class;
-   widget_class = (GtkWidgetClass*) class;
-   xtext_class = (GtkXTextClass*) class;
-
-   parent_class = gtk_type_class (gtk_widget_get_type ());
-
-   xtext_signals[WORD_CLICK] = gtk_signal_new ("word_click", GTK_RUN_FIRST, object_class->type, GTK_SIGNAL_OFFSET (GtkXTextClass, word_click), gtk_marshal_NONE__INT_POINTER, GTK_TYPE_NONE, 2, GTK_TYPE_INT, GTK_TYPE_STRING);
-   gtk_object_class_add_signals (object_class, xtext_signals, LAST_SIGNAL);
-
-   object_class->destroy = gtk_xtext_destroy;
-
-   widget_class->realize = gtk_xtext_realize;
-   widget_class->size_request = gtk_xtext_size_request;
-   widget_class->size_allocate = gtk_xtext_size_allocate;
-   widget_class->draw = gtk_xtext_draw;
-   widget_class->expose_event = gtk_xtext_expose;
-
-   xtext_class->word_click = NULL;
+  GtkObjectClass *object_class;
+  GtkWidgetClass *widget_class;
+  GtkXTextClass *xtext_class;
+  
+  object_class = (GtkObjectClass*) class;
+  widget_class = (GtkWidgetClass*) class;
+  xtext_class = (GtkXTextClass*) class;
+  
+  parent_class = gtk_type_class (gtk_widget_get_type ());
+  
+  object_class->destroy = gtk_xtext_destroy;
+  
+  widget_class->realize = gtk_xtext_realize;
+  widget_class->size_request = gtk_xtext_size_request;
+  widget_class->size_allocate = gtk_xtext_size_allocate;
+  widget_class->draw = gtk_xtext_draw;
+  widget_class->expose_event = gtk_xtext_expose;
+  
+  xtext_class->word_click = NULL;
 }
 
 guint
@@ -1147,12 +1108,11 @@ void
 gtk_xtext_set_palette (GtkXText *xtext, GdkColor palette[])
 {
    int i;
-   fprintf (stderr, "passed gtk_xtext_set_palette\n");
    for (i=0; i<20; i++)
       xtext->palette[i] = palette[i].pixel;
 
    if (GTK_WIDGET_REALIZED (xtext))
-   {fprintf (stderr, "passed gtk_xtext_set_palette 2\n");
+   {
      XSetForeground (xtext->display, xtext->xfgc, xtext->palette[5]); /* 18 */
      XSetBackground (xtext->display, xtext->xfgc, xtext->palette[10]); /*19*/
      XSetForeground (xtext->display, xtext->xbgc, xtext->palette[1]); /*19*/

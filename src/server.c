@@ -1,5 +1,5 @@
-/* X-Chat
- * Copyright (C) 1998 Peter Zelezny.
+/* NF-Chat: A cut down version of X-chat, cut down by _Death_ 
+ * based upon X-Chat by Peter Zelezny.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ extern int tcp_send (char *buf);
 extern void read_data (gint sok);
 extern void notc_msg (void);
 extern void PrintText (char *text);
-extern int fe_timeout_add (int interval, void *callback, void *userdata);
+extern int fe_timeout_add (int interval, void *callback);
 extern void fe_new_window (void);
 extern int fe_input_add (int sok, int read, int write, int ex, void *func);
 extern void fe_input_remove (int tag);
@@ -112,68 +112,63 @@ server_cleanup (void)
 static void
 connected_signal (int sok)
 {
-   char tbuf[128];
-   char outbuf[512];
-   char host[100];
-   char ip[100];
-
-   waitline (server->childread, tbuf, sizeof tbuf);
-
-   switch (tbuf[0])
-   {
-   case '1':                   /* unknown host */
+  char tbuf[128];
+  char outbuf[512];
+  char host[100];
+  char ip[100];
+  
+  waitline (server->childread, tbuf, sizeof tbuf);
+  
+  switch (tbuf[0])
+    {
+    case '1':                   /* unknown host */
       server_cleanup ();
       close (sok);
       fire_signal (XP_TE_UKNHOST, NULL, NULL, NULL, NULL, 0);
       break;
-   case '2':                   /* connection failed */
+    case '2':                   /* connection failed */
       waitline (server->childread, tbuf, sizeof tbuf);
       server_cleanup ();
       close (sok);
       fire_signal (XP_TE_CONNFAIL, errorstring (atoi (tbuf)), NULL, NULL, NULL, 0);
       if (prefs.autoreconnectonfail)
-         auto_reconnect (FALSE, -1);
+	auto_reconnect (FALSE, -1);
       break;
-   case '3':                   /* gethostbyname finished */
+    case '3':                   /* gethostbyname finished */
       waitline (server->childread, host, sizeof host);
       waitline (server->childread, ip, sizeof ip);
       waitline (server->childread, outbuf, sizeof outbuf);
       fire_signal (XP_TE_CONNECT, host, ip, outbuf, NULL, 0);
       strcpy (server->hostname, host);
       break;
-   case '4':                   /* success */
-     server_cleanup ();
-     server->connected = TRUE;
-    
-     server->iotag = fe_input_add (server->sok, 1, 0, 1, read_data);
-     if (!server->no_login)
-       {
-         fire_signal (XP_TE_CONNECTED, NULL, NULL, NULL, NULL, 0);
-         if (server->password[0])
-	   {
-	     sprintf (outbuf, "PASS %s\r\n", server->password);
-	     tcp_send (outbuf);
-	   }
-         snprintf (outbuf, 511, "NICK %s\r\nUSER %s 0 0 :%s\r\n", server->nick,
-		   prefs.username, prefs.realname);
-         tcp_send (outbuf);
-       }
-     else
-       fire_signal (XP_TE_SERVERCONNECTED, NULL, NULL, NULL, NULL, 0);
+    case '4':                   /* success */
+      server_cleanup ();
+      server->connected = TRUE;
       
-     fcntl (server->sok, F_SETFL, O_NONBLOCK);
-     set_server_name (server->servername);
-     break;
-   case '5':                   /* prefs ip discovered */
+      server->iotag = fe_input_add (server->sok, 1, 0, 1, read_data);
+      if (!server->no_login)
+	{
+	  fire_signal (XP_TE_CONNECTED, NULL, NULL, NULL, NULL, 0);
+	  if (server->password[0])
+	    {
+	      sprintf (outbuf, "PASS %s\r\n", server->password);
+	      tcp_send (outbuf);
+	    }
+	  snprintf (outbuf, 511, "NICK %s\r\nUSER %s 0 0 :%s\r\n", server->nick, prefs.username, prefs.realname);
+	  tcp_send (outbuf);
+	}
+      else
+	fire_signal (XP_TE_SERVERCONNECTED, NULL, NULL, NULL, NULL, 0);
+      
+      fcntl (server->sok, F_SETFL, O_NONBLOCK);
+      set_server_name (server->servername);
+      break;
+    case '5':                   /* prefs ip discovered */
       waitline (server->childread, tbuf, sizeof tbuf);
       prefs.local_ip = inet_addr (tbuf);
       break;
-   /*case '6':*/                  /* bind() returned -1 */
-      /*waitline (serv->childread, tbuf, sizeof tbuf);
-      sprintf (outbuf, "bind() failed, errno=%s\nCheck your IP Settings!", errorstring (atoi (tbuf)));
-      PrintText (sess, outbuf);
-      break;*/
-   case '7':                  /* gethostbyname (prefs.hostname) failed */
+      /*case '6': not needed aparently bind() returned -1 */
+    case '7':                  /* gethostbyname (prefs.hostname) failed */
       sprintf (outbuf, "Cannot resolve hostname %s\nCheck your IP Settings!", prefs.hostname);
       PrintText (outbuf);
       break;
@@ -198,9 +193,9 @@ check_connecting (void)
 }
 
 int
-close_socket (int sok)
+close_socket (void)
 {
-   close (sok);
+   close (server->sok);
    return 0;
 }
 
@@ -237,7 +232,7 @@ disconnect_server (int sendquit, int err)
    /* close it in 5 seconds so the QUIT doesn't get lost. Technically      *
     * we should send a QUIT and then wait for the server to disconnect us, *
       but that would hold up the GUI                                       */
-   if (fe_timeout_add (5000, close_socket, (void *)server->sok) == -1)
+   if (fe_timeout_add (5000, close_socket) == -1)
       close (server->sok);
 
    server->sok = -1;

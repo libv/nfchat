@@ -55,7 +55,6 @@ voice_myself (void)
    if (session->gui->op_xpm)
       gtk_widget_destroy (session->gui->op_xpm);
    session->gui->op_xpm = gtk_pixmap_new (voice_pixmap, voice_mask_bmp);
-   gtk_box_pack_start (GTK_BOX (session->gui->op_box), session->gui->op_xpm, 0, 0, 0);
    gtk_widget_show (session->gui->op_xpm);
 }
 
@@ -65,7 +64,6 @@ op_myself (void)
    if (session->gui->op_xpm)
       gtk_widget_destroy (session->gui->op_xpm);
    session->gui->op_xpm = gtk_pixmap_new (op_pixmap, op_mask_bmp);
-   gtk_box_pack_start (GTK_BOX (session->gui->op_box), session->gui->op_xpm, 0, 0, 0);
    gtk_widget_show (session->gui->op_xpm);
 }
 

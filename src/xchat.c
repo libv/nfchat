@@ -45,18 +45,17 @@ extern int fe_args (int argc, char *argv[]);
 extern void fe_init (void);
 extern void fe_main (void);
 extern void fe_exit (void);
-extern int fe_timeout_add (int interval, void *callback, void *userdata);
+extern int fe_timeout_add (int interval, void *callback);
 extern void fe_new_window (void);
 extern void fe_input_remove (int tag);
 extern void fe_session_callback (void);
 
 extern void process_line (void);
 extern void signal_setup (void);
-extern int close_socket (int sok);
+extern int close_socket (void);
 extern void connect_server (char *server, int port, int quiet);
 extern void disconnect_server (int sendquit, int err);
 extern void load_text_events (void);
-void auto_reconnect (int send_quit, int err);
 void init_commands (void);
 
 /* anything above SEND_MAX bytes in 1 second is
@@ -123,7 +122,7 @@ tcp_send_len (char *buf, int len)
    {
       buf = strdup (buf);
       if (!server->outbound_queue)
-         fe_timeout_add (QUEUE_TIMEOUT, tcp_send_queue, server);
+         fe_timeout_add (QUEUE_TIMEOUT, tcp_send_queue);
       server->outbound_queue = g_slist_append (server->outbound_queue, buf);
       return 1;
    }
@@ -147,18 +146,25 @@ timeout_auto_reconnect (void)
   return 0;         /* returning 0 should remove timeout handler */
 }
 
+void 
+reconnect (void)
+{
+  if (prefs.channel)
+    strcpy (session->willjoinchannel, prefs.channel);
+  
+  if (prefs.recon_delay)
+    fe_timeout_add (prefs.recon_delay * 1000, timeout_auto_reconnect);
+  else
+    connect_server (server->hostname, server->port, FALSE);
+}
+
 void
 auto_reconnect (int send_quit, int err)
 {
   disconnect_server (send_quit, err);
 
-  if (prefs.channel)
-    strcpy (session->willjoinchannel, prefs.channel);
-
-  if (prefs.recon_delay)
-    fe_timeout_add (prefs.recon_delay * 1000, timeout_auto_reconnect, server);
-  else
-    connect_server (server->hostname, server->port, FALSE);
+  
+  reconnect ();
 }
 
 void
@@ -268,7 +274,7 @@ kill_server_callback (void)
     {
       if (server->iotag != -1)
 	fe_input_remove (server->iotag);
-      if (fe_timeout_add (5000, close_socket, (void *)server->sok) == -1)
+      if (fe_timeout_add (5000, close_socket) == -1)
 	close (server->sok);
     }
   if (server->connecting)
@@ -283,18 +289,6 @@ kill_server_callback (void)
     }
   flush_server_queue ();
   free (server);
-}
-
-static void
-history_free (struct history *his)
-{
-  int i;
-  for (i = 0; i < HISTORY_SIZE; i++)
-    if (his->lines[i])
-      {
-	free (his->lines[i]);
-	his->lines[i] = 0;
-      }
 }
 
 void
@@ -316,8 +310,6 @@ kill_session_callback (void)
       tcp_send (tbuf);
       server->sent_quit = TRUE;
     }
-  
-  history_free (&session->history);
   
   fe_exit ();
 

@@ -11,6 +11,8 @@ NF-chat;
 ###       Since it didnt reoccur after fresh configfiles, its kinda   ###
 ###       impossible to track it decently.                            ###
 ###		STAY ON UR TOES					      ###
+###       !!! very likely a problem with keybindings !!!              ###
+###		was removed in e)				      ###
 #########################################################################
     	- cleanin up the debug shite
 	- removed new_data, nick_said, *setup  from session struct
@@ -120,21 +122,42 @@ NF-chat;
 	- moved strip_color from util.c to inbound.c
 	- set topicgad & namelistgad insensitive
 	- removed selectable stuff in userlist.c/maingui.c
-	stripped size =  84932
-    e)
-### make it rejoin a channel on reconnect
+	stripped size = 84932
+    e)	removing history
+	- removed history_up/down from fkeys.c
+	- removed history_add from outbound.c
+	- removed history from handle_command & handle_multiline
+	- removed history_free from xchat.c
+	- removed struct history & from session_t
+	stripped size = 84420
+	cleanin up fkeys.c
+	- removed keybinding stuff...
+	- made a simple switch on keyval
+	- only kept key_action_scroll_page, key_action_tab_comp
+	- tab_nick_comp is from 1.6.4
+	stripped size = 78025
+	- removed word_click signal from xtext.c
+	stripped size = 77636
+	- added gtk_signal_emit_stop to fkeys handle_key_press
+	- made close_socket accept void
+	- made fe_timeout_add use no userdata but void instead
+	- made the op_box (in front of the nickgad) invisible when
+	  progressbar isnt shown
+	- made key handle ignore ctrl/alt & other special keys
+	- implemented userlistscroll
+	- implemented reconnect on !connected & \n
+    f)
+BUG; $nickPRIVMSG :Unknown command
+
+### make it rejoin the channel on reconnect
 ### make it rejoin the set channel on a prefs specified time interval
-### remove key_action_page_switch
-### clean up fkeys.c
-### find another method to check whether the server is still connected
-    in timeout_auto_reconnect
-### should remove keybindings file
+*** make it send a quit to the server upon kill.
+
 ### make scrolling topic
 ### cmd_help
 *** add some extra prefs & code for my_widget_get_style(maingui.c)
     for/background - base colours!!!! -> seems to only affect inputbox
 *** remember to check for fprintf uniformication
-*** make it send a quit to the server upon kill.
 ### Add decent file headers
 
 0.3.3;

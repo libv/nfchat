@@ -460,20 +460,9 @@ check_nick_completion (char *cmd, char *tbuf)
    }
    tbuf[0] = 0;
 }
-static void
-history_add (struct history *his, char *text)
-{
-   if (his->lines[his->realpos])
-      free (his->lines[his->realpos]);
-   his->lines[his->realpos] = strdup (text);
-   his->realpos++;
-   if (his->realpos == HISTORY_SIZE)
-      his->realpos = 0;
-   his->pos = his->realpos;
-}
 
 int
-handle_command (char *cmd, int history)
+handle_command (char *cmd)
 {
    int user_cmd = FALSE, i;
    unsigned char pdibuf[2048];
@@ -483,9 +472,6 @@ handle_command (char *cmd, int history)
 
    if (!session || !*cmd)
       return TRUE;
-
-   if (history)
-      history_add (&session->history, cmd);
 
    if (cmd[0] == '/')
    {
@@ -579,7 +565,7 @@ handle_command (char *cmd, int history)
 }
 
 void
-handle_multiline (char *cmd, int history)
+handle_multiline (char *cmd)
 {
   char *cr;
 
@@ -589,7 +575,7 @@ handle_multiline (char *cmd, int history)
       {
 	if (cr)
 	  *cr = 0;
-	if (!handle_command (cmd, history))
+	if (!handle_command (cmd))
 	  return;
 	if (!cr)
 	  break;
@@ -598,6 +584,6 @@ handle_multiline (char *cmd, int history)
 	  break;
 	cr = strchr (cmd, '\n');
       }
-  else if (!handle_command (cmd, history))
+  else if (!handle_command (cmd))
     return;
 }

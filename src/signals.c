@@ -41,13 +41,27 @@ signal_setup ()
    printevent_setup ();
 }
 
+/* static void
+printchars (char *a)
+{
+  int i, size = strlen(a);
+
+  for(i = 0; i <= size; i++)
+    fprintf(stderr, "char %d:%c\n", a[i], a[i]);
+  fprintf(stderr, "end of string\n");
+  }*/
+
 int
 fire_signal (int s, char *a, char *b, char *c, char *d, char e)
 {
    GSList *cur;
    struct xp_signal *sig;
    int flag = 0;
-
+   /*   fprintf (stderr, "-int: %d\n", s);
+   if (s != 79 && s != 80)
+   fprintf (stderr, "char * %s, char * %s, char * %s, char * %s, char %c\n",a, b, c, d, e);*/
+   /* if (s == 78)
+      printchars(a);*/
    cur = sigroots[s];
    current_signal = s;
    while (cur) {

@@ -41,14 +41,14 @@ extern GtkStyle *channelwin_style;
 extern GdkFont *font_normal;
 extern gint xchat_is_quitting;
 
-extern int handle_multiline (char *cmd, int history);
+extern int handle_multiline (char *cmd);
 extern int kill_session_callback (void);
 extern gint gtk_kill_session_callback (GtkWidget *, void *blah);
 extern void clear_user_list (void);
 extern void handle_inputgad (GtkWidget * igad, void *blah);
 extern void fe_progressbar_end (void);
 
-int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);
+extern int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);
 
 
 struct relink_data {
@@ -208,8 +208,7 @@ gtkutil_clist_new (GtkWidget * box, int policy)
 void
 input_return_focus (GtkWidget * wid, GdkEventFocus *blah, void *blah2)
 {
-  fprintf(stderr, "passed return focus\n");
-  gtk_widget_grab_focus ((GtkWidget *) session->gui->window);
+  /*gtk_widget_grab_focus ((GtkWidget *) session->gui->inputgad);*/
 }
 
 void
@@ -250,7 +249,7 @@ create_window (void)
    gtk_entry_set_editable (GTK_ENTRY (session->gui->topicgad), FALSE);
    gtk_container_add (GTK_CONTAINER (tbox), session->gui->topicgad);
    gtk_widget_set_sensitive ((GtkWidget *) session->gui->topicgad, FALSE);
-   gtk_signal_connect ((GtkObject *) session->gui->topicgad, "focus_in_event", GTK_SIGNAL_FUNC (focus_in), session);
+   /*gtk_signal_connect ((GtkObject *) session->gui->topicgad, "focus_in_event", GTK_SIGNAL_FUNC (focus_in), session);*/
    gtk_widget_show (session->gui->topicgad);
    
    leftpane = gtk_hbox_new (FALSE, 0);
@@ -293,7 +292,7 @@ create_window (void)
 
    session->gui->op_box = gtk_hbox_new (0, 0);
    gtk_box_pack_start (GTK_BOX (bbox), session->gui->op_box, FALSE, FALSE, 2);
-   gtk_widget_show (session->gui->op_box);
+   /* gtk_widget_show (session->gui->op_box); */
 
    session->gui->nickgad = gtk_label_new (server->nick);
    gtk_box_pack_start (GTK_BOX (bbox), session->gui->nickgad, FALSE, FALSE, 4);
@@ -340,7 +339,7 @@ handle_inputgad (GtkWidget * igad, void *blah)
    if (cmd[0] == 0)
       return;
 
-   handle_multiline (cmd, TRUE);
+   handle_multiline (cmd);
 
    gtk_entry_set_text (GTK_ENTRY (igad), "");
 }
