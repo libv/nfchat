@@ -239,10 +239,8 @@ check_prefs_dir (void)
 {
    char *xdir = get_xdir ();
    if (access (xdir, F_OK) != 0)
-   {
-      if (mkdir (xdir, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
-         fe_message ("Cannot create ~/.nfchat", FALSE);
-   }
+     if (mkdir (xdir, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
+       fprintf (stderr, "Error: Cannot create ~/.nfchat");
 }
 
 char *
@@ -280,9 +278,6 @@ static struct prefs vars[] = {
 {"tint",                PREFS_OFFINT(tint),              TYPE_BOOL},
 {"use_server_tab",      PREFS_OFFINT(use_server_tab),    TYPE_BOOL},
 {"use_fontset",         PREFS_OFFINT(use_fontset),       TYPE_BOOL},
-
-{"mail_check",          PREFS_OFFINT(mail_check),        TYPE_BOOL},
-{"double_buffer",       PREFS_OFFINT(double_buffer),     TYPE_BOOL},
 {"mainwindow_left",     PREFS_OFFINT(mainwindow_left),   TYPE_INT},
 {"mainwindow_top",      PREFS_OFFINT(mainwindow_top),    TYPE_INT},
 {"mainwindow_width",    PREFS_OFFINT(mainwindow_width),  TYPE_INT},
@@ -290,14 +285,9 @@ static struct prefs vars[] = {
 {"max_lines",           PREFS_OFFINT(max_lines),         TYPE_INT},
 {"bt_color",            PREFS_OFFINT(bt_color),          TYPE_INT},
 {"reconnect_delay",     PREFS_OFFINT(recon_delay),       TYPE_INT},
-{"ban_type",            PREFS_OFFINT(bantype),           TYPE_INT},
-{"userlist_sort",       PREFS_OFFINT(userlist_sort),     TYPE_INT},
 {"tint_red",            PREFS_OFFINT(tint_red),          TYPE_INT},
 {"tint_green",          PREFS_OFFINT(tint_green),        TYPE_INT},
 {"tint_blue",           PREFS_OFFINT(tint_blue),         TYPE_INT},
-{"dialog_tint_red",     PREFS_OFFINT(dialog_tint_red),   TYPE_INT},
-{"dialog_tint_green",   PREFS_OFFINT(dialog_tint_green), TYPE_INT},
-{"dialog_tint_blue",    PREFS_OFFINT(dialog_tint_blue),  TYPE_INT},
 {"indent_pixels",       PREFS_OFFINT(indent_pixels),     TYPE_INT},
 {"max_auto_indent",     PREFS_OFFINT (max_auto_indent),  TYPE_INT},
 {"tabs_position",       PREFS_OFFINT (tabs_position),    TYPE_INT},
@@ -347,8 +337,6 @@ load_config (void)
    memset (&prefs, 0, sizeof (struct xchatprefs));
    /* Just for ppl upgrading --AGL */
    prefs.max_auto_indent = 112;
-   prefs.mail_check = 1;
-   prefs.double_buffer = 1;
 
    check_prefs_dir ();
    username = g_get_user_name ();
@@ -391,17 +379,13 @@ load_config (void)
       prefs.tabchannels = 1;
       prefs.use_server_tab = 1;
       prefs.nickcompletion = 1;
-      prefs.nu_color = 4;
       prefs.bt_color = 8;
-      prefs.max_lines = 300;
+      prefs.max_lines = 50;
       prefs.mainwindow_width = 601;
       prefs.mainwindow_height = 422;
-      prefs.tint_red =
-      prefs.tint_green =
-      prefs.tint_blue =
-      prefs.dialog_tint_red =
-      prefs.dialog_tint_green =
-      prefs.dialog_tint_blue = 208;
+      prefs.tint_red = 0;
+      prefs.tint_green = 0;
+      prefs.tint_blue = 0;
       strcpy (prefs.nick1, username);
       strcpy (prefs.nick2, username);
       strcat (prefs.nick2, "_");

@@ -7,7 +7,6 @@ void fe_exit (void);
 int fe_timeout_add (int interval, void *callback, void *userdata);
 void fe_timeout_remove (int tag);
 void fe_new_window (struct session *sess);
-void fe_message (char *msg, int wait);
 int fe_input_add (int sok, int read, int write, int ex, void *func, void *data);
 void fe_input_remove (int tag);
 struct session *fe_new_window_popup (char *target, struct server *serv);
@@ -23,12 +22,9 @@ void fe_userlist_remove (struct session *sess, struct user *user);
 void fe_userlist_move (struct session *sess, struct user *user, int new_row);
 void fe_userlist_numbers (struct session *sess);
 void fe_userlist_clear (struct session *sess);
-/* void fe_userlist_hide (struct session *sess); */
 void fe_clear_channel (struct session *sess);
 void fe_session_callback (struct session *sess);
-/* void fe_buttons_update (struct session *sess); */
 void fe_set_channel (struct session *sess);
 void fe_set_title (struct session *sess);
 void fe_set_nick (struct server *serv, char *newnick);
-void fe_beep (void);
 char *fe_buffer_get (session *sess);

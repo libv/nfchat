@@ -25,12 +25,7 @@ NF-chat;
 	- load_config (cfgfiles.c)
 	   - changing xdir to ~/.nfchat,
 	   - changing default_file to nfchat.conf
-*** should edit the preferences, and should set some defaults that
-*** shouldnt be changed at all
-*** just edit the prefs shit, throw out what u dont like and then update
-*** the rest when totally clear.
 	   - set default quit to '[nf]chat by NetForce (www.netforce.be)'
-*** should change all fe errors's gtkutil_simpledialog to fprintf(stderr
 	   - edited my_font_load to no longer fprintf(stderr
 	   - removed unused dialog_font_normal from fe_init(fe_gtk.c)
 	     xchatprefs(xchat.h); prefs var & load_config(cfgfiles.c)
@@ -50,7 +45,6 @@ NF-chat;
              & pevent_dialog_save
 	     removin pevt_ctcpsnd_help.
 	     removin play_wave & call from text_signal_handler
-*** prefs.soundcmd prefs.sounddir
 *** remember to check for fprintf uniformication
 	got as far as xchat_init's load_text_events	   
 
@@ -129,7 +123,6 @@ NF-chat;
 	- removed dialog_indent_nick/indent_pixels/show_separator  from
 	  cfgfiles.c, xchat.h
 	  dialog_indent_nick from text.c
-*** is_dialog????
 	- removed treeview from xchat.h, cfgfiles.c
 	- removed auto_indent from xchat.h, cfgfiles.c
 	  removed from maingui.c, xtext.c
@@ -137,7 +130,53 @@ NF-chat;
 *** gtk_xtext_button_release = one of the functions used to move the
 *** separator with the mouse, check this out asap. gtk_xtext_button_press
 	- removed wordwrap (always true) from cfgfiles.c, xchat.h
-	- removed dialog wordwrap from cfgfiles.c, xchat.h
+	  edited maingui.c, removed ->wordwrap from xtext.c/h
+	- removed dialog_wordwrap from cfgfiles.c, xchat.h
+	- savin
+    e)
+	- removed mail_check from from cfgfiles.c xchat.h
+	  removed xchat_misc_checks, xchat_mail_check, mail_items
+	  from xchat.c, removed pevt_newmail_help & edited te
+*** remove XP_TE_NEWMAIL
+	- removed double_buffer from cfgfiles.c, xchat.h
+	  removin all code inside USE_MITSHM, whatever that is
+	  it isnt used on a lin. removed tmp_pix from xchat.h
+	- removed ban_type from cfgfiles.c, xchat.h
+	- fixin userlist to '0', removed nick_cmp, edited userlist.c
+	- removed dialog_tint_* from xchat.h, cfgfiles.c
+	- removed nu_color of xchat.h, cfgfiles.c
+	- removed no_server_logs from xchat.h
+	- set max_lines default to 50
+	- removing is_dialog from session struct
+          edited xchat.c/h,text.c,outbound.c,inbound.c,server.c,fe-gtk.c 	
+	  editing new_session to only take server as arg
+	  edited text., fe_gtk.c accordingly
+	  removing find_dialog
+	- replacin gtkutil_simpledialogs in fkeys.c, maingui.c
+	  removed from gtkutil.c/h
+	  replacin fe_message in cfgfiles.c, text.c 
+	  removed fe_message from fe-gtk.c, fe.h
+	  replacing error_function in xtext.c, maingui.c
+	  removed from xtext.h
+	- removin all commented out 'command_level' from
+	  inbound.c, outbound.c (remainder from original xchat)
+	- changing key_load_kbs args to void
+	- removed gtkutil_null_this_var from gtkutil.c/h
+	- removed userlisthidden from session (xchat.h)
+	- removed ->is_shell from xchat.c/h, maingui.c
+	- removed fe_beep from fe.h, fe-gtk.c
+	- removed urlcheck & MOTION_MONITOR xchat.c/h
+	- removed gtk_xtext_leave_notify (false by default) xtext.c
+	- removed leave_notify_event from gtk_xtext_class_init
+	- moving palette_alloc to maingui.c
+	- removing palette_load from fe-gtk.c
+	- deleting palette.c/h
+	- removed theme_pixmap from userlistgui.c
+	- deleted themes-common.c
+	- edited Makefile.am, text.c, xchat.c
+	- moving to 3.3
+### should remove keybindings file.
+
 0.3.1; 
 """"""
     a) - deleted python.c
@@ -172,7 +211,6 @@ NF-chat;
 		  button_list, cmd_addbutton, cmd_delbutton, definitions
 		  of them & from commands struct.
 		- removed  nouserlistbuttons from cfgfiles.c & xchat.h
-### fe_buttons_update <-- channel or userlist, remove when channelbuttons
 	    - we dont need popup.conf
 		- xchat.c
 		  *popup_list, defaultconf define, xchat_init (list_load_)
@@ -379,11 +417,9 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
        - gtk_xtext_thaw, gtk_xtext_freeze, gtk_xtext_search
      - removed the logo from fe-gtk.c and edited the message 
        from init_sess
-  ### prefs.newtabstofront
      - removed prefs.newtabstofront from create_window/maingui_new_tab
        of maingui.c
-     - removed function maingui_pagetofront
-   
+     - removed function maingui_pagetofront   
 
 0.2.4;
 """"""
@@ -394,7 +430,6 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
    - removed adjacent find_selected_nick from maingui.c
    - removed maingui_word_check, maingui_word_clicked
    - removed calls from maingui_create_textlist,
-### prefs.timestamp
    - removed menu_urlmenu, menu_popup, menu_chanmenu
      from menu.c & maingui.c
    - removed adjacent functions and calls from menu.c
@@ -426,19 +461,16 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
   - removed button_box from struct session_gui fe-gtk.h
   - removed adjacent calls from maingui.c
         - maingui_createbuttons removed
-### prefs.nouserlistbuttons
         - removed fe_buttons_update
         - removed maingui_createbuttons call from create_window
         - removed userlist_button
   - removed fe_buttons_update calls from fe.h, outbound.c
-### userlist_button_cb
   b) removing treeview
    - removed from maingui.c
         - struct tree_data, tree_row_destroy, tree_add_sess, tree_build
           tree_new_entry, tree_populate, tree_destroy, tree_select_row
           new_tree_view, tree_update, tree_default_style, tree_red_style
           tree_blue_style
-### prefs.treeview
         - removed tree calls from
             - fe_set_channel, fe_clear_channel, focus_in, gui_make_tab_window
               fe_session_callback, 
@@ -449,13 +481,11 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
        - removed buttons from maingui_new_tab
        - removed maingui_delink_nontab
    d) removing panes
-### prefs.nopaned
      - removed paned from session_gui from fe-gtk.h
      - removed sess->gui->paned calls from maingui.c in
          userlist_hide, 
      - prefs.nopaned calls from create_window
    e) removing hidden userlist
-### sess->userlisthidden
      - removed userlist_hide/fe_userlist_hide from maingui.c,
           menu.c, fe-gtk.c, fe.h, xchat.h
 
@@ -463,15 +493,12 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
 """"""
   a)
   - removed new_dialog from maingui.c
- ### sess->is_dialog
- ### prefs.treeview???           
   - added if(!sess->iss_dialog) to fe_new_window in fe-gtk.c
     still segfaults, maybe i should dig this out more...
   - after some temp hacks fe_new_window in fe-gtk.c 
     edited so that new_session isnt called with the string from set 
     inbound.c; in private_msg, channel_action
     outbound.c; cmd_query, (lastlog???)
- ### lastlog function???
   - removed fe_change_nick from fe.h & inbound.c
   - removed extern ... *new_dialog from outbound.c
   - deleted dialog.c edited makefile, po-file
@@ -529,8 +556,6 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
     - X-Chat
        - menu_newserver_tab
  ### new_server
- ### prefs.use_server_tab
- ### prefs.tabchannels
        - menu_newserver_window
        - menu_newchannel_tab
        - menu_newchannel_window
@@ -544,54 +569,32 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
  ### fe_text_clear --> could prolly easily be removed
     - User Modes
        - menu_invisible
- ### prefs.invisible
        - menu_wallops
- ### prefs.wallops
        - menu_servernotice
- ### prefs.servernotice
        - menu_away
- ### prefs.away
- ### prefs.awayreason
  ### handle_command <---???
        - menu_autorejoin
- ### prefs.autorejoin
        - menu_autoreconnect
- ### prefs.autoreconnect 
        - menu_autoreconnectonfail
- ### prefs.autoreconnectonfail
        - menu_autodialog
- ### prefs.autodialog
        - menu_autodccchat
- ### prefs.autodccchat
        - menu_autodccsend
- ### prefs.autodccsend
- ### prefs.dccdir
     - Settings
        - menu_usercommands
- ### commands.conf
        - menu_ctcpguiopen
- ### ctcpreply.conf
        - menu_ulbuttons
- ### buttons.conf
        - menu_ulpopup
- ### popup.conf
        - menu_rpopup
- ### replace.conf
        - menu_urlhandlers
- ### urlhandlers.conf
        - menu_evtpopup
- ### remove pevent_dialog_show from textgui.c
        - menu_keypopup
- ### remove key_dialog_show from fkeys.c
        - menu_themes
- ### remove menu_themehandler from themes.c
        - menu_reload
- ### load_config, prolly common
  ### default_file <--- menu.c only
+ ### load_config, prolly common
        - menu_savedefault
  ### save_config, prolly common too
        - menu_saveexit
- ### prefs.autosave
     - Scripts & plugins
        - menu_loadperl
           - menu_loadperl_callback
@@ -602,7 +605,6 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
        - menu_help
  ### cmd_help
        - menu_webpage
- ### goto_url
        - menu_docs
  - removed editlist.c and edited Makefile.am
  - removed createmenus from menu.c and maingui.c
@@ -667,11 +669,9 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
 """"""
   - removed urlgrab.c
   - removed url_autosave from fe-gtk.c
-## prefs.autosave_url
   - removed url_open_gui from menu.c
   - removed fe_url_check from src/common/dcc.c fe.h inbound.c
   - edited Makefile.am
-## url in all source trees
 
 0.1.6;
 """"""
@@ -705,7 +705,6 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
   - removed fe_ignore_update from src/common/fe.h & ignore.c
   - removed ignore_gui_open from src/fe-gtk/menu.c
   - edited Makefile.am
-### ignore should still work np, only the graphical front end got lost
 
 0.1.2;
 """"""
@@ -727,7 +726,6 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
     /src/fe-gtk/menu.c (entire menu item)
  - removed the file out of /src/fe-gtk/Makefile.am
  
-### remember prefs autoconnect/prefs.skipserverlist
 
 Migrating to 0.1.*
 
@@ -764,9 +762,6 @@ Migrating to 0.1.*
     src/fe-gtk/userlistgui.c
     src/fe-gtk/usermenu.c
     configure.in
-### Lost dcc receive window??? - it has to be removed anyway ;)
-### this already existed on 0.0.2
-### Check out dnd*
 
 0.0.3;
 """"""

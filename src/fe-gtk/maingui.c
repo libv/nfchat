@@ -55,7 +55,6 @@ extern gint xchat_is_quitting;
 extern int handle_multiline (struct session *sess, char *cmd, int history, int nocommand);
 extern int kill_session_callback (struct session *sess);
 extern gint gtk_kill_session_callback (GtkWidget *, struct session *sess);
-extern void palette_alloc (GtkWidget * widget);
 extern void clear_user_list (struct session *sess);
 extern void handle_inputgad (GtkWidget * igad, struct session *sess);
 int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);
@@ -157,21 +156,33 @@ focus_in (GtkWindow * win, GtkWidget * wid, struct session *sess)
    {
       if (current_tab)
       {
-         if (!current_tab->is_shell)
-            gtk_widget_grab_focus (current_tab->gui->inputgad);
-         else
-            gtk_widget_grab_focus (current_tab->gui->textgad);
-         if (!prefs.use_server_tab)
-            current_tab->server->front_session = current_tab;
+	gtk_widget_grab_focus (current_tab->gui->inputgad);
+	if (!prefs.use_server_tab)
+	  current_tab->server->front_session = current_tab;
       }
    } else
    {
       if (!prefs.use_server_tab)
          sess->server->front_session = sess;
-      if (!sess->is_shell)
-         gtk_widget_grab_focus (sess->gui->inputgad);
-      else
-         gtk_widget_grab_focus (sess->gui->textgad);
+      gtk_widget_grab_focus (sess->gui->inputgad);
+   }
+}
+
+static void
+palette_alloc (GtkWidget *widget)
+{
+   int i;
+
+   if (!colors[0].pixel)        /* don't do it again */
+   {
+      for (i = 0; i < 20; i++)
+      {
+         colors[i].pixel = (gulong) ((colors[i].red & 0xff00) * 256 +
+                                     (colors[i].green & 0xff00) +
+                                     (colors[i].blue & 0xff00) / 256);
+         if (!gdk_color_alloc (gtk_widget_get_colormap (widget), &colors[i]))
+            fprintf (stderr, "*** X-CHAT: cannot alloc colors\n");
+      }
    }
 }
 
@@ -182,6 +193,8 @@ show_and_unfocus (GtkWidget * wid)
    gtk_widget_show (wid);
 }
 
+
+
 static void
 maingui_create_textlist (struct session *sess, GtkWidget *leftpane)
 {
@@ -189,11 +202,8 @@ maingui_create_textlist (struct session *sess, GtkWidget *leftpane)
 
    gtk_object_set_user_data (GTK_OBJECT (sess->gui->textgad), sess);
 
-   ((GtkXText*)sess->gui->textgad)->double_buffer = prefs.double_buffer;
-   ((GtkXText*)sess->gui->textgad)->wordwrap = prefs.wordwrap;
    ((GtkXText*)sess->gui->textgad)->max_auto_indent = prefs.max_auto_indent;
    ((GtkXText*)sess->gui->textgad)->max_lines = prefs.max_lines;
-   ((GtkXText*)sess->gui->textgad)->error_function = gtkutil_simpledialog;
   
    ((GtkXText*)sess->gui->textgad)->tint_red = prefs.tint_red;
    ((GtkXText*)sess->gui->textgad)->tint_green = prefs.tint_green;
@@ -224,8 +234,7 @@ gui_new_tab (session *sess)
    if (!prefs.use_server_tab)
       sess->server->front_session = sess;
    fe_set_title (sess);
-   if (!sess->is_shell)
-      gtk_widget_grab_focus (sess->gui->inputgad);
+   gtk_widget_grab_focus (sess->gui->inputgad);
 
    if (sess->new_data || sess->nick_said)
    {

@@ -49,7 +49,6 @@ struct session *menu_sess = 0;
 struct xchatprefs prefs;
 
 void xchat_cleanup (void);
-struct session *new_session (struct server *serv, char *from);
 
 /* inbound.c */
 
@@ -78,11 +77,6 @@ extern void list_loadconf (char *, GSList **, char *);
 
 extern unsigned char *strip_color (unsigned char *text);
 extern void load_text_events ();
-
-/* themes-common */
-
-extern void init_themes (void);
-
 
 void auto_reconnect (struct server *serv, int send_quit, int err);
 
@@ -193,25 +187,6 @@ is_session (session *sess)
 }
 
 struct session *
-find_dialog (struct server *serv, char *nick)
-{
-   GSList *list = sess_list;
-   struct session *sess;
-
-   while (list)
-   {
-      sess = (struct session *) list->data;
-      if (sess->server == serv && sess->is_dialog)
-      {
-         if (!strcasecmp (nick, sess->channel))
-            return (sess);
-      }
-      list = list->next;
-   }
-   return 0;
-}
-
-struct session *
 find_session_from_channel (char *chan, struct server *serv)
 {
    struct session *sess;
@@ -219,7 +194,7 @@ find_session_from_channel (char *chan, struct server *serv)
    while (list)
    {
       sess = (struct session *) list->data;
-      if (!sess->is_shell && !strcasecmp (chan, sess->channel))
+      if (!strcasecmp (chan, sess->channel))
       {
          if (!serv)
             return sess;
@@ -267,11 +242,9 @@ find_session_from_waitchannel (char *chan, struct server *serv)
    while (list)
    {
       sess = (struct session *) list->data;
-      if (sess->server == serv && sess->channel[0] == 0 && !sess->is_shell)
-      {
+      if (sess->server == serv && sess->channel[0] == 0)
          if (!strcasecmp (chan, sess->waitchannel))
             return sess;
-      }
       list = list->next;
    }
    return 0;
@@ -395,6 +368,23 @@ flush_server_queue (struct server *serv)
    serv->bytes_sent = 0;
 }
 
+struct session *
+new_session (struct server *serv)
+{
+   struct session *sess;
+
+   sess = malloc (sizeof (struct session));
+   memset (sess, 0, sizeof (struct session));
+
+   sess->server = serv;
+   
+   sess_list = g_slist_prepend (sess_list, sess);
+
+   fe_new_window (sess);
+   
+   return sess;
+}
+
 struct server *
 new_server (void)
 {
@@ -410,37 +400,10 @@ new_server (void)
    
    if (prefs.use_server_tab)
    {
-      serv->front_session = new_session (serv, 0);
+      serv->front_session = new_session (serv);
       serv->front_session->is_server = TRUE;
-    /* fe_userlist_hide (serv->front_session); */
    }
    return serv;
-}
-
-
-struct session *
-new_session (struct server *serv, char *from)
-{
-   struct session *sess;
-
-   sess = malloc (sizeof (struct session));
-   memset (sess, 0, sizeof (struct session));
-
-   sess->server = serv;
-   
-  
-   if (from)
-   {
-      sess->is_dialog = TRUE;
-      strcpy (sess->channel, from);
-   } 
-
-   sess_list = g_slist_prepend (sess_list, sess);
-
-   fe_new_window (sess);
-   
-   return sess;
- 
 }
 
 static void
@@ -526,7 +489,7 @@ send_quit_or_part (session *killsess)
          }
       } else
       {
-         if (!killsess->is_dialog && !killsess->is_server && killsess->channel[0])
+         if (!killsess->is_server && killsess->channel[0])
          {
             snprintf (tbuf, sizeof tbuf, "PART %s\r\n", killsess->channel);
             tcp_send (killserv, tbuf);
@@ -646,82 +609,6 @@ save_away_message (struct server *serv, char *nick, char *msg)
    }
 }
 
-static int
-mail_items (char *file)
-{
-   FILE *fp;
-   int items;
-   char buf[512];
-
-   fp = fopen (file, "r");
-   if (!fp)
-      return 1;
-
-   items = 0;
-   while (fgets (buf, sizeof buf, fp))
-   {
-      if (!strncmp (buf, "From ", 5))
-         items++;
-   }
-   fclose (fp);
-
-   return items;
-}
-
-static void
-xchat_mail_check (void)
-{
-   static int last_size = -1;
-   int size;
-   struct stat st;
-   char buf[512];
-   char *maildir;
-
-   maildir = getenv ("MAIL");
-   if (!maildir)
-   {
-      snprintf (buf, 511, "/var/spool/mail/%s", g_get_user_name ());
-      maildir = buf;
-   }
-
-   if (stat (maildir, &st) < 0)
-      return;
-
-   size = st.st_size;
-
-   if (last_size == -1)
-   {
-      last_size = size;
-      return;
-   }
-
-   if (size > last_size)
-   {
-      sprintf (buf, "%d", mail_items (maildir));
-      sprintf (buf + 16, "%d", size);
-      if (menu_sess && !menu_sess->is_server)
-         EMIT_SIGNAL (XP_TE_NEWMAIL, menu_sess, buf, buf + 16, NULL, NULL, 0);
-   }
-
-   last_size = size;
-}
-
-static int
-xchat_misc_checks (void) /* this gets called every 2 seconds */
-{
-   static int count = 0;
-
-   count++;
-   if (count == 10)
-   {
-      count = 0;
-      if (prefs.mail_check)
-         xchat_mail_check ();
-   }
-
-   return 1;
-}
-
 #define defaultconf_ctcp  "NAME TIME\nCMD /nctcp %s TIME %t\n\n"\
                           "NAME PING\nCMD /nctcp %s PING %d\n\n"
 
@@ -745,9 +632,7 @@ xchat_init (void)
    if (prefs.use_server_tab)
       sess = serv->front_session;
    else
-      sess = new_session (serv, 0);
-
-   fe_timeout_add (2000, xchat_misc_checks, 0);
+      sess = new_session (serv);
 }
 
 void
@@ -798,8 +683,6 @@ main (int argc, char *argv[])
       return 0;
 
    load_config ();
-
-   init_themes ();
 
    fe_init ();
 

@@ -85,13 +85,6 @@ struct _GtkXText
    Display *display;
    XFontStruct *xfont;
 
-   Pixmap tmp_pix;      /* for double buffering */
-
-#ifdef USE_MITSHM
-   XShmSegmentInfo shminfo;
-   XImage *img;
-#endif
-
    GdkFont *font;
    int fontsize;
    int fonttype;
@@ -138,10 +131,6 @@ struct _GtkXText
 
    short grid_offset[256];
 
-   GtkWidget* (*error_function) (char *text);
-   int (*urlcheck_function) (GtkXText *xtext, char *word);
-
-   unsigned int double_buffer:1;
    unsigned int auto_indent:1;
    unsigned int moving_separator:1;
    unsigned int scrollbar_down:1;
@@ -156,7 +145,6 @@ struct _GtkXText
    unsigned int reverse:1;
    unsigned int transparent:1;
    unsigned int shaded:1;
-   unsigned int wordwrap:1;
    unsigned int dont_render:1;
    unsigned int cursor_hand:1;
 };

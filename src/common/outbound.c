@@ -51,14 +51,12 @@ extern struct server *new_server (void);
 extern int child_handler (int pid);
 extern void auto_reconnect (struct server *serv, int send_quit, int err);
 extern void do_dns (struct session *sess, char *tbuf, char *nick, char *host);
-extern struct session *new_session (struct server *serv, char *from);
 extern int tcp_send_len (struct server *serv, char *buf, int len);
 extern int tcp_send (struct server *serv, char *buf);
 extern struct session *tab_msg_session (char *target, struct server *serv);
 extern struct session *find_session_from_channel (char *chan, struct server *serv);
 extern int list_delentry (GSList ** list, char *name);
 extern void list_addentry (GSList ** list, char *cmd, char *name);
-extern struct session *find_dialog (struct server *serv, char *nick);
 extern void PrintText (struct session *sess, char *text);
 extern void connect_server (struct session *sess, char *server, int port, int quiet);
 extern void channel_action (struct session *sess, char *tbuf, char *chan, char *from, char *text, int fromme);
@@ -616,16 +614,7 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
    char *word[32];
    char *word_eol[32];
 
-   if (!sess)
-      return TRUE;
-   /*if (command_level > 10) {
-      gtkutil_simpledialog("Too many levels of user commands, aborting");
-      command_level = 0;
-      return FALSE;
-      }
-      command_level++; */
-
-   if (!*cmd)
+   if (!sess || !*cmd)
       return TRUE;
 
    if (history)
@@ -694,45 +683,31 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
          else
             newcmd[0] = 0;
          if (!newcmd[0])
-         {
-           if (sess->is_dialog)
-            {
-              if (sess->server->connected)
-              {
-                 channel_msg (sess->server, tbuf, sess->channel, sess->server->nick, cmd, TRUE);
-                 sprintf (tbuf, "PRIVMSG %s :%s\r\n", sess->channel, cmd);
-              } else
-              {
-                 notc_msg (sess);
-                 return TRUE;
-              }
-            } else
-            { 
-               if (sess->server->connected)
+	   {
+	     if (sess->server->connected)
                {
-                  channel_msg (sess->server, tbuf, sess->channel, sess->server->nick, cmd, TRUE);
-                  sprintf (tbuf, "PRIVMSG %s :%s\r\n", sess->channel, cmd);
+		 channel_msg (sess->server, tbuf, sess->channel, sess->server->nick, cmd, TRUE);
+		 sprintf (tbuf, "PRIVMSG %s :%s\r\n", sess->channel, cmd);
                } else
-               {
-                  notc_msg (sess);
-                  return TRUE;
-               }
-            } 
-         } else
-         {
-            if (sess->server->connected)
-            {
-               channel_msg (sess->server, tbuf, sess->channel, sess->server->nick, newcmd, TRUE);
-               sprintf (tbuf, "PRIVMSG %s :%s\r\n", sess->channel, newcmd);
-            } else
-            {
-               notc_msg (sess);
-               return TRUE;
-            }
-         }
+		 {
+		   notc_msg (sess);
+		   return TRUE;
+		 }
+	   } else
+	     {
+	       if (sess->server->connected)
+		 {
+		   channel_msg (sess->server, tbuf, sess->channel, sess->server->nick, newcmd, TRUE);
+		   sprintf (tbuf, "PRIVMSG %s :%s\r\n", sess->channel, newcmd);
+		 } else
+		   {
+		     notc_msg (sess);
+		     return TRUE;
+		   }
+	     }
          tcp_send (sess->server, tbuf);
       } else
-         notj_msg (sess);
+	notj_msg (sess);
    }
    return TRUE;
 }
@@ -749,7 +724,6 @@ handle_multiline (struct session *sess, char *cmd, int history, int nocommand)
       {
          if (cr)
             *cr = 0;
-         /*command_level = 0;*/
          if (!handle_command (cmd, sess, history, nocommand))
             return;
          if (!cr)
@@ -761,7 +735,6 @@ handle_multiline (struct session *sess, char *cmd, int history, int nocommand)
       }
    } else
    {
-      /*command_level = 0;*/
       if (!handle_command (cmd, sess, history, nocommand))
          return;
    }

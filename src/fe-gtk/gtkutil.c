@@ -28,7 +28,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
-GtkWidget *gtkutil_simpledialog (char *msg);
 extern void path_part (char *file, char *path);
 extern GtkWidget *maingui_new_tab (char *title, char *name, void *close_callback, void *userdata);
 extern struct xchatprefs prefs;
@@ -38,33 +37,6 @@ void
 gtkutil_destroy (GtkWidget * igad, GtkWidget * dgad)
 {
    gtk_widget_destroy (dgad);
-}
-
-GtkWidget *
-gtkutil_simpledialog (char *msg)
-{
-   GtkWidget *label, *button, *dialog;
-
-   dialog = gtk_dialog_new ();
-   gtk_window_set_title (GTK_WINDOW (dialog), "Message");
-   gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_MOUSE);
-   gtk_container_border_width (GTK_CONTAINER (GTK_DIALOG (dialog)->vbox), 10);
-
-   label = gtk_label_new (msg);
-   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), label, TRUE, TRUE, 10);
-   gtk_widget_show (label);
-
-   button = gtk_button_new_with_label ("Ok");
-   GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
-   gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                       GTK_SIGNAL_FUNC (gtkutil_destroy), dialog);
-   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->action_area), button, TRUE, TRUE, 10);
-   gtk_widget_grab_default (button);
-   gtk_widget_show (button);
-
-   gtk_widget_show (dialog);
-
-   return dialog;
 }
 
 GtkWidget *
@@ -119,8 +91,3 @@ gtkutil_clist_selection (GtkWidget * clist)
       return -1;
 }
 
-void
-gtkutil_null_this_var (GtkWidget * unused, GtkWidget ** dialog)
-{
-   *dialog = 0;
-}

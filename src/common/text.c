@@ -31,7 +31,6 @@
 #include "signals.h"
 #include "fe.h"
 #include "util.h"
-#include "themes-common.h"
 
 extern GSList *sess_list;
 extern struct xchatprefs prefs;
@@ -40,8 +39,6 @@ extern unsigned char *strip_color (unsigned char *text);
 extern void my_system (char *cmd);
 extern void check_special_chars (char *);
 extern int child_handler (int pid);
-extern int load_themeconfig (int themefile);
-extern int save_themeconfig (int themefile);
 
 extern char **environ;
 
@@ -584,13 +581,6 @@ static char *pevt_resolvinguser_help[] =
    NULL
 };
 
-static char *pevt_newmail_help[] =
-{
-   "Number of messages",
-   "Bytes in mailbox",
-   NULL
-};
-
 struct text_event
 {
    char *name;
@@ -751,7 +741,7 @@ struct text_event te[] =
 /*135*/   {NULL, NULL, NULL, 0}, /* XP_TE_MALFORMED_PACKET */
 /*136*/   {"Part with Reason", pevt_partreason_help, "<%C10-%C11-%O$t$1 %C14(%O$2%C14)%C has left $3 %C14(%O$4%C14)%O", 4},
 /*137*/   {"You Part with Reason", pevt_partreason_help, "-%C10-%C11-%O$tYou have left channel $3 %C14(%O$4%C14)%O", 4},
-/*138*/   {"New Mail", pevt_newmail_help, "-%C3-%C9-%O$tYou have new mail ($1 messages, $2 bytes total).", 2},
+/*138*/   {NULL, NULL, NULL, 0}, 
 /*139*/   {"Motd", pevt_servertext_help, "-%C10-%C11-%O$t$1%O", 1},
 
 /*140*/   {NULL, NULL, NULL, 0},	/* XP_IF_SEND */
@@ -789,7 +779,6 @@ void
 pevent_make_pntevts ()
 {
    int i, m, len;
-   char out[1024];
 
    for (i = 0; i < NUM_XP; i++)
    {
@@ -799,15 +788,14 @@ pevent_make_pntevts ()
          free (pntevts[i]);
       if (pevt_build_string (pntevts_text[i], &(pntevts[i]), &m) != 0)
       {
-         snprintf (out, sizeof (out), "Error parsing event %s.\nLoading default", te[i].name);
-         fe_message (out, FALSE);
+         fprintf (stderr, "Error parsing event %s.\nLoading default", te[i].name);
          free (pntevts_text[i]);
          len = strlen (te[i].def) + 1;
          pntevts_text[i] = malloc (len);
          memcpy (pntevts_text[i], te[i].def, len);
          if (pevt_build_string (pntevts_text[i], &(pntevts[i]), &m) != 0)
          {
-            fprintf (stderr, "XChat CRITICAL *** default event text failed to build!\n");
+            fprintf (stderr, "Error: default event text from  %sfailed to build!\n", te[i].name);
             abort ();
          }
       }
@@ -903,10 +891,7 @@ display_event (char *i, struct session *sess, int numargs, char **args)
          done_all = TRUE;
          continue;
       case 3:
-	 if (sess->is_dialog)
-	   o[oi++] = ' ';
-	 else 
-	   o[oi++] = '\t';
+	o[oi++] = '\t';
 	 break;
       }
    }
@@ -968,7 +953,7 @@ pevt_build_string (char *input, char **output, int *max_arg)
       }
       if (ii == len)
       {
-         fe_message ("String ends with a $", FALSE);
+         fprintf (stderr, "String ends with a $");
          return 1;
       }
       d = i[ii++];
@@ -996,10 +981,10 @@ pevt_build_string (char *input, char **output, int *max_arg)
          continue;
 
        a_len_error:
-         fe_message ("String ends in $a", FALSE);
+         fprintf (stderr, "Error: String ends in $a");
          return 1;
        a_range_error:
-         fe_message ("$a value is greater then 255", FALSE);
+         fprintf (stderr, "Error: $a value is greater then 255");
          return 1;
       }
       if (d == 't') {
@@ -1021,8 +1006,7 @@ pevt_build_string (char *input, char **output, int *max_arg)
       }
       if (d < '0' || d > '9')
       {
-         snprintf (o, sizeof (o), "Error, invalid argument $%c\n", d);
-         fe_message (o, FALSE);
+         fprintf (stderr, "Error: invalid argument $%c\n", d);
          return 1;
       }
       d -= '0';

@@ -221,14 +221,10 @@ disconnect_server (struct session *sess, int sendquit, int err)
       {
          if (sess->channel[0])
          {
-            if (!sess->is_dialog && !sess->is_server)
-            {
+            if (!sess->is_server)
                clear_channel (sess);
-            }
          } else
-         {
             clear_channel (sess);
-         }
       }
       list = list->next;
    }

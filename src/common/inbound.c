@@ -38,7 +38,6 @@ extern int tcp_send (struct server *serv, char *buf);
 extern struct session *find_session_from_nick (char *nick, struct server *serv);
 extern struct session *find_session_from_channel (char *chan, struct server *serv);
 extern struct session *find_session_from_waitchannel (char *chan, struct server *serv);
-extern struct session *new_session (struct server *serv, char *from);
 struct away_msg *find_away_message (struct server *serv, char *nick);
 void save_away_message (struct server *serv, char *nick, char *msg);
 
@@ -55,7 +54,6 @@ extern void change_nick (struct session *sess, char *oldnick, char *newnick);
 
 extern int handle_command (char *cmd, struct session *sess, int history, int nocommand);
 extern void process_data_init (unsigned char *buf, char *cmd, char *word[], char *word_eol[]);
-extern int command_level;
 
 /* ctcp.c */
 
@@ -194,13 +192,9 @@ channel_msg (struct server *serv, char *outbuf, char *chan, char *from, char *te
    }
 
    if (fromme)
-      EMIT_SIGNAL (XP_TE_UCHANMSG, sess, real_outbuf, text, NULL, NULL, 0);
-   else {
-      if (sess && sess->is_dialog)
-         EMIT_SIGNAL (XP_TE_DPRIVMSG, sess, real_outbuf, text, NULL, NULL, 0);
-      else 
-         EMIT_SIGNAL (XP_TE_CHANMSG, sess, real_outbuf, text, NULL, NULL, 0);
-   }
+     EMIT_SIGNAL (XP_TE_UCHANMSG, sess, real_outbuf, text, NULL, NULL, 0);
+   else 
+     EMIT_SIGNAL (XP_TE_CHANMSG, sess, real_outbuf, text, NULL, NULL, 0);
 }
 
 void
@@ -480,15 +474,8 @@ user_quit (struct server *serv, char *outbuf, char *nick, char *reason)
    {
       sess = (struct session *) list->data;
       if (sess->server == serv)
-      {
          if (sub_name (sess, nick))
             EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, NULL, NULL, 0);
-
-         else if (sess->is_dialog && !strcasecmp (sess->channel, nick))
-         {
-            EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, NULL, NULL, 0);
-         } 
-      }
       list = list->next;
    }
 }
@@ -879,8 +866,6 @@ process_line (struct session *sess, struct server *serv, char *buf)
    char *word[32];
    char *word_eol[32];
    int n;
-
-  /*   command_level = 0; */
 
    process_data_init (pdibuf, buf + 1, word, word_eol);
 

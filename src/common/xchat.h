@@ -80,10 +80,6 @@ struct xchatprefs
    int tint_green;
    int tint_blue;
 
-   int dialog_tint_red;
-   int dialog_tint_green;
-   int dialog_tint_blue;
-
    int tabs_position;
    int max_auto_indent;
    int indent_pixels;
@@ -93,9 +89,7 @@ struct xchatprefs
    int mainwindow_width;
    int mainwindow_height;
    int recon_delay;
-   int bantype;
    int userlist_sort;
-   int nu_color;
    int bt_color;
    unsigned long local_ip;
 
@@ -108,12 +102,8 @@ struct xchatprefs
    unsigned int tabchannels;
    unsigned int transparent;
    unsigned int tint;
-   unsigned int no_server_logs;
    unsigned int use_server_tab;
    unsigned int use_fontset;
-
-   unsigned int mail_check;
-   unsigned int double_buffer;
 };
 
 struct session
@@ -141,15 +131,12 @@ struct session
 
    struct session_gui *gui;	     /* initialized by fe_new_window */
 
-   int is_shell:1;
    int is_tab:1;                /* is this a tab or toplevel window? */
-   int is_dialog:1;
    int is_server:1;		  /* for use_server_tab feature */
    int new_data:1;              /* new data avail? (red tab) */
    int nick_said:1;             /* your nick mentioned? (green tab) */
    int end_of_names:1;
    int doing_who:1;             /* /who sent on this channel */
-   int userlisthidden:1;
 };
 
 typedef struct session session;

@@ -50,11 +50,10 @@ extern void PrintTextRaw (GtkWidget * textwidget, unsigned char *text);
 extern void notify_gui_update (void);
 extern void update_all_of (char *name);
 extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, struct session *sess);
-extern void palette_load (void);
 extern void key_init (void);
 extern void create_window (struct session *);
 extern void PrintText (struct session *, char *);
-extern struct session *new_session (struct server *serv, char *from);
+extern struct session *new_session (struct server *serv);
 extern void init_userlist_xpm (struct session *sess);
 extern struct session *find_session_from_waitchannel (char *target, struct server *serv);
 
@@ -116,8 +115,6 @@ void
 fe_init (void)
 {
    font_normal = my_font_load (prefs.font_normal);
- 
-   palette_load ();
    key_init ();
 
    channelwin_style = my_widget_get_style (prefs.background);
@@ -176,28 +173,10 @@ fe_timeout_remove (int tag)
 void
 fe_new_window (struct session *sess)
 {
-   if(!sess->is_dialog) 
-   {
-     sess->gui = malloc (sizeof (struct session_gui));
-     memset (sess->gui, 0, sizeof (struct session_gui));
-     create_window (sess);
-     init_sess ();
-   }
-}
-
-void
-fe_message (char *msg, int wait)
-{
-   GtkWidget *dialog;
-
-   dialog = gtkutil_simpledialog (msg);
-   if (wait)
-   {
-      gtk_signal_connect (GTK_OBJECT (dialog), "destroy",
-      gtkutil_null_this_var, &dialog);
-      while (dialog)
-         gtk_main_iteration ();
-   }
+  sess->gui = malloc (sizeof (struct session_gui));
+  memset (sess->gui, 0, sizeof (struct session_gui));
+  create_window (sess);
+  init_sess ();
 }
 
 void
@@ -312,7 +291,7 @@ fe_new_window_popup (char *target, struct server *serv)
    {
       sess = find_unused_session (serv);
       if (!sess)
-         sess = new_session (serv, 0);
+         sess = new_session (serv);
    }
    if (sess)
    {
@@ -422,12 +401,6 @@ fe_print_text (struct session *sess, char *text)
       sess->new_data = TRUE;
       gtk_widget_set_style (sess->gui->changad, redtab_style);
    }
-}
-
-void
-fe_beep (void)
-{
-   gdk_beep ();
 }
 
 char *

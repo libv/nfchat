@@ -17,7 +17,6 @@
  */
 
 #include <stdio.h>
-/* #include "themes.h" */
 #include "../common/xchat.h"
 #include "fe-gtk.h"
 #include "../common/util.h"
@@ -36,13 +35,10 @@ extern struct xchatprefs prefs;
 GdkPixmap *op_pixmap, *voice_pixmap;
 GdkBitmap *op_mask_bmp, *voice_mask_bmp;
 
-#define THEME_OP_ICON 1
-#define THEME_VOICE_ICON 2
-
 /*
  * create_pixmap_from_data [STATIC]
  *
- * Called from theme_pixmap and uses IMLIB or Gtk functions to render images
+ * uses IMLIB or Gtk functions to render images
  *
  */
 static GdkPixmap *
@@ -63,33 +59,13 @@ create_pixmap_from_data (GtkWidget *window, GdkBitmap **mask, GtkWidget *style_w
   return(pixmap);
 }
 
-/*
- * theme_pixmap [PUBLIC]
- *
- * Called from each function which has themeable pixmaps
- *
- */
-GdkPixmap *
-theme_pixmap (GtkWidget *window, GdkBitmap **mask, GtkWidget *style_widget, int theme)
-{
-  switch(theme) {
-  case THEME_OP_ICON:
-    return (create_pixmap_from_data (window, mask, style_widget, op_xpm));
-  case THEME_VOICE_ICON:
-    return (create_pixmap_from_data (window, mask, style_widget, voice_xpm));
-  default:
-    return (NULL);
-  }
-}
-
-
 void
 init_userlist_xpm (struct session *sess)
 {
-   op_pixmap = theme_pixmap (sess->gui->window, &op_mask_bmp, 
-			     sess->gui->window, THEME_OP_ICON);
-   voice_pixmap = theme_pixmap (sess->gui->window, &voice_mask_bmp, 
-				sess->gui->window, THEME_VOICE_ICON);
+  op_pixmap = create_pixmap_from_data (sess->gui->window, &op_mask_bmp, 
+			     sess->gui->window, op_xpm);
+  voice_pixmap = create_pixmap_from_data (sess->gui->window, &voice_mask_bmp, 
+				sess->gui->window, voice_xpm);
 }
 
 void

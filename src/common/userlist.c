@@ -63,30 +63,6 @@ nick_cmp_az_ops (struct user *user1, struct user *user2)
    return strcasecmp (user1->nick, user2->nick);
 }
 
-int
-nick_cmp (struct user *user1, struct user *user2)
-{
-   switch (prefs.userlist_sort)
-   {
-      case 0:
-         return nick_cmp_az_ops (user1, user2);
-      case 1:
-         return strcasecmp (user1->nick, user2->nick);
-      case 2:
-         if (nick_cmp_az_ops (user1, user2) < 0)
-            return 1;
-         else
-            return -1;
-      case 3:
-         if (strcasecmp (user1->nick, user2->nick) < 0)
-            return 1;
-         else
-            return -1;
-      default:
-         return 1;
-   }
-}
-
 void
 clear_user_list (struct session *sess)
 {
@@ -254,7 +230,7 @@ userlist_insertname_sorted (struct session *sess, struct user *newuser)
    while (list)
    {
       user = (struct user *)list -> data;
-      if (nick_cmp (newuser, user) < 1)
+      if (nick_cmp_az_ops (newuser, user) < 1)
       {
          sess->userlist = g_slist_insert (sess->userlist, newuser, row);
          return row;

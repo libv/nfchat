@@ -25,10 +25,7 @@
 #define REFRESH_TIMEOUT 20
 #define WORDWRAP_LIMIT 24
 #define TINT_VALUE 195           /* 195/255 of the brightness. */
-#define MOTION_MONITOR 1         /* URL hilights. */
 #define MARGIN 2
-#undef USE_MITSHM                /* this causes problems on Solaris, plus it
-                                    doesn't seem to be a performance advantage */
 
 #include "../../config.h"
 #include <string.h>
@@ -121,8 +118,6 @@ gtk_xtext_init (GtkXText *xtext)
    xtext->reverse = FALSE;
    xtext->font = NULL;
    xtext->xfont = NULL;
-   xtext->error_function = NULL;
-   xtext->urlcheck_function = NULL;
    xtext->color_paste = FALSE;
    xtext->tint_red = xtext->tint_green = xtext->tint_blue = TINT_VALUE;
 
@@ -208,8 +203,6 @@ gtk_xtext_new (int indent)
 
    xtext = gtk_type_new (gtk_xtext_get_type ());
    xtext->indent = indent;
-   xtext->wordwrap = FALSE;
-   xtext->double_buffer = TRUE;
 
    return GTK_WIDGET (xtext);
 }
@@ -310,11 +303,7 @@ gtk_xtext_realize (GtkWidget *widget)
    attributes.window_type = GDK_WINDOW_CHILD;
    attributes.event_mask = gtk_widget_get_events (widget) | 
           GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK
-#ifdef MOTION_MONITOR
-          | GDK_POINTER_MOTION_MASK | GDK_LEAVE_NOTIFY_MASK;
-#else
           | GDK_POINTER_MOTION_MASK;
-#endif
 
    attributes.visual = gtk_widget_get_visual (widget);
    attributes.colormap = gtk_widget_get_colormap (widget);
@@ -363,8 +352,7 @@ gtk_xtext_realize (GtkWidget *widget)
    XSetWindowBackgroundPixmap (xtext->display, xtext->drawable, None);
    XFillRectangle (xtext->display, xtext->drawable, xtext->xbgc, 0, 0, w, h);
  
-   if (!xtext->double_buffer)
-      xtext->draw_buf = xtext->drawable;
+   xtext->draw_buf = xtext->drawable;
 
    xtext->indent = 1;
 }
@@ -635,26 +623,15 @@ gtk_xtext_selection_draw (GtkXText *xtext, int draw)
       return;
 
    if (draw)
-   {
-      if (xtext->double_buffer)
-      {
-         if (xtext->io_tag == -1)
-            xtext->io_tag = gtk_timeout_add (REFRESH_TIMEOUT,
-                                  (GtkFunction)gtk_xtext_adjustment_timeout,
-                                          xtext);
-      } else
-      {
-         if (xtext->io_tag == -1)
-         {
-            xtext->old_ent_start = xtext->last_ent_start;
-            xtext->old_ent_end = xtext->last_ent_end;
-            xtext->io_tag = gtk_timeout_add (REFRESH_TIMEOUT,
-                                  (GtkFunction)gtk_xtext_entrender_timeout,
-                                          xtext);
-         }
-     }
-   }
-
+     if (xtext->io_tag == -1)
+       {
+	   xtext->old_ent_start = xtext->last_ent_start;
+	   xtext->old_ent_end = xtext->last_ent_end;
+	   xtext->io_tag = gtk_timeout_add (REFRESH_TIMEOUT,
+		      (GtkFunction)gtk_xtext_entrender_timeout,
+					    xtext);
+	 }
+   
    xtext->last_ent_start = ent_start;
    xtext->last_ent_end = ent_end;
    xtext->last_offset_start = offset_start;
@@ -790,32 +767,13 @@ gtk_xtext_get_word (GtkXText *xtext, int x, int y, textentry **ret_ent, int *ret
    return word;
 }
 
-static gint
-gtk_xtext_leave_notify (GtkWidget *widget, GdkEventCrossing *event)
-{
-#ifdef MOTION_MONITOR
-   GtkXText *xtext = GTK_XTEXT (widget);
-
-   if (xtext->cursor_hand)
-   {
-      xtext->hilight_start = -1;
-      xtext->hilight_end = -1;
-      xtext->cursor_hand = FALSE;
-      gdk_window_set_cursor (widget->window, 0);
-      gtk_xtext_render_ents (xtext, xtext->hilight_ent, NULL, xtext->adj->value, FALSE);
-   }
-#endif
-   return FALSE;
-}
 
 static gint
 gtk_xtext_motion_notify (GtkWidget      *widget,
 			                GdkEventMotion *event)
 {
    GtkXText *xtext = GTK_XTEXT (widget);
-   int tmp, x, y, offset, len;
-   char *word;
-   textentry *word_ent, *old_ent;
+   int tmp, x, y;
 
    gdk_window_get_pointer (widget->window, &x, &y, 0);
 
@@ -853,44 +811,6 @@ gtk_xtext_motion_notify (GtkWidget      *widget,
       gtk_xtext_selection_update (xtext, event);
       return FALSE;
    }
-
-#ifdef MOTION_MONITOR
-
-   if (xtext->urlcheck_function == NULL)
-      return FALSE;
-
-   word = gtk_xtext_get_word (xtext, x, y, &word_ent, &offset, &len);
-   if (word)
-   {
-      if (xtext->urlcheck_function (xtext, word) > 0)
-      {
-         free (word);
-         if (!xtext->cursor_hand ||
-             xtext->hilight_ent != word_ent ||
-             xtext->hilight_start != offset ||
-             xtext->hilight_end != offset + len)
-         {
-            xtext->cursor_hand = TRUE;
-            gdk_window_set_cursor (GTK_WIDGET (xtext)->window, xtext->hand_cursor);
-            old_ent = xtext->hilight_ent;
-            xtext->hilight_ent = word_ent;
-            xtext->hilight_start = offset;
-            xtext->hilight_end = offset + len;
-            gtk_xtext_render_ents (xtext, old_ent, word_ent, xtext->adj->value, FALSE);
-            /*if (xtext->io_tag == -1)
-               xtext->io_tag = gtk_timeout_add (REFRESH_TIMEOUT,
-                                  (GtkFunction)gtk_xtext_adjustment_timeout,
-                                          xtext);*/
-         }
-         return FALSE;
-      }
-      free (word);
-   }
-
-   gtk_xtext_leave_notify (widget, NULL);
-
-#endif
-
    return FALSE;
 }
 
@@ -1162,7 +1082,6 @@ gtk_xtext_class_init (GtkXTextClass *class)
    widget_class->button_press_event = gtk_xtext_button_press;
    widget_class->button_release_event = gtk_xtext_button_release;
    widget_class->motion_notify_event = gtk_xtext_motion_notify;
-   widget_class->leave_notify_event = gtk_xtext_leave_notify;
    widget_class->draw = gtk_xtext_draw;
    widget_class->expose_event = gtk_xtext_expose;
 
@@ -1291,59 +1210,58 @@ gtk_xtext_render_flush (GtkXText *xtext, int x, int y, char *str, int len, GC gc
       return 0;
 
    if (xtext->fonttype == FONT_1BYTE)
-      str_width = gtk_xtext_text_width_simple (xtext, str, len);
+     str_width = gtk_xtext_text_width_simple (xtext, str, len);
    else
-      str_width = gdk_text_width (xtext->font, str, len);
-
+     str_width = gdk_text_width (xtext->font, str, len);
+   
    if (!xtext->backcolor && xtext->pixmap)
-   {
-      dofill = FALSE;
-      /* draw the background pixmap behind the text - CAUSES FLICKER HERE !! */
-      if (!xtext->double_buffer)
-      XFillRectangle (xtext->display, xtext->draw_buf, xtext->xbgc,
-                      x, y - xtext->font->ascent, str_width, xtext->fontsize);
-   } else
-      dofill = TRUE;
-
+     {
+       dofill = FALSE;
+       /* draw the background pixmap behind the text - CAUSES FLICKER HERE !! */
+       XFillRectangle (xtext->display, xtext->draw_buf, xtext->xbgc,
+		       x, y - xtext->font->ascent, str_width, xtext->fontsize);
+     } else
+       dofill = TRUE;
+   
    switch (xtext->fonttype)
-   {
-      case FONT_1BYTE:
-         if (dofill)
-            XDrawImageString (xtext->display, xtext->draw_buf, gc, x, y, str, len);
-         else
-            XDrawString (xtext->display, xtext->draw_buf, gc, x, y, str, len);
-         if (xtext->bold)
-            XDrawString (xtext->display, xtext->draw_buf, gc, x+1, y, str, len);
-         break;
-
-      case FONT_2BYTE:
-         len /= 2;
-         if (dofill)
-            XDrawImageString16 (xtext->display, xtext->draw_buf,
-		                          gc, x, y, (XChar2b *)str, len);
-         else
-            XDrawString16 (xtext->display, xtext->draw_buf,
-		                     gc, x, y, (XChar2b *)str, len);
-         if (xtext->bold)
-            XDrawString16 (xtext->display, xtext->draw_buf,
-		                     gc, x+1, y, (XChar2b *)str, len);
-         break;
-
+     {
+     case FONT_1BYTE:
+       if (dofill)
+	 XDrawImageString (xtext->display, xtext->draw_buf, gc, x, y, str, len);
+       else
+	 XDrawString (xtext->display, xtext->draw_buf, gc, x, y, str, len);
+       if (xtext->bold)
+	 XDrawString (xtext->display, xtext->draw_buf, gc, x+1, y, str, len);
+       break;
+       
+     case FONT_2BYTE:
+       len /= 2;
+       if (dofill)
+	 XDrawImageString16 (xtext->display, xtext->draw_buf,
+			     gc, x, y, (XChar2b *)str, len);
+       else
+	 XDrawString16 (xtext->display, xtext->draw_buf,
+			gc, x, y, (XChar2b *)str, len);
+       if (xtext->bold)
+	 XDrawString16 (xtext->display, xtext->draw_buf,
+			gc, x+1, y, (XChar2b *)str, len);
+       break;
+       
       case FONT_SET:
-         if (dofill)
-            XmbDrawImageString (xtext->display, xtext->draw_buf,
-                                (XFontSet)xtext->xfont, gc, x, y, str, len);
-         else
-            XmbDrawString (xtext->display, xtext->draw_buf,
-                           (XFontSet)xtext->xfont, gc, x, y, str, len);
+	if (dofill)
+	  XmbDrawImageString (xtext->display, xtext->draw_buf,
+			      (XFontSet)xtext->xfont, gc, x, y, str, len);
+	else
+	  XmbDrawString (xtext->display, xtext->draw_buf,
+			 (XFontSet)xtext->xfont, gc, x, y, str, len);
          if (xtext->bold)
-            XmbDrawString (xtext->display, xtext->draw_buf,
-                           (XFontSet)xtext->xfont, gc, x+1, y, str, len);
-   }
+	   XmbDrawString (xtext->display, xtext->draw_buf,
+			  (XFontSet)xtext->xfont, gc, x+1, y, str, len);
+     }
 
    if (xtext->underline)
-      XDrawLine (xtext->display, xtext->draw_buf, gc, x, y+1, x + str_width, y+1);
-
+     XDrawLine (xtext->display, xtext->draw_buf, gc, x, y+1, x + str_width, y+1);
+   
    return str_width;
 }
 
@@ -1406,11 +1324,10 @@ gtk_xtext_render_str (GtkXText *xtext, int y, textentry *ent, char *str, int len
    }
 #endif
 
-   if (!xtext->double_buffer)
-     /* draw background to the left of the text */
-     /* fill the indent area with background gc */
-     XFillRectangle (xtext->display, xtext->draw_buf, xtext->xbgc,
-		     0, y - xtext->font->ascent, indent, xtext->fontsize);
+   /* draw background to the left of the text */
+   /* fill the indent area with background gc */
+   XFillRectangle (xtext->display, xtext->draw_buf, xtext->xbgc,
+		   0, y - xtext->font->ascent, indent, xtext->fontsize);
   
    while (i < len)
    {
@@ -1581,15 +1498,13 @@ gtk_xtext_render_str (GtkXText *xtext, int y, textentry *ent, char *str, int len
    if (j)
       x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc);
 
-   if (!xtext->double_buffer)
-   {
+
       /* draw separator now so it doesn't appear to flicker */
       gtk_xtext_draw_sep (xtext, y + 1);
       /* draw background to the right of the text */
       XFillRectangle (xtext->display, xtext->draw_buf, xtext->xbgc,
                       x, y - xtext->font->ascent, (win_width + MARGIN) - x,
                       xtext->fontsize);
-   }
 }
 
 /* get the desktop/root window - thanks Eterm */
@@ -1767,12 +1682,9 @@ gtk_xtext_load_trans (GtkXText *xtext)
    rootpix = get_pixmap_prop (GDK_WINDOW_XWINDOW(widget->window));
    if (rootpix == None)
    {
-      if (xtext->error_function)
-         xtext->error_function (
-                                "Unable to get root window pixmap!\n\n"
-                                "You may need to use Esetroot or Gnome\n"
-                                "control-center to set your background.\n"
-                               );
+     fprintf(stderr,  "Unable to get root window pixmap!\n\n"
+	     "You may need to use Esetroot or Gnome\n"
+	     "control-center to set your background.\n");
       xtext->transparent = FALSE;
       return;
    }
@@ -1835,12 +1747,12 @@ startrl:
    str_width += indent;
 
    tmp = 0;
-   while (str_width > width || (!is_del(str[len]) && xtext->wordwrap))
+   while (str_width > width || !is_del(str[len]))
    {
       if (str_width <= width && !tmp)
          tmp = len;
       len--;
-      if (xtext->wordwrap && tmp - len > WORDWRAP_LIMIT)
+      if (tmp - len > WORDWRAP_LIMIT)
       {
          len = tmp;
          str_width = gtk_xtext_text_width (xtext, str, len) + indent;
@@ -1859,7 +1771,7 @@ startrl:
       str_width = gtk_xtext_text_width (xtext, str, len) + indent;
    }
 
-   if (xtext->wordwrap && str[len] == ' ')
+   if (str[len] == ' ')
       len++;
 
    if (!subline)
@@ -2111,12 +2023,12 @@ gtk_xtext_lines_taken (GtkXText *xtext, textentry *ent)
       if (str_width <= win_width)
          break;
       tmp = 0;
-      while (str_width > win_width || (!is_del(str[len]) && xtext->wordwrap))
+      while (str_width > win_width || !is_del(str[len]))
       {
          if (str_width <= win_width && !tmp)
             tmp = len;
          len--;
-         if (xtext->wordwrap && tmp - len > WORDWRAP_LIMIT)
+         if (tmp - len > WORDWRAP_LIMIT)
          {
             len = tmp;
             str_width = gtk_xtext_text_width (xtext, str, len) + indent;
@@ -2132,7 +2044,7 @@ gtk_xtext_lines_taken (GtkXText *xtext, textentry *ent)
       if (len == orig_len)
          break;
 
-      if (xtext->wordwrap && str[len] == ' ')
+      if (str[len] == ' ')
          len++;
 
       str += len;
@@ -2255,12 +2167,6 @@ gtk_xtext_render_ents (GtkXText *xtext, textentry *enta, textentry *entb, int st
    int subline;
    int drawing = FALSE;
 
-   if (xtext->double_buffer)
-   {
-      gtk_xtext_render_page (xtext, startline);
-      return;
-   }
-
    if (xtext->indent < MARGIN)
       xtext->indent = MARGIN;      /* 2 pixels is our left margin */
 
@@ -2341,65 +2247,6 @@ gtk_xtext_render_ents (GtkXText *xtext, textentry *enta, textentry *entb, int st
    gtk_xtext_draw_sep (xtext, -1);
 }
 
-#ifdef USE_MITSHM
-
-static void
-gtk_xtext_kill_buffer (GtkXText *xtext)
-{
-   if (xtext->img != NULL)
-   {
-      XSync (xtext->display, False);
-      XShmDetach (xtext->display, &xtext->shminfo);
-      XDestroyImage (xtext->img);
-      shmdt (xtext->shminfo.shmaddr);
-   }
-   XFreePixmap (xtext->display, xtext->tmp_pix);
-}
-
-static Pixmap
-gtk_xtext_create_buffer (GtkXText *xtext, int width, int height)
-{
-   int major, minor;
-   Bool pixmaps, XSh;
-
-   XSh = XShmQueryVersion (xtext->display, &major, &minor, &pixmaps);
-   if (XSh != True || pixmaps != True)
-   {
-/*      fprintf (stderr, "** NO MIT-SHM!\n");*/
-      xtext->img = NULL;
-      return XCreatePixmap (xtext->display, xtext->drawable,
-                            width, height, xtext->depth);
-   }
-
-/*   fprintf (stderr, "** USING MIT-SHM!\n");*/
-
-   xtext->img = XShmCreateImage (xtext->display,
-                  DefaultVisual(xtext->display, DefaultScreen(xtext->display)),
-                          xtext->depth, ZPixmap,
-                          NULL, &xtext->shminfo, width, height);
-/*   printf ("img: %p\n", xtext->img);*/
-
-   /* allocate shared memory segment */
-   xtext->shminfo.shmid = shmget (IPC_PRIVATE, xtext->img->bytes_per_line *
-                                  xtext->img->height, IPC_CREAT|0777);
-/*   printf ("shmid: 0x%x\n", xtext->shminfo.shmid);*/
-
-   /* attach this memory to our process */
-   xtext->shminfo.readOnly = False;
-   xtext->shminfo.shmaddr = xtext->img->data = shmat (xtext->shminfo.shmid, 0, 0);
-/*   printf ("shmaddr: %p\n", xtext->shminfo.shmaddr);*/
-
-   XShmAttach (xtext->display, &xtext->shminfo);
-
-   shmctl (xtext->shminfo.shmid, IPC_RMID, 0);
-
-   return XShmCreatePixmap (xtext->display, xtext->drawable,
-                            xtext->shminfo.shmaddr, &xtext->shminfo,
-                            width, height, xtext->depth);
-}
-
-#endif
-
 /* render a whole page/window, starting from 'startline' */
 
 static void
@@ -2433,20 +2280,6 @@ gtk_xtext_render_page (GtkXText *xtext, int startline)
    xtext->last_ent = ent;
    xtext->last_subline = subline;
 
-   if (xtext->double_buffer)
-   {
-#ifdef USE_MITSHM
-      xtext->tmp_pix = gtk_xtext_create_buffer (xtext, width+MARGIN, height);
-#else
-      xtext->tmp_pix = XCreatePixmap (xtext->display, xtext->drawable,
-                                      width+MARGIN, height, xtext->depth);
-#endif
-      xtext->draw_buf = xtext->tmp_pix;
-      /* render the backdrop */
-      XFillRectangle (xtext->display, xtext->draw_buf, xtext->xbgc,
-                      0, 0, width+MARGIN, height);
-   }
-
    while (ent)
    {
       gtk_xtext_reset (xtext, FALSE, TRUE);
@@ -2459,30 +2292,13 @@ gtk_xtext_render_page (GtkXText *xtext, int startline)
       ent = ent->next;
    }
 
-   if (!xtext->double_buffer)
-   {
-      line = (xtext->fontsize * line);
-      /* fill any space below the last line with our background GC */
-      XFillRectangle (xtext->display, xtext->draw_buf, xtext->xbgc,
-                      0, line, width + MARGIN, height - line);
-   }
+   line = (xtext->fontsize * line);
+   /* fill any space below the last line with our background GC */
+   XFillRectangle (xtext->display, xtext->draw_buf, xtext->xbgc,
+		   0, line, width + MARGIN, height - line);
 
    /* draw the separator line */
    gtk_xtext_draw_sep (xtext, -1);
-
-   if (xtext->double_buffer)
-   {
-      /* send our double buffer to the actual window */
-#ifdef USE_MITSHM
-      XShmPutImage (xtext->display, xtext->drawable, xtext->xfgc,
-                    xtext->img, 0, 0, 0, 0, width + MARGIN, height, False);
-      gtk_xtext_kill_buffer (xtext);
-#else
-      XCopyArea (xtext->display, xtext->tmp_pix, xtext->drawable, xtext->xfgc,
-                 0, 0, width + MARGIN, height, 0, 0);
-      XFreePixmap (xtext->display, xtext->tmp_pix);
-#endif
-   }
 }
 
 void

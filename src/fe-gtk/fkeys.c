@@ -85,7 +85,7 @@ struct key_action
    char *help;
 };
 
-int key_load_kbs (char *);
+int key_load_kbs ();
 void key_load_defaults ();
 
 static int key_action_handle_command (GtkWidget * wid, GdkEventKey * evt, char *d1,
@@ -129,11 +129,11 @@ void
 key_init ()
 {
    keys_root = NULL;
-   if (key_load_kbs (NULL) == 1)
+   if (key_load_kbs () == 1)
    {
       key_load_defaults ();
-      if (key_load_kbs (NULL) == 1)
-         gtkutil_simpledialog ("There was an error loading key bindings configuration");
+      if (key_load_kbs () == 1)
+         fprintf(stderr, "Error: There was an error loading key bindings configuration");
    }
 }
 
@@ -314,7 +314,7 @@ key_load_kbs_helper_mod (char *in, int *out)
 /* *** Warning, Warning! - massive function ahead! --AGL */
 
 int
-key_load_kbs (char *filename)
+key_load_kbs (void)
 {
    char *buf, *ibuf;
    struct stat st;
@@ -322,13 +322,10 @@ key_load_kbs (char *filename)
    int fd, len, pnt = 0, state = 0, n;
 
    buf = malloc (1000);
-   if (filename == NULL)
-      snprintf (buf, 1000, "%s/keybindings.conf", get_xdir ());
-   else
-      strcpy (buf, filename);
-
+   snprintf (buf, 1000, "%s/keybindings.conf", get_xdir ());
    fd = open (buf, O_RDONLY | OFLAGS);
    free (buf);
+
    if (fd < 0)
       return 1;
    if (fstat (fd, &st) != 0)
@@ -370,10 +367,7 @@ key_load_kbs (char *filename)
             if (last)
                last->next = NULL;
             free (ibuf);
-            ibuf = malloc (1024);
-            snprintf (ibuf, 1024, "Unknown keyname %s in key bindings config file\nLoad aborted, please fix ~/.xchat/keybindings.conf\n", buf);
-            gtkutil_simpledialog (ibuf);
-            free (ibuf);
+            fprintf (stderr, "Error: Unknown keyname %s in key bindings config file\nLoad aborted, please fix ~/.nfchat/keybindings.conf\n", buf);
             return 2;
          }
          kb->keyname = gdk_keyval_name (n);
@@ -406,10 +400,7 @@ key_load_kbs (char *filename)
             if (last)
                last->next = NULL;
             free (ibuf);
-            ibuf = malloc (1024);
-            snprintf (ibuf, 1024, "Unknown action %s in key bindings config file\nLoad aborted, Please fix ~/.xchat/keybindings\n", buf);
-            gtkutil_simpledialog (ibuf);
-            free (ibuf);
+            fprintf (stderr, "Error: Unknown action %s in key bindings config file\nLoad aborted, Please fix ~/.nfchat/keybindings.conf\n", buf);
             return 3;
          }
          state = KBSTATE_DT1;
@@ -425,10 +416,7 @@ key_load_kbs (char *filename)
          if (buf[0] != 'D')
          {
             free (ibuf);
-            ibuf = malloc (1024);
-            snprintf (ibuf, 1024, "Expecting Data line (beginning Dx{:|!}) but got:\n%s\n\nLoad aborted, Please fix ~/.xchat/keybindings\n", buf);
-            gtkutil_simpledialog (ibuf);
-            free (ibuf);
+            fprintf (stderr, "Error: Expecting Data line (beginning Dx{:|!}) but got:\n%s\n\nLoad aborted, Please fix ~/.nfchat/keybindings.nf\n", buf);
             return 4;
          }
          switch (buf[1])
@@ -485,19 +473,15 @@ key_load_kbs (char *filename)
          continue;
       }
    }
+   free (ibuf);
    if (last)
       last->next = NULL;
-   free (ibuf);
    return 0;
 
  corrupt_file:
    if (getenv ("XCHAT_DEBUG"))
       abort ();
-   free (ibuf);
-   buf = malloc (1024);
-   snprintf (buf, 1024, "Key bindings config file is corrupt, load aborted\nPlease fix ~/.xchat/keybindings.conf\n");
-   gtkutil_simpledialog (buf);
-   free (buf);
+   fprintf (stderr, "Error: Key bindings config file is corrupt, load aborted\nPlease fix ~/.nfchat/keybindings.conf\n");
    return 5;
 }
 
