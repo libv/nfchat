@@ -66,6 +66,20 @@ NF-chat;
      - removed from gtkutil.c/h
        - gtkutil_window_new, gtkutil_dialog_new, gtkutil_button
          gtkutil_label_new, gtkutil_entry_new, gtkutil_set_icon
+   e)
+     - removed from userlistgui.c
+       - dcc_send, *theme_pixmap
+     - removed from palette.c 
+       - prefs, *sess_list, *channelwin_style
+     - removed from xtext.c
+       - gtk_xtext_thaw, gtk_xtext_freeze, gtk_xtext_search
+     - removed the logo from fe-gtk.c and edited the message 
+       from init_sess
+  ### prefs.newtabstofront
+     - removed prefs.newtabstofront from create_window/maingui_new_tab
+       of maingui.c
+     - removed function maingui_pagetofront
+   
 
 0.2.4;
 """"""

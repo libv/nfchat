@@ -135,7 +135,6 @@ static void
 init_sess (void)
 {
    char buf[512];
-   time_t tim = time (0);
    struct session *sess = sess_list->data;
 
    if (done_intro)
@@ -144,46 +143,13 @@ init_sess (void)
 
    init_userlist_xpm (sess_list->data);
 
-   PrintText (sess,
-"\n"
-"\00314\002     #      #####    \002\n"
-"\00314\002     ##    ####  ###\002\n"
-"\00314\002     ###   ###  #####\002\n"
-"\00314\002     #### ###  ###       ######## #### #### ######### ##########\002\n"
-"\00314\002     #######  ###        ######## #### #### ######### ##########\002\n"
-"\00314\002    ########  ##### #### ####     ######### #### ####    ####\002\n"
-"\00314\002   #### ####  ##### #### ####     #### #### #########    ####\002\n"
-"\00314\002  #####  ###  ###        ######## #### #### #### ####    ####\002\n"
-"\00314\002 #####    ##  ###        ######## #### #### #### ####    ####\002\n"
-"\n");
-
    snprintf (buf, sizeof buf,
-"   \00313xc\0032! \00310"VERSION"\017 on %s \017GTK\00310 %d.%d.%d\n"
-"\n"
-"   \00310Launched\0032: \017%s\n",
-      get_cpu_str (1), gtk_major_version, gtk_minor_version, gtk_micro_version,
-      ctime (&tim));
+   "Welcome to \002NF\002-Chat %s; An irc-client for dancings, clubs and discos.\n"
+   "Written by \0032_Death_\003 for \0034NetForce\003 (\002www.netforce.be\002)\n\n\n",
+   VERSION );
+
    PrintText (sess, buf);
 
-   strcpy (buf, "   \00310Features\0032: \017");
-#ifdef USE_IMLIB
-   strcat (buf, "Imlib ");
-#endif
-#ifdef USE_PERL
-   strcat (buf, "Perl ");
-#endif
-#ifdef USE_PLUGIN
-   strcat (buf, "Plugin ");
-#endif
-#ifdef ENABLE_NLS
-   strcat (buf, "NLS ");
-#endif
-#ifdef SOCKS
-   strcat (buf, "Socks5\n\n");
-#else
-   strcat (buf, "\n\n");
-#endif
-   PrintText (sess, buf);
    while (gtk_events_pending ())
       gtk_main_iteration ();
 }
@@ -221,9 +187,7 @@ fe_new_window (struct session *sess)
      memset (sess->gui, 0, sizeof (struct session_gui));
      create_window (sess);
      init_sess ();
-   } /* this shouldnt be called at all */
-   else
-       puts ("fe asked for a dialog???");
+   }
 }
 
 void

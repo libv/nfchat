@@ -30,11 +30,9 @@
 #include "../pixmaps/op.xpm"
 #include "../pixmaps/voice.xpm"
 
-extern GdkColor colors[];
+extern GdkColor colors[]; 
 extern struct xchatprefs prefs;
-extern int notify_isnotify (struct session *sess, char *name);
-extern void dcc_send (struct session *sess, char *tbuf, char *to, char *file);
-extern GdkPixmap *theme_pixmap (GtkWidget *window, GdkBitmap **mask, GtkWidget *style_widget, int theme);
+extern int notify_isnotify (struct session *sess, char *name); 
 
 GdkPixmap *op_pixmap, *voice_pixmap;
 GdkBitmap *op_mask_bmp, *voice_mask_bmp;

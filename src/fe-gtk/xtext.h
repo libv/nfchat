@@ -184,9 +184,6 @@ void       gtk_xtext_set_palette (GtkXText *xtext, GdkColor palette[]);
 void       gtk_xtext_remove_lines (GtkXText *xtext, int lines, int refresh);
 gchar*     gtk_xtext_get_chars   (GtkXText *xtext);
 void       gtk_xtext_refresh     (GtkXText *xtext);
-void       gtk_xtext_thaw        (GtkXText *xtext);
-void       gtk_xtext_freeze      (GtkXText *xtext);
-void*      gtk_xtext_search      (GtkXText *xtext, char *text, void *start);
 char*      gtk_xtext_strip_color (unsigned char *text, int len);
 
 #endif

@@ -313,13 +313,6 @@ gui_new_tab_callback (GtkWidget * widget, GtkNotebookPage * nbpage, guint page)
    current_tab = 0;
 }
 
-int
-maingui_pagetofront (int page)
-{
-   gtk_notebook_set_page (GTK_NOTEBOOK (main_book), page);
-   return 0;
-}
-
 static void
 gui_mainbook_invalid (GtkWidget * w, GtkWidget * main_window)
 {
@@ -355,7 +348,7 @@ static void
 maingui_userlist_selected (GtkWidget *clist, gint row, gint column,
                            GdkEventButton *even)
 {
-gtk_clist_unselect_all (GTK_CLIST (clist));
+   gtk_clist_unselect_all (GTK_CLIST (clist));
 }
 
 void
@@ -586,13 +579,6 @@ create_window (struct session *sess)
       if (!normaltab_style)
          maingui_init_styles (gtk_widget_get_style (sess->gui->changad));
 
-      if (prefs.newtabstofront && !justopened)
-      {
-         maingui_pagetofront (gtk_notebook_page_num (GTK_NOTEBOOK (main_book), sess->gui->window));
-         sess->new_data = TRUE;
-         gui_new_tab (sess);
-      }
-
       /* make switching tabs super smooth! */
       gtk_widget_realize (rightpane);
       gdk_window_set_background (rightpane->window,
@@ -630,7 +616,7 @@ maingui_box_close (GtkWidget *wid, struct relink_data *rld)
 GtkWidget *
 maingui_new_tab (char *title, char *name, void *close_callback, void *userdata)
 {
-   int page;
+   /* int page; */
    GtkWidget *wid, *box, *label, *topbox;
    struct relink_data *rld = g_new0 (struct relink_data, 1);
    char *buf;
@@ -656,12 +642,6 @@ maingui_new_tab (char *title, char *name, void *close_callback, void *userdata)
    gtk_widget_show (label);
 
    gtk_notebook_append_page (GTK_NOTEBOOK (main_book), box, label);
-
-   if (prefs.newtabstofront)
-   {
-      page = gtk_notebook_page_num (GTK_NOTEBOOK (main_book), box);
-      maingui_pagetofront (page);
-   }
 
    rld->win = NULL;
    rld->stitle = name;

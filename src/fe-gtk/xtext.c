@@ -1197,22 +1197,6 @@ gtk_xtext_get_type ()
    return xtext_type;
 }
 
-/*void
-gtk_xtext_thaw (GtkXText *xtext)
-{
-   if (xtext->frozen > 0)
-      xtext->frozen--;
-
-   if (xtext->frozen == 0)
-      gtk_xtext_render_page (xtext, xtext->adj->value);
-}
-
-void
-gtk_xtext_freeze (GtkXText *xtext)
-{
-   xtext->frozen++;
-}*/
-
 /* strip MIRC colors and other attribs. */
 
 char *
@@ -2603,54 +2587,6 @@ gtk_xtext_remove_lines (GtkXText *xtext, int lines, int refresh)
       gtk_xtext_calc_lines (xtext, TRUE);
       gtk_xtext_refresh (xtext);
    }
-}
-
-void *
-gtk_xtext_search (GtkXText *xtext, char *text, void *start)
-{
-   textentry *ent, *fent;
-   char *str;
-   int line;
-
-   gtk_xtext_selection_clear (xtext);
-
-   if (start)
-      ent = ((textentry*)start)->next;
-   else
-      ent = xtext->text_first;
-   while (ent)
-   {
-      if ((str = nocasestrstr (ent->str, text)))
-      {
-         ent->mark_start = str - ent->str;
-         ent->mark_end = ent->mark_start + strlen (text);
-         break;
-      }
-      ent = ent->next;
-   }
-
-   fent = ent;
-   ent = xtext->text_first;
-   line = 0;
-   while (ent)
-   {
-      line += ent->lines_taken;
-      ent = ent->next;
-      if (ent == fent)
-         break;
-   }
-   while (line > xtext->adj->upper - xtext->adj->page_size)
-      line--;
-
-   if (fent != 0)
-   {
-      xtext->adj->value = line;
-      xtext->scrollbar_down = FALSE;
-      gtk_adjustment_changed (xtext->adj);
-   }
-   gtk_xtext_render_page (xtext, xtext->adj->value);
-
-   return fent;
 }
 
 static int
