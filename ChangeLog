@@ -12,7 +12,23 @@ NF-chat;
      - removed redundant inits from those 2 functions
      - deleted menu.*
      - edited Makefile.am & 
-
+   b) cleanin up maingui.c
+     - removed externs
+       *button_list, *serv_list, userlist_dnd_*, *perl_sess
+     - removed inclusion of xchat_mini.xpm and deleted the file   
+     - removed maingui_set_icon function and calls from
+         create_window, gui_make_tab_window
+     - removed menu_sess from focus_in, maingui_configure,
+         maingui_configure, gui_new_tab, gui_new_tab_callback,
+         fe_session_callback
+     - removed maingui_configure and calls from
+          maingui_create_textlist, gui_make_tab_window
+     - removed externs key_action_insert, tcp_send_len, tcp_send
+     - removed function add_tip, textgad_get_focus_cb, 
+         my_window_set_title
+     - removed my_widget_get_style externs from 
+        fkeys.c, palette.c, textgui.c
+          
 0.2.4;
 """"""
    - made topic uneditable

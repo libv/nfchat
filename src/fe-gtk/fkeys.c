@@ -59,7 +59,7 @@ extern void history_down (GtkWidget * widget, struct history *his);
 extern int tab_nick_comp (GtkWidget * t, int shift);
 extern void nick_comp_chng (GtkWidget * t, int updown);
 extern void replace_handle (GtkWidget * wid);
-extern GtkStyle *my_widget_get_style (char *bg_pic);
+/* extern GtkStyle *my_widget_get_style (char *bg_pic); */
 
 
 /***************** Key Binding Code ******************/

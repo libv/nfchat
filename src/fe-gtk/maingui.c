@@ -30,7 +30,6 @@
 #include <ctype.h>
 #include "../common/xchat.h"
 #include "../common/fe.h"
-#include "../pixmaps/xchat_mini.xpm"
 #include "fe-gtk.h"
 #include "gtkutil.h"
 #ifdef USE_IMLIB
@@ -46,26 +45,17 @@ GtkStyle *redtab_style;
 GtkStyle *bluetab_style;
 GtkStyle *inputgad_style;
 
-extern struct session *current_tab, *menu_sess, *perl_sess;
+extern struct session *current_tab; 
 extern struct xchatprefs prefs;
 extern GSList *sess_list;
-extern GSList *button_list;
-extern GSList *serv_list;
 extern GtkStyle *channelwin_style;
-/* extern GdkFont *dialog_font_normal; */
 extern GdkFont *font_normal;
 extern gint xchat_is_quitting;
 
-extern int key_action_insert (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2, struct session *sess);
 extern int handle_multiline (struct session *sess, char *cmd, int history, int nocommand);
 extern int kill_session_callback (struct session *sess);
 extern gint gtk_kill_session_callback (GtkWidget *, struct session *sess);
 extern void palette_alloc (GtkWidget * widget);
-extern void userlist_dnd_drop (GtkWidget *, GdkDragContext *, gint, gint, GtkSelectionData *, guint, guint32, struct session *);
-extern int userlist_dnd_motion (GtkWidget *, GdkDragContext *, gint, gint, guint);
-extern int userlist_dnd_leave (GtkWidget *, GdkDragContext *, guint time);
-extern int tcp_send_len (struct server *serv, char *buf, int len);
-extern int tcp_send (struct server *serv, char *buf);
 extern void clear_user_list (struct session *sess);
 extern void handle_inputgad (GtkWidget * igad, struct session *sess);
 int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);
@@ -101,24 +91,6 @@ GdkColor colors[] =
    {0, 0xcccc, 0xcccc, 0xcccc}, /* 18 foreground (white) */
    {0, 0, 0, 0},                /* 19 background (black) */
 };
-
-static void
-maingui_set_icon (GtkWidget *win)
-{
-   static GdkPixmap *xchat_icon = NULL;
-   static GdkBitmap *xchat_bmp;
-
-   if (xchat_icon == NULL)
-   {
-#ifndef USE_IMLIB
-      xchat_icon = gdk_pixmap_create_from_xpm_d (win->window, &xchat_bmp,
-				       &win->style->bg[GTK_STATE_NORMAL], xchat_mini_xpm);
-#else
-      gdk_imlib_data_to_pixmap (xchat_mini_xpm, &xchat_icon, &xchat_bmp);
-#endif
-   }
-   gtkutil_set_icon (win->window, xchat_icon, xchat_bmp);
-}
 
 void
 fe_set_title (struct session *sess)
@@ -179,13 +151,6 @@ fe_set_nick (struct server *serv, char *newnick)
 }
 
 void
-add_tip (GtkWidget * wid, char *text)
-{
-   GtkTooltips *tip = gtk_tooltips_new ();
-   gtk_tooltips_set_tip (tip, wid, text, 0);
-}
-
-void
 focus_in (GtkWindow * win, GtkWidget * wid, struct session *sess)
 {
    if (!sess)
@@ -196,7 +161,6 @@ focus_in (GtkWindow * win, GtkWidget * wid, struct session *sess)
             gtk_widget_grab_focus (current_tab->gui->inputgad);
          else
             gtk_widget_grab_focus (current_tab->gui->textgad);
-         menu_sess = current_tab;
          if (!prefs.use_server_tab)
             current_tab->server->front_session = current_tab;
       }
@@ -208,7 +172,6 @@ focus_in (GtkWindow * win, GtkWidget * wid, struct session *sess)
          gtk_widget_grab_focus (sess->gui->inputgad);
       else
          gtk_widget_grab_focus (sess->gui->textgad);
-      menu_sess = sess;
    }
 }
 
@@ -218,6 +181,8 @@ show_and_unfocus (GtkWidget * wid)
    GTK_WIDGET_UNSET_FLAGS (wid, GTK_CAN_FOCUS);
    gtk_widget_show (wid);
 }
+
+/* could be moved to fe-gtk.c */
 
 GtkStyle *
 my_widget_get_style (char *bg_pic)
@@ -266,32 +231,6 @@ my_widget_get_style (char *bg_pic)
    return style;
 }
 
-int
-textgad_get_focus_cb (GtkWidget * wid, GdkEventKey * event, struct session *sess)
-{
-   char text[2] = " ";
-
-   if (event->keyval >= GDK_space && event->keyval <= GDK_asciitilde)
-   {
-      text[0] = event->keyval;
-      gtk_entry_append_text (GTK_ENTRY (sess->gui->inputgad), text);
-      gtk_widget_grab_focus (sess->gui->inputgad);
-      return FALSE;
-   } else if (event->keyval == GDK_BackSpace)
-   {
-      gtk_widget_grab_focus (sess->gui->inputgad);
-      return FALSE;
-   }
-   return TRUE;
-}
-
-void
-maingui_configure (GtkWidget *unused)
-{
-   if (menu_sess)
-      gtk_widget_queue_draw (menu_sess->gui->textgad);
-}
-
 static void
 maingui_create_textlist (struct session *sess, GtkWidget *leftpane)
 {
@@ -331,19 +270,12 @@ maingui_create_textlist (struct session *sess, GtkWidget *leftpane)
    sess->gui->vscrollbar = gtk_vscrollbar_new (GTK_XTEXT (sess->gui->textgad)->adj);
    gtk_box_pack_start (GTK_BOX (leftpane), sess->gui->vscrollbar, FALSE, FALSE, 1);
    show_and_unfocus (sess->gui->vscrollbar);
-
-   if (!sess->is_tab)
-      gtk_signal_connect_object (GTK_OBJECT (sess->gui->window),
-                                 "configure_event",
-                                 GTK_SIGNAL_FUNC (maingui_configure),
-                                 GTK_OBJECT (sess->gui->textgad));
 }
 
 static void
 gui_new_tab (session *sess)
 {
    current_tab = sess;
-   menu_sess = sess;
    if (!prefs.use_server_tab)
       sess->server->front_session = sess;
    fe_set_title (sess);
@@ -355,7 +287,6 @@ gui_new_tab (session *sess)
       sess->nick_said = FALSE;
       sess->new_data = FALSE;
       gtk_widget_set_rc_style (sess->gui->changad);
-      /*gtk_widget_set_style (sess->gui->changad, normaltab_style);*/
    }
 }
 
@@ -380,7 +311,6 @@ gui_new_tab_callback (GtkWidget * widget, GtkNotebookPage * nbpage, guint page)
    }
 
    current_tab = 0;
-   menu_sess = 0;
 }
 
 int
@@ -463,13 +393,10 @@ gui_make_tab_window (struct session *sess)
       main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
       gtk_widget_realize (main_window);
-      maingui_set_icon (main_window);
       gtk_signal_connect ((GtkObject *) main_window, "destroy",
                           GTK_SIGNAL_FUNC (gui_main_window_kill), sess);
       gtk_signal_connect ((GtkObject *) main_window, "focus_in_event",
                           GTK_SIGNAL_FUNC (focus_in), 0);
-      gtk_signal_connect_object (GTK_OBJECT (main_window), "configure_event",
-                          GTK_SIGNAL_FUNC (maingui_configure), 0);
       gtk_window_set_policy ((GtkWindow *) main_window, TRUE, TRUE, FALSE);
 
       main_box = gtk_vbox_new (0, 0);
@@ -540,7 +467,6 @@ create_window (struct session *sess)
 
       fe_set_title (sess);
       gtk_widget_realize (sess->gui->window);
-      maingui_set_icon (sess->gui->window);
       gtk_signal_connect ((GtkObject *) sess->gui->window, "destroy",
                           GTK_SIGNAL_FUNC (gtk_kill_session_callback), sess);
       gtk_signal_connect ((GtkObject *) sess->gui->window, "focus_in_event",
@@ -685,15 +611,6 @@ create_window (struct session *sess)
 
 }
 
-void
-my_window_set_title (GtkWidget *window, char *title)
-{
-   if (GTK_IS_WINDOW(window))
-      gtk_window_set_title (GTK_WINDOW(window), title);
-   else
-      gtk_label_set_text (gtk_object_get_user_data (GTK_OBJECT(window)), title);
-}
-
 static int
 maingui_box_close (GtkWidget *wid, struct relink_data *rld)
 {
@@ -771,8 +688,6 @@ fe_session_callback (struct session *sess)
       fe_progressbar_end (sess);
       sess->server->connecting = TRUE;
    }
-   if (menu_sess == sess && sess_list)
-      menu_sess = (struct session *) sess_list->data;
 
    if (sess->is_tab && main_book)
    {

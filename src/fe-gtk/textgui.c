@@ -47,7 +47,7 @@ extern int timecat (char *buf);
 extern void check_special_chars (char *);
 extern int buf_get_line (char *, char **, int *, int len);
 extern void show_and_unfocus (GtkWidget *);
-extern GtkStyle *my_widget_get_style (char *bg_pic);
+/* extern GtkStyle *my_widget_get_style (char *bg_pic); */
 #ifdef USE_PERL
 extern int perl_print (char *cmd, struct session *sess, char *b, char *c, char *d, char *e);
 #endif

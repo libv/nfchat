@@ -36,7 +36,7 @@ extern GtkStyle *channelwin_style;
 extern int cfg_get_int_with_result (char *cfg, char *var, int *result);
 extern int cfg_get_int (char *cfg, char *var);
 extern void cfg_put_int (int fh, int val, char *var);
-extern GtkStyle *my_widget_get_style (char *bg_pic);
+/* extern GtkStyle *my_widget_get_style (char *bg_pic); */
 extern char *get_xdir (void);
 extern int load_themeconfig (int themefile);
 extern int save_themeconfig (int themefile);
