@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "xchat.h"
-#include "plugin.h"
+#include "signals.h"
 #include "util.h"
 #include "fe.h"
 #include <sys/time.h>
@@ -67,10 +67,6 @@ extern void channel_action (struct session *sess, char *tbuf, char *chan, char *
 extern void user_new_nick (struct server *serv, char *outbuf, char *nick, char *newnick, int quiet);
 extern void channel_msg (struct server *serv, char *outbuf, char *chan, char *from, char *text, char fromme);
 extern void disconnect_server (struct session *sess, int sendquit, int err);
-extern int module_command (char *cmd, struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-extern int module_load (char *name, struct session *sess);
-extern int module_list (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-extern int module_unload (char *name, struct session *sess);
 
 #ifdef MEMORY_DEBUG
 extern int current_mem_usage;
@@ -242,7 +238,6 @@ static int cmd_join (struct session *sess, char *tbuf, char *word[], char *word_
 static int cmd_kick (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_kickban (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_lastlog (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-int cmd_loaddll (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_mdeop (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_mkick (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -260,7 +255,6 @@ static int cmd_query (struct session *sess, char *tbuf, char *word[], char *word
 static int cmd_quit (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_quote (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-int cmd_rmdll (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_say (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 int cmd_set (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_settab (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -301,10 +295,6 @@ struct commands cmds[] =
    {"KICK", cmd_kick, 1, 1, "/KICK <nick>, kicks the nick from the current channel (needs chanop)\n"},
    {"KICKBAN", cmd_kickban, 1, 1, "/KICKBAN <nick>, bans then kicks the nick from the current channel (needs chanop)\n"},
    {"LASTLOG", cmd_lastlog, 0, 0, "/LASTLOG <string>, searches for a string in the buffer.\n"},
-#ifdef USE_PLUGIN
-   {"LISTDLL", module_list, 0, 0, "/LISTDLL, Lists all currenly loaded plugins\n"},
-   {"LOADDLL", cmd_loaddll, 0, 0, "/LOADDLL <file>, loads a plugin\n"},
-#endif
    {"MDEOP", cmd_mdeop, 1, 1, "/MDEOP, Mass deop's all chanops in the current channel (needs chanop)\n"},
    {"MKICK", cmd_mkick, 1, 1, "/MKICK, Mass kicks everyone except you in the current channel (needs chanop)\n"},
    {"MKICKB", cmd_mkickb, 1, 1, "/MKICKB, Sets a ban of *@* and mass kicks everyone except you in the current channel (needs chanop)\n"},
@@ -322,9 +312,6 @@ struct commands cmds[] =
    {"QUIT", cmd_quit, 0, 0, "/QUIT [<reason>], disconnects from the current server\n"},
    {"QUOTE", cmd_quote, 1, 0, "/QUOTE <text>, sends the text in raw form to the server\n"},
    {"RECONNECT", cmd_reconnect, 0, 0, "/RECONENCT, reconnects to the current server\n"},
-#ifdef USE_PLUGIN
-   {"RMDLL", cmd_rmdll, 0, 0, "/RMDLL <dll name>, unloads a plugin\n"},
-#endif
    {"SAY", cmd_say, 0, 0, "/SAY <text>, sends the text to the object in the current window\n"},
    {"SET", cmd_set, 0, 0, "/SET <variable> [<value>]\n"},
    {"SETTAB", cmd_settab, 0, 0, ""},
@@ -1438,25 +1425,6 @@ cmd_lastlog (struct session *sess, char *tbuf, char *word[], char *word_eol[])
    return FALSE;
 }
 
-#ifdef USE_PLUGIN
-int
-cmd_loaddll (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-   char *file;
-   int i;
-
-   file = expand_homedir (word[2]);
-
-   i = module_load (file, sess);
-
-   free (file);
-
-   if (i == 0)
-      return TRUE;
-   return FALSE;
-}
-#endif
-
 int
 cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
@@ -1697,18 +1665,6 @@ cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
    return TRUE;
 }
-
-#ifdef USE_PLUGIN
-int
-cmd_rmdll (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-   char *dllname = find_word (pdi_buf, 2);
-
-   if (module_unload (dllname, sess) == 0)
-      return TRUE;
-   return FALSE;
-}
-#endif
 
 int
 cmd_say (struct session *sess, char *tbuf, char *word[], char *word_eol[])
@@ -2144,11 +2100,6 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
 
       if (EMIT_SIGNAL (XP_USERCOMMAND, sess, pdibuf, word, word_eol, NULL, 0) == 1)
          return TRUE;
-
-#ifdef USE_PLUGIN
-      if (module_command (pdibuf, sess, tbuf, word, word_eol) == 0)
-         return TRUE;
-#endif
 
       while (list)
       {

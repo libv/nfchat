@@ -51,11 +51,6 @@ AC_ARG_ENABLE(imlib,
 [  --disable-imlib         disable use of imlib],
         imlib=$enableval, imlib=yes)
 
-AC_ARG_ENABLE(plugin,
-[  --disable-plugin        disable plugin support],
-        plugin=$enableval, plugin=yes)
-
-
 dnl *********************************************************************
 dnl ** DEBUG ************************************************************
 dnl *********************************************************************
@@ -66,10 +61,8 @@ fi
 
 
 dnl *********************************************************************
-dnl ** GLIB/GLIB REPLACE ************************************************
+dnl ** GLIB *************************************************************
 dnl *********************************************************************
-
-glibreplace=no
 
 AC_PATH_PROG(glibpath, glib12-config)
 if test "_$glibpath" = _ ; then
@@ -97,12 +90,6 @@ else
   fi
   AC_DEFINE_UNQUOTED(PREFIX, "$prefix")
 fi
-
-if test "$glibreplace" = yes; then
-  AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl")
-  AC_DEFINE(USE_MYGLIB)
-fi
-
 
 dnl *********************************************************************
 dnl ** GTK **************************************************************
@@ -172,21 +159,6 @@ if test "$socks" = yes; then
       AC_DEFINE(SOCKS)
       LIBS="$LIBS -lsocks5"
     fi
-  fi
-fi
-
-
-dnl *********************************************************************
-dnl ** PLUGIN ***********************************************************
-dnl *********************************************************************
-
-if test "$plugin" = yes; then
-  AC_CHECK_FUNCS(dlopen, have_dl=yes)
-  if test "$have_dl" = yes; then
-    AC_CHECK_FUNCS(dlerror)
-    AC_DEFINE(USE_PLUGIN)
-  else
-    plugin=no
   fi
 fi
 
@@ -279,7 +251,6 @@ else
 fi
 
 echo Building with Glib replacement .. : $glibreplace
-echo Building with Plugin Support .... : $plugin
 echo Building with SOCKS5 ............ : $socks
 echo Building with Language Support .. : $USE_NLS
 echo Build System .................... : $system

@@ -26,7 +26,7 @@
 #include "cfgfiles.h"
 #include "util.h"
 #include "popup.h"
-#include "plugin.h"
+#include "signals.h"
 #include "../common/util.h"
 
 

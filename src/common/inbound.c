@@ -28,7 +28,7 @@
 #include <time.h>
 #include "xchat.h"
 #include "util.h"
-#include "plugin.h"
+#include "signals.h"
 #include "fe.h"
 
 /* xchat.c */

@@ -29,7 +29,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include "plugin.h"
+#include "signals.h"
 #include "fe.h"
 
 extern GSList *sess_list;

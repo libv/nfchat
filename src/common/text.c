@@ -28,7 +28,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include "cfgfiles.h"
-#include "plugin.h"
+#include "signals.h"
 #include "fe.h"
 #include "util.h"
 #include "themes-common.h"
@@ -239,7 +239,7 @@ setup_logging (struct session *sess)
    Make up a pevt_name_help struct (with a NULL at the end)
    add a struct to the end of te with,
    {"Name", help_struct, "Default text", num_of_args, NULL}
-   Open up plugin.h
+   Open up signal.h
    add one to NUM_XP
    add a #define XP_TE_NAME with a value of +1 on the last XP_
  */
@@ -1445,10 +1445,6 @@ printevent_setup ()
    sig->naddr = NULL;
    sig->callback = XP_CALLBACK (textsignal_handler);
    
-#ifdef USE_PLUGIN
-   sig->mod = NULL;
-#endif
-
    for (evt = 0; evt < NUM_XP; evt++)
    {
       if (!text_event (evt))

@@ -82,7 +82,20 @@ DECIDED: no perl or plugin will be used, this will be a lightweight client
         - removed perl comment from text.c
         - removed cmd_load/cmd_scpinfo/cmd_unloadall from outbound.c
    e) cleanin up plugin.c / USE_PLUGIN
-
+	- editing configure.in
+	- rmdir plugins
+	- removin USE_PERL from 
+		outbound.c (5x), plugin.c/h (4x/2x)
+	- removed module_list/load/command/unload cmd_loaddll/rmdll
+	  from outbound.c
+	- removed module_setup from xchat.c
+        - movin plugin.c/h to signals.c/h
+	- removed  MODULE_IFACE_VER,  XP_CALLNEXT/_ANDSET from signals.h
+	- signal_data is not extern, so removed from signals.h
+	- removed hook/unhook_signal from signals.c
+	- edited Makefile.am
+	- moved plugin.h include to signals.h in
+          ctcp/inbound/outbound/server/text/xchat
 
 0.3.0; Starting work on the actual client
 """"""

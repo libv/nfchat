@@ -1,8 +1,7 @@
 
-#ifndef PLUGIN_H
-#define PLUGIN_H
+#ifndef SIGNAL_H
+#define SIGNAL_H
 
-#define MODULE_IFACE_VER	2
 #define XP_CALLBACK(x)	( (int (*) (void *, void *, void *, void *, void *, char) ) x )
 
 #define XP_USERCOMMAND	0
@@ -130,33 +129,9 @@
 
 #define NUM_XP		   142
 
-
 #define	EMIT_SIGNAL(s, a, b, c, d, e, f) (fire_signal(s, a, b, c, d, e, f))
-/* #define XP_CALLNEXT(s, a, b, c, d, e, f)  if (s != NULL) return s(a, b, c, d, e, f); return 0; */
-/* #define XP_CALLNEXT_ANDSET(s, a, b, c, d, e, f) if (s != NULL) s(a, b, c, d, e, f); return 1; */
-
-#define XP_CALLNEXT(s, a, b, c, d, e, f) return 0;
-#define XP_CALLNEXT_ANDSET(s, a, b, c, d, e, f) return 1;
 
 extern int current_signal;
-
-#ifdef USE_PLUGIN
-
-struct module
-{
-   void *handle;
-   char *name, *desc;
-   struct module *next, *last;
-};
-
-struct module_cmd_set
-{
-   struct module *mod;
-   struct commands *cmds;
-   struct module_cmd_set *next, *last;
-};
-
-#endif
 
 struct xp_signal
 {
@@ -166,11 +141,7 @@ struct xp_signal
    /* These aren't used, but needed to keep compatibility --AGL */
    void *next, *last;
    void *data;
-#ifdef USE_PLUGIN
-   struct module *mod;
-#else
    void *padding;
-#endif
 };
 
 struct pevt_stage1
@@ -180,15 +151,12 @@ struct pevt_stage1
    struct pevt_stage1 *next;
 };
 
-#ifndef	PLUGIN_C
-/* extern int (*sighandler[NUM_XP]) (void *, void *, void *, void *, void *, char); */
-extern void *signal_data;
+#ifndef SIGNALS_C
 extern struct xp_signal *sigroots[NUM_XP];
 extern int fire_signal (int, void *, void *, void *, void *, void *, char);
-
 #endif
 
-#endif /* PLUGIN_H */
+#endif /* SIGNAL_H */
 
 
 

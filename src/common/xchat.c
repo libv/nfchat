@@ -32,7 +32,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
-#include "plugin.h"
+#include "signals.h"
 
 
 GSList *command_list = 0;
@@ -65,7 +65,6 @@ extern void process_line (struct session *sess, struct server *serv, char *buf);
 
 /* plugin.c */
 
-extern void module_setup ();
 extern void signal_setup ();
 
 /* server.c */
@@ -835,9 +834,6 @@ xchat_init (void)
    else
       sess = new_session (serv, 0);
 
-#ifdef USE_PLUGIN
-   module_setup ();
-#endif
    fe_timeout_add (2000, xchat_misc_checks, 0);
 }
 
