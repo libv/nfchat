@@ -46,7 +46,6 @@ void save_away_message (struct server *serv, char *nick, char *msg);
 
 extern unsigned char *strip_color (unsigned char *text);
 extern void PrintText (struct session *sess, char *text);
-extern void setup_logging (struct session *sess);
 
 /* userlist.c */
 
@@ -57,10 +56,6 @@ extern void change_nick (struct session *sess, char *oldnick, char *newnick);
 extern int handle_command (char *cmd, struct session *sess, int history, int nocommand);
 extern void process_data_init (unsigned char *buf, char *cmd, char *word[], char *word_eol[]);
 extern int command_level;
-
-/* text.c */
-
-extern void end_logging (int fd);
 
 /* ctcp.c */
 
@@ -100,11 +95,6 @@ void
 clear_channel (struct session *sess)
 {
    sess->channel[0] = 0;
-   if (sess->logfd != -1)
-   {
-      end_logging (sess->logfd);
-      sess->logfd = -1;
-   }
    fe_clear_channel (sess);
    fe_set_title (sess);
 }
@@ -119,19 +109,8 @@ private_msg (struct server *serv, char *tbuf, char *from, char *ip, char *text)
 
    if (prefs.beepmsg)
 	   fe_beep ();
-   /* sess = find_session_from_channel (from, serv);
-    if (sess || prefs.autodialog)
-   {
-      if (!sess)
-         sess = new_session (serv, from);*/  /* Create a dialog session */ /*
-      channel_msg (serv, tbuf, from, from, text, FALSE);
-      if (ip && ip[0])
-         fe_set_topic (sess, ip);
-      return;
-   }
-   sess = find_session_from_nick (from, serv);
-   if (!sess) */
-      sess = serv->front_session;
+
+   sess = serv->front_session;
    EMIT_SIGNAL (XP_TE_PRIVMSG, sess, from, text, NULL, NULL, 0);
 }
 
@@ -162,11 +141,6 @@ channel_action (struct session *sess, char *tbuf, char *chan, char *from, char *
 
    if (is_channel (chan) || fromme)
       sess = find_session_from_channel (chan, sess->server);
-   /* else */                        /* it's a private action! */
-     /* sess = find_session_from_channel (from, sess->server);
-
-   if (!sess && !is_channel (chan) && prefs.autodialog)
-      sess = new_session (def->server, from); */
 
    if (sess)
       EMIT_SIGNAL (XP_TE_CHANACTION, sess, tbuf, text, NULL, NULL, 0);
@@ -320,8 +294,6 @@ you_joined (struct server *serv, char *outbuf, char *chan, char *nick, char *ip)
    struct session *sess = fe_new_window_popup (chan, serv);
    if (sess)
    {
-      if (prefs.logging)
-         setup_logging (sess);
       sess->waitchannel[0] = 0;
       sess->end_of_names = FALSE;
       sprintf (outbuf, "MODE %s\r\n", chan);
@@ -936,19 +908,6 @@ next_nick (struct session *sess, char *outbuf, char *nick)
    }
 }
 
-void
-do_dns (struct session *sess, char *tbuf, char *nick, char *host)
-{
-   char *po;
-
-   po = strrchr (host, '@');
-   if (po)
-      host = po + 1;
-   EMIT_SIGNAL (XP_TE_RESOLVINGUSER, sess, nick, host, NULL, NULL, 0);
-   sprintf (tbuf, "/exec %s %s", prefs.dnsprogram, host);
-   handle_command (tbuf, sess, 0, 0);
-}
-
 static void
 set_default_modes (server *serv, char *outbuf)
 {
@@ -1054,8 +1013,6 @@ process_line (struct session *sess, struct server *serv, char *buf)
             case 1:
                user_new_nick (serv, outbuf, serv->nick, word[3], TRUE);
                set_server_name (serv, pdibuf);
-               if (sess->is_server && prefs.logging)
-                  setup_logging (sess);
                goto def;
             case 301:
                handle_away (serv, outbuf, find_word (pdibuf, 4),
@@ -1138,23 +1095,20 @@ process_line (struct session *sess, struct server *serv, char *buf)
                if (!serv->skip_next_who)
                {
                   struct session *who_sess;
-
+		  
                   who_sess = find_session_from_channel (word[4], serv);
                   if (who_sess)
-                  {
-                     sprintf (outbuf, "%s@%s", word[5], word[6]);
+		    {
+		    sprintf (outbuf, "%s@%s", word[5], word[6]);
                      if (!userlist_add_hostname (who_sess, word[8], outbuf, word_eol[11], word[7]))
-                     {
-                        if (!who_sess->doing_who)
-                           goto def;
+		       {
+		       if (!who_sess->doing_who)
+			  goto def;
                      }
                   } else
-                  {
-                     if (serv->doing_who)
-                        do_dns (sess, outbuf, word[8], word[6]);
-                     else
-                        goto def;
-                  }
+		    if (!serv->doing_who)
+		      goto def;
+                  
                } else
                {
                   if (!strcasecmp (word[8], serv->nick))

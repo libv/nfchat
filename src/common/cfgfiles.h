@@ -8,7 +8,7 @@ char *cfg_get_str (char *cfg, char *var, char *dest);
 char *get_xdir (void);
 void check_prefs_dir (void);
 void load_config (void);
-int save_config (void);
+
 
 #define STRUCT_OFFSET_STR(type,field) \
 ( (unsigned int) (((char *) (&(((type *) NULL)->field)))- ((char *) NULL)) )

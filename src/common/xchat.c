@@ -51,12 +51,6 @@ struct xchatprefs prefs;
 void xchat_cleanup (void);
 struct session *new_session (struct server *serv, char *from);
 
-/* trans */
-extern void serv2user(unsigned char *);
-extern void user2serv(unsigned char *);
-extern int load_trans_table(char *full_path);
-/* ~trans */
-
 /* inbound.c */
 
 extern void process_line (struct session *sess, struct server *serv, char *buf);
@@ -83,7 +77,6 @@ extern void list_loadconf (char *, GSList **, char *);
 /* text.c */
 
 extern unsigned char *strip_color (unsigned char *text);
-extern void end_logging (int fd);
 extern void load_text_events ();
 extern void pevent_dialog_save (char *fn);
 
@@ -142,12 +135,7 @@ tcp_send_queue (struct server *serv)
 int
 tcp_send_len (struct server *serv, char *buf, int len)
 {
-/* trans */
-   unsigned char *tbuf;
-#define TRANS_STAT_BUF_LEN 1024
-   static unsigned char sbuf[TRANS_STAT_BUF_LEN];
-   int ret;
-/* ~trans */
+
    time_t now = time (0);
 
    if (serv->last_send != now)
@@ -167,27 +155,7 @@ tcp_send_len (struct server *serv, char *buf, int len)
       serv->outbound_queue = g_slist_append (serv->outbound_queue, buf);
       return 1;
    }
-/* trans */
-   if(prefs.use_trans){
-     if(len>=TRANS_STAT_BUF_LEN)
-       tbuf=malloc(len+1);
-     else
-       tbuf=sbuf;
-     if(!tbuf){
-       return -1;
-     }
-	 
-     strcpy(tbuf,buf);
-     user2serv(tbuf);
-     ret=(!EMIT_SIGNAL (XP_IF_SEND,
-                       (void *)serv->sok, buf,
-                       (void *)len, NULL, NULL, 0)
-         )? send (serv->sok, tbuf, len, 0): 1;
-     if(tbuf!=sbuf)
-       free(tbuf);
-     return ret;
-   }
-/* ~trans */
+
    if (!EMIT_SIGNAL (XP_IF_SEND, (void *)serv->sok, buf, (void *)len, NULL, NULL, 0))
 	   return send (serv->sok, buf, len, 0);
    return 1;
@@ -393,10 +361,7 @@ read_data (struct server *serv, int sok)
 
             case '\n':
                serv->linebuf[serv->pos] = 0;
-/* trans */
-               if(prefs.use_trans)
-                 serv2user(serv->linebuf);
-/* ~trans */
+
                if (prefs.stripcolor)
                {
                   temp = strip_color (serv->linebuf);
@@ -473,7 +438,6 @@ new_session (struct server *serv, char *from)
    memset (sess, 0, sizeof (struct session));
 
    sess->server = serv;
-   sess->logfd = -1;
    
   
    if (from)
@@ -516,13 +480,6 @@ kill_server_callback (server *serv)
    flush_server_queue (serv);
 
    free (serv);
-}
-
-static void
-log_notify_kill (session *sess)
-{
-   if (sess->logfd != -1)
-      end_logging (sess->logfd);
 }
 
 static void
@@ -624,8 +581,6 @@ kill_session_callback (session *killsess)
    fe_session_callback (killsess);
 
    exec_notify_kill (killsess);
-
-   log_notify_kill (killsess);
 
    send_quit_or_part (killsess);
 
@@ -797,12 +752,6 @@ xchat_init (void)
    load_text_events ();
    list_loadconf ("ctcpreply.conf", &ctcp_list, defaultconf_ctcp);
    
-   if (prefs.use_trans)
-   {
-      if (load_trans_table (prefs.trans_file) == 0)
-         prefs.use_trans = 0;
-   }
-
    serv = new_server ();
    if (prefs.use_server_tab)
       sess = serv->front_session;
@@ -816,11 +765,9 @@ void
 xchat_cleanup (void)
 {
    xchat_is_quitting = TRUE;
-   if (prefs.autosave)
-   {
-      save_config ();
-      pevent_dialog_save (NULL);
-   }
+
+   /*   pevent_dialog_save (NULL); */
+   
    free_sessions ();
    fe_exit ();
 }

@@ -141,31 +141,15 @@ handle_ctcp (struct session *sess, char *outbuf, char *to, char *nick, char *msg
    }
 
    if (!ctcp_check ((void *) sess, outbuf, nick, word, word_eol, word[4] + 2))
-   {
-      if (!strncasecmp (msg, "ACTION", 6))
-      {
+     if (!strncasecmp (msg, "ACTION", 6))
+       {
          po = strchr (msg + 7, '\001');
          if (po)
-            po[0] = 0;
+	   po[0] = 0;
          channel_action (sess, outbuf, to, nick, msg + 7, FALSE);
          return;
-      }
-      if (!strncasecmp (msg, "SOUND", 5))
-      {
-         po = strchr (word[5], '\001');
-         if (po)
-            po[0] = 0;
-         EMIT_SIGNAL (XP_TE_CTCPSND, sess->server->front_session, word[5], nick,
-                      NULL, NULL, 0);
-         sprintf (outbuf, "%s/%s", prefs.sounddir, word[5]);
-         if (access (outbuf, R_OK) == 0)
-         {
-            sprintf (outbuf, "%s %s/%s", prefs.soundcmd, prefs.sounddir, word[5]);
-            my_system (outbuf);
-         }
-         return;
-      }
-   }
+       }
+   
 
    po = strchr (msg, '\001');
    if (po)

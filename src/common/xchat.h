@@ -69,18 +69,12 @@ struct xchatprefs
    char nick3[64];
    char realname[127];
    char username[127];
-   char awayreason[256];
    char quitreason[256];
    char font_normal[FONTNAMELEN + 1];
-   char doubleclickuser[256];
-   char sounddir[PATHLEN + 1];
-   char soundcmd[PATHLEN + 1];
    char background[PATHLEN + 1];
    char bluestring[64];
-   char dnsprogram[72];
+
    char hostname[127];
-   char trans_file[256];
-   char logmask[256];
 
    int tint_red;
    int tint_green;
@@ -106,9 +100,6 @@ struct xchatprefs
    int bt_color;
    unsigned long local_ip;
 
-   unsigned int use_trans;
-   unsigned int autosave;
-   unsigned int autodialog;
    unsigned int autoreconnect;
    unsigned int autoreconnectonfail;
    unsigned int invisible;
@@ -132,7 +123,6 @@ struct xchatprefs
    unsigned int filterbeep;
    unsigned int beepmsg;
    unsigned int privmsgtab;
-   unsigned int logging;
    unsigned int newtabstofront;
    unsigned int hidever;
    unsigned int ip_from_server;
@@ -168,7 +158,6 @@ struct session
    char willjoinchannel[202];   /* /join done for this channel */
    char channelkey[64];         /* XXX correct max length? */
    int limit;			  /* channel user limit */
-   int logfd;
 
    char lastnick[64];           /* last nick you /msg'ed */
 
@@ -179,7 +168,6 @@ struct session
 
    char *quitreason;
 
-   struct session *lastlog_sess;
    struct setup *setup;
    struct nbexec *running_exec;
 

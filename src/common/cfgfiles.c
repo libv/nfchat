@@ -264,20 +264,12 @@ static struct prefs vars[] = {
 {"nickname3",           PREFS_OFFSET(nick3),             TYPE_STR},
 {"realname",            PREFS_OFFSET(realname),          TYPE_STR},
 {"username",            PREFS_OFFSET(username),          TYPE_STR},
-{"awayreason",          PREFS_OFFSET(awayreason),        TYPE_STR},
 {"quitreason",          PREFS_OFFSET(quitreason),        TYPE_STR},
 {"font_normal",         PREFS_OFFSET(font_normal),       TYPE_STR},
-{"sounddir",            PREFS_OFFSET(sounddir),          TYPE_STR},
-{"soundcmd",            PREFS_OFFSET(soundcmd),          TYPE_STR},
 {"background_pic",      PREFS_OFFSET(background),        TYPE_STR},
-{"doubleclickuser",     PREFS_OFFSET(doubleclickuser),   TYPE_STR},
 {"bluestring",          PREFS_OFFSET(bluestring),        TYPE_STR},
-{"dnsprogram",          PREFS_OFFSET(dnsprogram),        TYPE_STR},
 {"hostname",            PREFS_OFFSET(hostname),          TYPE_STR},
-{"trans_file",          PREFS_OFFSET(trans_file),        TYPE_STR},
-{"logmask",             PREFS_OFFSET(logmask),           TYPE_STR},
-{"autosave",            PREFS_OFFINT(autosave),          TYPE_BOOL},
-{"autodialog",          PREFS_OFFINT(autodialog),        TYPE_BOOL},
+
 {"autoreconnect",       PREFS_OFFINT(autoreconnect),     TYPE_BOOL},
 {"autoreconnectonfail", PREFS_OFFINT(autoreconnectonfail),TYPE_BOOL},
 {"invisible",           PREFS_OFFINT(invisible),         TYPE_BOOL},
@@ -300,7 +292,6 @@ static struct prefs vars[] = {
 {"filterbeep",          PREFS_OFFINT(filterbeep),        TYPE_BOOL},
 {"beep_msg",            PREFS_OFFINT(beepmsg),           TYPE_BOOL},
 {"priv_msg_tabs",       PREFS_OFFINT(privmsgtab),        TYPE_BOOL},
-{"logging",             PREFS_OFFINT(logging),           TYPE_BOOL},
 {"newtabs_to_front",    PREFS_OFFINT(newtabstofront),    TYPE_BOOL},
 {"hide_version",        PREFS_OFFINT(hidever),           TYPE_BOOL},
 {"raw_modes",           PREFS_OFFINT(raw_modes),         TYPE_BOOL},
@@ -317,7 +308,6 @@ static struct prefs vars[] = {
 {"thin_separator",      PREFS_OFFINT(thin_separator),    TYPE_BOOL},
 {"dialog_indent_nicks", PREFS_OFFINT(dialog_indent_nicks),TYPE_BOOL},
 {"dialog_show_separator",PREFS_OFFINT(dialog_show_separator),TYPE_BOOL},
-{"use_trans",           PREFS_OFFINT(use_trans),         TYPE_BOOL},
 {"treeview",            PREFS_OFFINT (treeview),         TYPE_BOOL},
 {"auto_indent",         PREFS_OFFINT(auto_indent),       TYPE_BOOL},
 {"wordwrap",            PREFS_OFFINT(wordwrap),          TYPE_BOOL},
@@ -346,6 +336,39 @@ static struct prefs vars[] = {
 {0, 0, 0},
 };
 
+int
+save_config (void)
+{
+   int fh, i;
+
+   check_prefs_dir ();
+
+   fh = open (default_file (), O_TRUNC | O_WRONLY | O_CREAT, 0600);
+   if (fh == -1)
+      return 0;
+
+   cfg_put_str (fh, "version", VERSION);
+   i = 0;
+   do
+   {
+      switch (vars[i].type)
+      {
+      case TYPE_STR:
+         cfg_put_str (fh, vars[i].name, (char *) &prefs + vars[i].offset);
+         break;
+      case TYPE_INT:
+      case TYPE_BOOL:
+         cfg_put_int (fh, *((int *)&prefs + vars[i].offset), vars[i].name);
+      }
+      i++;
+   }
+   while (vars[i].type != 0);
+
+   close (fh);
+
+   return 1;
+}
+
 void
 load_config (void)
 {
@@ -355,7 +378,6 @@ load_config (void)
 
    memset (&prefs, 0, sizeof (struct xchatprefs));
    /* Just for ppl upgrading --AGL */
-   strcpy (prefs.logmask, "%s,%c.xchatlog");
    prefs.auto_indent = 1;
    prefs.max_auto_indent = 112;
    prefs.mail_check = 1;
@@ -404,8 +426,6 @@ load_config (void)
       prefs.indent_nicks = 1;
       prefs.dialog_indent_nicks = 1;
       prefs.thin_separator = 1;
-      prefs.autosave = 1;
-      prefs.autodialog = 1;
       prefs.autorejoin = 1;
       prefs.autoreconnect = 1;
       prefs.recon_delay = 2;
@@ -432,14 +452,10 @@ load_config (void)
       strcat (prefs.nick3, "__");
       strcpy (prefs.realname, username);
       strcpy (prefs.username, username);
-      strcpy (prefs.doubleclickuser, "/QUOTE WHOIS %s");
-      strcpy (prefs.awayreason, "I'm busy");
+      strcpy (prefs.bluestring, "netforce");
       strcpy (prefs.quitreason, "[nf]chat by NetForce (www.netforce.be)");
       strcpy (prefs.font_normal, "-b&h-lucidatypewriter-medium-r-normal-*-*-120-*-*-m-*-*-*");
-      strcpy (prefs.sounddir, g_get_home_dir ());
-      strcpy (prefs.soundcmd, "play");
-      strcpy (prefs.dnsprogram, "host");
-      strcpy (prefs.logmask, "%s,%c.xchatlog");
+      save_config ();
    }
    if (prefs.mainwindow_height < 106)
       prefs.mainwindow_height = 106;
@@ -451,38 +467,6 @@ load_config (void)
       prefs.dialog_indent_pixels = 80;
 }
 
-int
-save_config (void)
-{
-   int fh, i;
-
-   check_prefs_dir ();
-
-   fh = open (default_file (), O_TRUNC | O_WRONLY | O_CREAT, 0600);
-   if (fh == -1)
-      return 0;
-
-   cfg_put_str (fh, "version", VERSION);
-   i = 0;
-   do
-   {
-      switch (vars[i].type)
-      {
-      case TYPE_STR:
-         cfg_put_str (fh, vars[i].name, (char *) &prefs + vars[i].offset);
-         break;
-      case TYPE_INT:
-      case TYPE_BOOL:
-         cfg_put_int (fh, *((int *)&prefs + vars[i].offset), vars[i].name);
-      }
-      i++;
-   }
-   while (vars[i].type != 0);
-
-   close (fh);
-
-   return 1;
-}
 
 static void
 set_list (session *sess, char *tbuf)

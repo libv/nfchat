@@ -2,28 +2,89 @@ NF-chat;
 
 0.3.2;
 """"""
-    cleanin up the commands (outbound.c)
+     a) cleanin out all the unneccessary commands from outbound.c
+        - cmd_away;cmd_ban;cmd_clear: clears textwindow
+          cmd_close: closes window;cmd_country;cmd_deop
+          cmd_devoice;cmd_dns;cmd_echo;cmd_exec*;cmd_invite
+          cmd_kick*;cmd_lastlog;cmd_mdeop;cmd_mkick*
+          cmd_nctcp;cmd_notice;cmd_op;cmd_ping;cmd_query
+          cmd_say;cmd_set/settab;cmd_servchan;cmd_topic
+          cmd_unban;cmd_wall*;cmd_voice;cmd_ctcp;cmd_discon
+          cmd_gate;cmd_names;cmd_newserver;cmd_quote
+        - lastlog + call; ban; exec_check_process; exec_data
+          exec_handle_colors; insert_color; esc; color_data[]
+          color_data_bold[]; send_channel_modes; cmd_set;
+        - removin user defined commands from xchat.c
+                -command_list, defaultconf_commands
+        - removed command_list from outbound.c + user_command, pop
 
-    a) cleanin out all the unneccessary ones from outbound.c
-	- cmd_away;cmd_ban;cmd_clear: clears textwindow
-	  cmd_close: closes window;cmd_country;cmd_deop
-	  cmd_devoice;cmd_dns;cmd_echo;cmd_exec*;cmd_invite
-	  cmd_kick*;cmd_lastlog;cmd_mdeop;cmd_mkick*
-	  cmd_nctcp;cmd_notice;cmd_op;cmd_ping;cmd_query
-	  cmd_say;cmd_set/settab;cmd_servchan;cmd_topic
-	  cmd_unban;cmd_wall*;cmd_voice;cmd_ctcp;cmd_discon
-	  cmd_gate;cmd_names;cmd_newserver;cmd_quote
-	- lastlog + call; ban; exec_check_process; exec_data
-	  exec_handle_colors; insert_color; esc; color_data[]
-	  color_data_bold[]; send_channel_modes; cmd_set;
-	- removin user defined commands from xchat.c
-		-command_list, defaultconf_commands
-	- removed command_list from outbound.c + user_command, pop
+    b) started runnin down the whole program looking
+       for stuff that may be deleted.
+	changed X-chat to nf-chat in fe-gtk.c fe_args
+        removed gtk_set_locale from fe_args
+	- load_config (cfgfiles.c)
+	   - changing xdir to ~/.nfchat,
+	   - changing default_file to nfchat.conf
+*** should edit the preferences, and should set some defaults that
+*** shouldnt be changed at all
+*** just edit the prefs shit, throw out what u dont like and then update
+*** the rest when totally clear.
+	   - set default quit to '[nf]chat by NetForce (www.netforce.be)'
+*** should change all fe errors's gtkutil_simpledialog to fprintf(stderr
+	   - edited my_font_load to no longer fprintf(stderr
+	   - removed unused dialog_font_normal from fe_init(fe_gtk.c)
+	     xchatprefs(xchat.h); prefs var & load_config(cfgfiles.c)
+*** add some extra prefs & code for my_widget_get_style(maingui.c)
+*** for/background - base colours!!!! -> seems to only affect inputbox
+	   - removed gtkutil_simpledialog from
+             my_widget_get_style(maingui.c)
+  	   - movin my_widget_get_style to fe-gtk.c
+	     added #include <unistd.h> to fe-gtk.c
+             moved colors main definition to fe-gtk.c
+	     added 'Extern GdkColor colors[];' to fe-gtk.c
+	   - removin dialogwin_style(fe-gtk.c)
+ 	     & prefs.background_dialog from xchat.h
+	   - removin sound from text_event (text.c)
+	     removin every 5th element of the struct in te
+	     removin .sound from pevent_trigger_load, pevent_load
+             & pevent_dialog_save
+	     removin pevt_ctcpsnd_help.
+	     removin play_wave & call from text_signal_handler
+*** prefs.soundcmd prefs.sounddir
+*** remember to check for fprintf uniformication
+	got as far as xchat_init's load_text_events	   
 
-????XP_USERCOMMAND?????
-    b) removin unneccessary output
+    c) cleanin out the dead prefs.
+	- awayreason (cfgfiles.c, xchat.h)
+	- sounddir (cfgfiles.c, ctcp.c(whole sound part), xchat.h) 
+*** clean up ctcp.c
+	- soundcmd (cfgfiles.c, xchat.h)
+	- doubleclickuser (cfgfiles.c, xchat.h)
+	- edited bluestring to highlight on "netforce" as standard
+	- removed dnsprogram (cfgfiles.c, inbound.c, xchat.h)
+ 	    & do_dns(inbound.c)
+	- use_trans, trans_file;
+	  removed trans stuff from tcp_send_len(xchat.c)
+	  removin user2serv/s2u, trans_serv2user/u2s, load_trans_table
+	    from outbound.c 
+	  removed from xchat.c/h
+	- logmask from xchat.h, cfgfiles.c
+	  logging from xchat.h, cfgfiles.c
+	  removed logfd from new_session(xchat.c), xchat.h,
+	    clear_channel(inbound.c), PrintText(text.c) 
+	  removed log_notify_kill from kill_session_callback (xchat.c)
+	  removed setup_logging from text.c,
+	    you_joined & process_line(inbound.c)
+	  removed end_logging from text.c, inbound.c, xchat.c
+	  removed open_log_file & parse_log_filename from text.c
+	  removed lastlog & lastlog_sess from inbound.c/xchat.h
+	- removed autodialog from cfgfiles.c, xchat.h
+	- removed autosave from cfgfiles.c, xchat.h
+	  added save_config to load_config
+	  removed autosave/save_config from xchat_cleanup(xchat.c)
 
-0.3.1;
+
+0.3.1; 
 """"""
     a) - deleted python.c
        - removing ignore

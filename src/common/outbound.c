@@ -70,75 +70,6 @@ extern void disconnect_server (struct session *sess, int sendquit, int err);
 extern int current_mem_usage;
 #endif
 
-/* trans */
-
-unsigned char trans_serv2user[256];
-unsigned char trans_user2serv[256];
-
-void serv2user(unsigned char *s){
-  for(;*s;++s)
-    *s=trans_serv2user[*s];
-}
-
-void user2serv(unsigned char *s){
-  for(;*s;++s)
-    *s=trans_user2serv[*s];
-}
-
-int load_trans_table(char *full_path){ 
-  int tf,i,st,val=0,t;
-  char r;
-
-  if((tf=open(full_path,O_RDONLY))!=-1){
-  st=0;
-  i=0;
-  t=0;
-  while(read(tf,&r,1)==1){
-    switch(st){
-    case 0:/*nothing yet...*/
-      if(r=='0')
-        st=1;
-      break;
-    case 1:
-      if(r=='x') st=2;
-      else st=0;
-      break;
-    case 2:
-      if(r<='9' && r>='0') val=16*(r-'0');
-      else if(r<='f' && r>='a') val=16*(r-'a'+10);
-      else if(r<='F' && r>='A') val=16*(r-'A'+10);
-      else {st=0;break;}
-      st=3;
-      break;
-    case 3:
-      if(r<='9' && r>='0') val+=r-'0';
-      else if(r<='f' && r>='a') val+=r-'a'+10;
-      else if(r<='F' && r>='A') val+=r-'A'+10;
-      else {st=0;break;}
-      st=0;
-      if(t==0) trans_serv2user[i++]=val;
-      else     trans_user2serv[i++]=val;
-      if(i==256){
-        if(t==1)
-          {close(tf);return 1;}
-        t=1;
-        i=0;
-      }
-      break;
-    default:/* impossible */
-      close(tf);return 0;
-    }
-  }
-  close(tf);
-  }
-  for(tf=0;tf<256;++tf){
-    trans_user2serv[tf]=tf;
-    trans_serv2user[tf]=tf;
-  }
-  return 0;
-}
-/* ~trans */
-
 void
 notj_msg (struct session *sess)
 {
@@ -756,13 +687,6 @@ handle_command (char *cmd, struct session *sess, int history, int nocommand)
 
    } else
    {
-     /*
-      if (strcmp (sess->channel, "(lastlog)") == 0)
-      {
-         lastlog (sess->lastlog_sess, tbuf, cmd);
-         return TRUE;
-      }
-     */
       check_special_chars (cmd);
 
       if (sess->channel[0] && !sess->is_server)
