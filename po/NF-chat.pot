@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-08-27 22:42+0200\n"
+"POT-Creation-Date: 2000-08-28 03:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,157 +48,145 @@ msgid "Windows"
 msgstr ""
 
 #: src/fe-gtk/menu.c:903
-msgid "DCC Send Window.."
-msgstr ""
-
-#: src/fe-gtk/menu.c:904
-msgid "DCC Receive Window.."
-msgstr ""
-
-#: src/fe-gtk/menu.c:905
-msgid "DCC Chat Window.."
-msgstr ""
-
-#: src/fe-gtk/menu.c:907
 msgid "Flush Buffer"
 msgstr ""
 
-#: src/fe-gtk/menu.c:908
+#: src/fe-gtk/menu.c:904
 msgid "Save Buffer.."
 msgstr ""
 
 #. 23
-#: src/fe-gtk/menu.c:910
+#: src/fe-gtk/menu.c:906
 msgid "User Modes"
 msgstr ""
 
-#: src/fe-gtk/menu.c:911
+#: src/fe-gtk/menu.c:907
 msgid "Invisible"
 msgstr ""
 
-#: src/fe-gtk/menu.c:912
+#: src/fe-gtk/menu.c:908
 msgid "Receive Wallops"
 msgstr ""
 
-#: src/fe-gtk/menu.c:913
+#: src/fe-gtk/menu.c:909
 msgid "Receive Server Notices"
 msgstr ""
 
-#: src/fe-gtk/menu.c:915
+#: src/fe-gtk/menu.c:911
 msgid "Marked Away"
 msgstr ""
 
-#: src/fe-gtk/menu.c:917
+#: src/fe-gtk/menu.c:913
 msgid "Auto ReJoin on Kick"
 msgstr ""
 
-#: src/fe-gtk/menu.c:918
+#: src/fe-gtk/menu.c:914
 msgid "Auto ReConnect to Server"
 msgstr ""
 
-#: src/fe-gtk/menu.c:919
+#: src/fe-gtk/menu.c:915
 msgid "Never-give-up ReConnect"
 msgstr ""
 
-#: src/fe-gtk/menu.c:921
+#: src/fe-gtk/menu.c:917
 msgid "Auto Open Dialog Windows"
 msgstr ""
 
 #. 35
-#: src/fe-gtk/menu.c:922
+#: src/fe-gtk/menu.c:918
 msgid "Auto Accept DCC Chat"
 msgstr ""
 
-#: src/fe-gtk/menu.c:923
+#: src/fe-gtk/menu.c:919
 msgid "Auto Accept DCC Send"
 msgstr ""
 
-#: src/fe-gtk/menu.c:925
+#: src/fe-gtk/menu.c:921
 msgid "Settings"
 msgstr ""
 
 #. 38
-#: src/fe-gtk/menu.c:926
+#: src/fe-gtk/menu.c:922
 msgid "Setup.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:927
+#: src/fe-gtk/menu.c:923
 msgid "User Commands.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:928
+#: src/fe-gtk/menu.c:924
 msgid "CTCP Replies.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:929
+#: src/fe-gtk/menu.c:925
 msgid "Userlist Buttons.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:930
+#: src/fe-gtk/menu.c:926
 msgid "Userlist Popup.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:931
+#: src/fe-gtk/menu.c:927
 msgid "Replace.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:932
+#: src/fe-gtk/menu.c:928
 msgid "URL Handlers.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:933
+#: src/fe-gtk/menu.c:929
 msgid "Edit Event Texts.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:934
+#: src/fe-gtk/menu.c:930
 msgid "Edit Key Bindings.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:935
+#: src/fe-gtk/menu.c:931
 msgid "Select theme.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:937
+#: src/fe-gtk/menu.c:933
 msgid "Reload Settings"
 msgstr ""
 
-#: src/fe-gtk/menu.c:939
+#: src/fe-gtk/menu.c:935
 msgid "Save Settings now"
 msgstr ""
 
-#: src/fe-gtk/menu.c:940
+#: src/fe-gtk/menu.c:936
 msgid "Save Settings on exit"
 msgstr ""
 
-#: src/fe-gtk/menu.c:941
+#: src/fe-gtk/menu.c:937
 msgid "Scripts & Plugins"
 msgstr ""
 
-#: src/fe-gtk/menu.c:943
+#: src/fe-gtk/menu.c:939
 msgid "Load Perl Script.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:944
+#: src/fe-gtk/menu.c:940
 msgid "Unload All Scripts"
 msgstr ""
 
-#: src/fe-gtk/menu.c:945
+#: src/fe-gtk/menu.c:941
 msgid "Perl List"
 msgstr ""
 
-#: src/fe-gtk/menu.c:947
+#: src/fe-gtk/menu.c:943
 msgid "Help"
 msgstr ""
 
-#: src/fe-gtk/menu.c:948
+#: src/fe-gtk/menu.c:944
 msgid "Help.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:950
+#: src/fe-gtk/menu.c:946
 msgid "X-Chat Homepage.."
 msgstr ""
 
-#: src/fe-gtk/menu.c:951
+#: src/fe-gtk/menu.c:947
 msgid "Online Docs.."
 msgstr ""
 

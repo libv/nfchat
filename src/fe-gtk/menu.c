@@ -900,10 +900,6 @@ static struct mymenu mymenu[] =
    {M_MENU, N_ ("Quit"), (menucallback)xchat_cleanup, 0, 1},  /* 10 */
 
    {M_NEWMENU, N_ ("Windows"), 0, 0, 1},
-   {M_MENU, N_ ("DCC Send Window.."), (menucallback)fe_dcc_open_send_win, 0, 1},
-   {M_MENU, N_ ("DCC Receive Window.."), (menucallback)fe_dcc_open_recv_win, 0, 1},
-   {M_MENU, N_ ("DCC Chat Window.."), (menucallback)fe_dcc_open_chat_win, 0, 1},
-   {M_SEP, 0, 0, 0, 0},
    {M_MENU, N_ ("Flush Buffer"), (menucallback)menu_flushbuffer, 0, 1},
    {M_MENU, N_ ("Save Buffer.."), (menucallback)menu_savebuffer, 0, 1},  /* 23 */
 

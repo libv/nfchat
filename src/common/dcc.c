@@ -113,12 +113,7 @@ dcc_check_timeouts (void)
 
          switch (dcc->type)
          {
-         case TYPE_SEND:
-            fe_dcc_update_send (dcc);
-            break;
-         case TYPE_RECV:
-            fe_dcc_update_recv (dcc);
-            break;
+         /* removed fe dcc update calls */
          }
       }
 
@@ -179,27 +174,8 @@ dcc_connect_sok (struct DCC *dcc)
 }
 
 void
-update_dcc_window (int type)
-{
-   switch (type)
-   {
-   case TYPE_SEND:
-      fe_dcc_update_send_win ();
-      break;
-   case TYPE_RECV:
-      fe_dcc_update_recv_win ();
-      break;
-   case TYPE_CHATRECV:
-   case TYPE_CHATSEND:
-      fe_dcc_update_chat_win ();
-      break;
-   }
-}
-
-void
 dcc_close (struct DCC *dcc, int dccstat, int destroy)
 {
-   char type = dcc->type;
    if (dcc->sok != -1)
    {
       if (dcc->wiotag != -1)
@@ -227,19 +203,7 @@ dcc_close (struct DCC *dcc, int dccstat, int destroy)
       if (dcc->destfile) free (dcc->destfile);
       free (dcc->nick);
       free (dcc);
-      update_dcc_window (type);
       return;
-   }
-   switch (type)
-   {
-   case TYPE_SEND:
-      fe_dcc_update_send (dcc);
-      break;
-   case TYPE_RECV:
-      fe_dcc_update_recv (dcc);
-      break;
-   default:
-      update_dcc_window (type);
    }
 }
 
@@ -298,7 +262,7 @@ dcc_write_chat (char *nick, char *text)
 /* ~trans */
       send (dcc->sok, text, len, 0);
       send (dcc->sok, "\n", 1, 0);
-      fe_dcc_update_chat_win ();
+     /* fe_dcc_update_chat_win (); */
       return &dcc->SAddr;
    }
    return 0;
@@ -382,7 +346,7 @@ dcc_read_chat (struct DCC *dcc, gint sok)
             }
             dcc->pos += dcc->dccchat->pos;
             dcc->dccchat->pos = 0;
-            fe_dcc_update_chat_win ();
+           /* fe_dcc_update_chat_win (); */
             break;
          default:
             dcc->dccchat->linebuf[dcc->dccchat->pos] = lbuf[i];
@@ -492,7 +456,6 @@ dcc_connect_finished (struct DCC *dcc, gint sok)
                       dcctypes[(int) dcc->type], dcc->nick, errorstring (er),
                       NULL, 0);
          dcc->dccstat = STAT_FAILED;
-         update_dcc_window (dcc->type);
          return;
       }
    }
@@ -510,7 +473,6 @@ dcc_connect_finished (struct DCC *dcc, gint sok)
       dcc->dccchat->pos = 0;
       break;
    }
-   update_dcc_window (dcc->type);
    dcc->starttime = time (0);
    dcc->lasttime = dcc->starttime;
 
@@ -529,11 +491,10 @@ dcc_connect (struct session *sess, struct DCC *dcc)
    if (dcc->sok == -1)
    {
       dcc->dccstat = STAT_FAILED;
-      update_dcc_window (dcc->type);
       return;
    }
    dcc->iotag = fe_input_add (dcc->sok, 0, 1, 1, dcc_connect_finished, dcc);
-   fe_dcc_update_recv (dcc);
+  /* fe_dcc_update_recv (dcc); */
 }
 
 static void
@@ -677,8 +638,6 @@ dcc_accept (struct DCC *dcc, gint sokk)
       break;
    }
 
-   update_dcc_window (dcc->type);
-
    snprintf (host, sizeof host, "%s:%d", inet_ntoa (dcc->SAddr.sin_addr), dcc->port);
    EMIT_SIGNAL (XP_TE_DCCCON, dcc->serv->front_session, dcctypes[(int) dcc->type],
           dcc->nick, host, "from", 0);
@@ -802,10 +761,6 @@ dcc_send (struct session *sess, char *tbuf, char *to, char *file)
                      file++;
                   }
                   dcc->nick = strdup (to);
-                  if (!prefs.noautoopendccsendwindow)
-                     fe_dcc_open_send_win ();
-                  else
-                     fe_dcc_update_send_win ();
                   snprintf (tbuf, 255, "PRIVMSG %s :\001DCC SEND %s %lu %d %ld\001\r\n",
                             to, file_part (dcc->file), dcc->addr, dcc->port, dcc->size);
                   tcp_send (sess->server, tbuf);
@@ -999,10 +954,6 @@ dcc_chat (struct session *sess, char *nick)
    dcc->nick = strdup (nick);
    if (dcc_listen_init (dcc))
    {
-      if (!prefs.noautoopendccchatwindow)
-         fe_dcc_open_chat_win ();
-      else
-         fe_dcc_update_chat_win ();
       snprintf (outbuf, sizeof outbuf, "PRIVMSG %s :\001DCC CHAT chat %lu %d\001\r\n",
           nick, dcc->addr, dcc->port);
       tcp_send (dcc->serv, outbuf);
@@ -1073,10 +1024,6 @@ handle_dcc (struct session *sess, char *outbuf, char *nick, char *word[], char *
 
          EMIT_SIGNAL (XP_TE_DCCCHATOFFER, sess->server->front_session, nick,
                  NULL, NULL, NULL, 0);
-         if (!prefs.noautoopendccchatwindow)
-            fe_dcc_open_chat_win ();
-         else
-            fe_dcc_update_chat_win ();
          if (prefs.autodccchat)
             dcc_connect (0, dcc);
          return;
@@ -1161,10 +1108,7 @@ handle_dcc (struct session *sess, char *outbuf, char *nick, char *word[], char *
          dcc->port = port;
          dcc->size = size;
          dcc->nick = strdup (nick);
-         if (!prefs.noautoopendccrecvwindow)
-            fe_dcc_open_recv_win ();
-         else
-            fe_dcc_update_recv_win ();
+         
          if (prefs.autodccsend)
          {
             if (prefs.autoresume && dcc->resumable)

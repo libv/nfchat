@@ -804,7 +804,7 @@ cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
                file = find_word (pdibuf, i);
                if (!*file && i == 4)
                {
-                  fe_dcc_send_filereq (sess, nick);
+                 /* fe_dcc_send_filereq (sess, nick); */
                   return TRUE;
                }
                if (!*file)

@@ -9,7 +9,7 @@ INCLUDES = \
 
 nfchat_LDADD = ../common/libnfchatmain.a
 
-nfchat_SOURCES =	ascii.c dccgui.c dialog.c \
+nfchat_SOURCES =	ascii.c dialog.c \
 			editlist.c fe-gtk.c fkeys.c \
 			gtkutil.c \
 			maingui.c \

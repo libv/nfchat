@@ -96,12 +96,6 @@ dialog_whois (GtkWidget *wid, struct session *sess)
 }
 
 static void
-dialog_send (GtkWidget *wid, struct session *sess)
-{
-   fe_dcc_send_filereq (sess, sess->channel);
-}
-
-static void
 dialog_chat (GtkWidget *wid, struct session *sess)
 {
    dcc_chat (sess, sess->channel);
@@ -209,12 +203,6 @@ open_dialog_window (struct session *sess)
    gtk_box_pack_start (GTK_BOX (hbox), wid, FALSE, FALSE, 0);
    gtk_signal_connect (GTK_OBJECT (wid), "clicked",
                        GTK_SIGNAL_FUNC (dialog_whois), sess);
-   gtk_widget_show (wid);
-
-   wid = gtk_button_new_with_label ("Send");
-   gtk_box_pack_start (GTK_BOX (hbox), wid, FALSE, FALSE, 0);
-   gtk_signal_connect (GTK_OBJECT (wid), "clicked",
-                       GTK_SIGNAL_FUNC (dialog_send), sess);
    gtk_widget_show (wid);
 
    wid = gtk_button_new_with_label ("Chat");
