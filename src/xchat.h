@@ -110,54 +110,63 @@ struct xchatprefs
   unsigned int allow_nick;
 };
 
+typedef struct topic_t
+{
+  char *topic; /* holds the full topic string */
+  int length;
+  int tag; /* holds the timeout */
+  int pos; 
+} topic_t;
+
 struct session_t
 {
-   GSList *userlist;
-   char channel[202];
-   char waitchannel[202];       /* waiting to join this channel */
-   char nick[202];
-   char channelkey[64];         /* XXX correct max length? */
-   int limit;			  /* channel user limit */
-   char lastnick[64];           /* last nick you /msg'ed */
-   int ops;                     /* num. of ops in channel */
-   int total;                   /* num. of users in channel */
-   char *quitreason;
-   struct session_gui *gui;	     /* initialized by fe_new_window */
-   int end_of_names:1;
-   int doing_who:1;             /* /who sent on this channel */
+  GSList *userlist;
+  char channel[202];
+  char waitchannel[202];       /* waiting to join this channel */
+  char nick[202];
+  char channelkey[64];         /* XXX correct max length? */
+  int limit;			  /* channel user limit */
+  char lastnick[64];           /* last nick you /msg'ed */
+  int ops;                     /* num. of ops in channel */
+  int total;                   /* num. of users in channel */
+  char *quitreason;
+  struct session_gui *gui;	     /* initialized by fe_new_window */
+  int end_of_names:1;
+  int doing_who:1;             /* /who sent on this channel */
+  topic_t *topic;
 };
 
 typedef struct session_t session_t;
 
 struct server_t
 {
-   int port;
-   int sok;
-   int childread;
-   int childwrite;
-   int childpid;
-   int iotag;
-   int bartag;
-   char hostname[128];          /* real ip number */
-   char servername[128];        /* what the server says is its name */
-   char password[86];
-   char nick[64];
-   char linebuf[2048];
-   long pos;
-   int nickcount;
-
-   GSList *outbound_queue;
-   time_t last_send;
-   int bytes_sent;              /* this second only */
-
-   int motd_skipped:1;
-   int connected:1;
-   int connecting:1;
-   int no_login:1;
-   int skip_next_who:1;         /* used for "get my ip from server" */
-   int doing_who:1;             /* /dns has been done */
-   int end_of_motd:1;		/* end of motd reached (logged in) */
-   int sent_quit:1;        /* sent a QUIT already? */
+  int port;
+  int sok;
+  int childread;
+  int childwrite;
+  int childpid;
+  int iotag;
+  int bartag;
+  char hostname[128];          /* real ip number */
+  char servername[128];        /* what the server says is its name */
+  char password[86];
+  char nick[64];
+  char linebuf[2048];
+  long pos;
+  int nickcount;
+  
+  GSList *outbound_queue;
+  time_t last_send;
+  int bytes_sent;              /* this second only */
+  
+  int motd_skipped:1;
+  int connected:1;
+  int connecting:1;
+  int no_login:1;
+  int skip_next_who:1;         /* used for "get my ip from server" */
+  int doing_who:1;             /* /dns has been done */
+  int end_of_motd:1;		/* end of motd reached (logged in) */
+  int sent_quit:1;        /* sent a QUIT already? */
 };
 
 typedef struct server_t server_t;

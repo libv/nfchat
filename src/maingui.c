@@ -48,9 +48,9 @@ extern gint gtk_kill_session_callback (GtkWidget *, void *blah);
 extern void clear_user_list (void);
 extern void handle_inputgad (GtkWidget * igad, void *blah);
 extern void fe_progressbar_end (void);
+extern GdkFont *my_font_load (char *fontname);
 
 extern int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);
-
 
 struct relink_data {
    GtkWidget *win, *hbox;
@@ -77,7 +77,7 @@ GdkColor colors[] =
    {0, 0, 0, 0xffff},           /* 12 blue */
    {0, 0xffff, 0, 0xffff},      /* 13 pink */
    {0, 0x7777, 0x7777, 0x7777}, /* 14 grey */
-   {0, 0x9999, 0x9999, 0x9999}, /* 15 light grey */
+   {0, 0xeeee, 0xeeee, 0xeeee}, /* 15 light grey */
    {0, 0, 0, 0xcccc},           /* 16 blue markBack */
    {0, 0xeeee, 0xeeee, 0xeeee}, /* 17 white markFore */
    {0, 0xcccc, 0xcccc, 0xcccc}, /* 18 foreground (white) */
@@ -171,12 +171,37 @@ maingui_create_textlist (GtkWidget *leftpane)
    show_and_unfocus (session->gui->vscrollbar);
 }
 
-/* static void
-maingui_userlist_selected (GtkWidget *clist, gint row, gint column, GdkEventButton *even)
+static GtkStyle *
+namelist_style (void)
 {
-  gtk_clist_unselect_all (GTK_CLIST (clist));
-   gtk_widget_grab_focus (session->gui->inputgad);
-} */
+  GtkStyle *style = gtk_style_new ();
+  
+  style->base[GTK_STATE_INSENSITIVE] = style->base[GTK_STATE_NORMAL];
+  style->bg[GTK_STATE_INSENSITIVE] = style->bg[GTK_STATE_NORMAL];
+  style->fg[GTK_STATE_INSENSITIVE] = style->fg[GTK_STATE_NORMAL];
+  style->light[GTK_STATE_INSENSITIVE] = style->light[GTK_STATE_NORMAL];
+  style->dark[GTK_STATE_INSENSITIVE] = style->dark[GTK_STATE_NORMAL];
+  style->text[GTK_STATE_INSENSITIVE] = style->text[GTK_STATE_NORMAL];
+
+  return (style);
+}
+
+static GtkStyle *
+topic_style (void)
+{
+  GtkStyle *style = gtk_style_new ();
+
+  style->font = my_font_load ("-etl-fixed-medium-r-normal-*-*-140-*-*-c-*-iso8859-9");
+
+  style->base[GTK_STATE_INSENSITIVE] = style->base[GTK_STATE_NORMAL];
+  style->bg[GTK_STATE_INSENSITIVE] = style->bg[GTK_STATE_NORMAL];
+  style->fg[GTK_STATE_INSENSITIVE] = style->fg[GTK_STATE_NORMAL];
+  style->light[GTK_STATE_INSENSITIVE] = style->light[GTK_STATE_NORMAL];
+  style->dark[GTK_STATE_INSENSITIVE] = style->dark[GTK_STATE_NORMAL];
+  style->text[GTK_STATE_INSENSITIVE] = style->text[GTK_STATE_NORMAL];
+
+  return (style);
+}
 
 static GtkWidget *
 gtkutil_clist_new (GtkWidget * box, int policy)
@@ -192,17 +217,15 @@ gtkutil_clist_new (GtkWidget * box, int policy)
    
    gtk_clist_column_titles_passive (GTK_CLIST (clist));
    gtk_container_add (GTK_CONTAINER (win), clist);
-   /* gtk_signal_connect (GTK_OBJECT (clist), "select_row", GTK_SIGNAL_FUNC (maingui_userlist_selected), session);*/
    gtk_widget_show (clist);
 
    return clist;
 }
 
-/* called when inputgad looses focus, to return focus to it */ 
 void
-input_return_focus (GtkWidget * wid, GdkEventFocus *blah, void *blah2)
+maingui_configure (GtkWidget *unused)
 {
-  /*gtk_widget_grab_focus ((GtkWidget *) session->gui->inputgad);*/
+  gtk_widget_queue_draw (session->gui->textgad);
 }
 
 void
@@ -218,6 +241,7 @@ create_window (void)
    gtk_widget_realize (session->gui->window);
    gtk_signal_connect ((GtkObject *) session->gui->window, "destroy", GTK_SIGNAL_FUNC (gtk_kill_session_callback), session);
    gtk_signal_connect ((GtkObject *) session->gui->window, "focus_in_event", GTK_SIGNAL_FUNC (focus_in), session);
+   gtk_signal_connect_object ((GtkObject *) session->gui->window, "configure_event", GTK_SIGNAL_FUNC (maingui_configure), 0);
    gtk_window_set_policy ((GtkWindow *) session->gui->window, TRUE, TRUE, FALSE);
    
    palette_alloc (session->gui->window);
@@ -239,8 +263,8 @@ create_window (void)
    gtk_entry_set_editable (GTK_ENTRY (session->gui->topicgad), FALSE);
    gtk_container_add (GTK_CONTAINER (tbox), session->gui->topicgad);
    gtk_widget_set_sensitive ((GtkWidget *) session->gui->topicgad, FALSE);
-   /*gtk_signal_connect ((GtkObject *) session->gui->topicgad, "focus_in_event", GTK_SIGNAL_FUNC (focus_in), session);*/
-   gtk_widget_show (session->gui->topicgad);
+   gtk_widget_set_style (session->gui->topicgad, topic_style ());
+    gtk_widget_show (session->gui->topicgad);
    
    leftpane = gtk_hbox_new (FALSE, 0);
    gtk_widget_show (leftpane);
@@ -274,7 +298,7 @@ create_window (void)
    gtk_widget_set_sensitive ((GtkWidget *) session->gui->namelistgad, FALSE);
    gtk_clist_set_column_width (GTK_CLIST (session->gui->namelistgad), 0, 10);
    gtk_widget_set_usize (session->gui->namelistgad->parent, 115, 0);
- 
+   gtk_widget_set_style (session->gui->namelistgad, namelist_style ());
    bbox = gtk_hbox_new (FALSE, 0);
    gtk_container_set_border_width (GTK_CONTAINER (bbox), 0);
    gtk_box_pack_end (GTK_BOX (vbox), bbox, FALSE, TRUE, 2);
@@ -282,7 +306,6 @@ create_window (void)
 
    session->gui->op_box = gtk_hbox_new (0, 0);
    gtk_box_pack_start (GTK_BOX (bbox), session->gui->op_box, FALSE, FALSE, 2);
-   /* gtk_widget_show (session->gui->op_box); */
 
    session->gui->nickgad = gtk_label_new (server->nick);
    gtk_box_pack_start (GTK_BOX (bbox), session->gui->nickgad, FALSE, FALSE, 4);
@@ -292,7 +315,6 @@ create_window (void)
    gtk_container_add (GTK_CONTAINER (bbox), session->gui->inputgad);
    gtk_signal_connect (GTK_OBJECT (session->gui->inputgad), "activate", GTK_SIGNAL_FUNC (handle_inputgad), session);
    gtk_signal_connect (GTK_OBJECT (session->gui->inputgad), "key-press-event", GTK_SIGNAL_FUNC (key_handle_key_press), session);
-   gtk_signal_connect (GTK_OBJECT (session->gui->inputgad), "focus-out-event", GTK_SIGNAL_FUNC (input_return_focus), session);
    gtk_widget_set_style (session->gui->inputgad, inputgad_style);
    gtk_widget_show (session->gui->inputgad);
    if (justopened)

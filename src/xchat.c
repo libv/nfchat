@@ -248,6 +248,9 @@ init_session (void)
 {
   session = malloc (sizeof (session_t));
   memset (session, 0, sizeof (session_t));
+  session->topic = malloc (sizeof (topic_t));
+  memset (session->topic, 0, sizeof (topic_t));
+  session->topic->topic = malloc (1024 * sizeof (char));
   
   fe_new_window ();
 }
@@ -364,7 +367,7 @@ main (int argc, char *argv[])
   sv.sa_handler = got_quit;
   sigaction(SIGQUIT, &sv, NULL);
   sigaction(SIGTERM, &sv, NULL);
-
+  sigaction(SIGINT, &sv, NULL);
 #ifdef SOCKS
    SOCKSinit (argv[0]);
 #endif
@@ -378,7 +381,6 @@ main (int argc, char *argv[])
    xchat_init ();
 
    fe_main ();
-
 
    return 0;
 }

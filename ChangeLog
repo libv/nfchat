@@ -1,5 +1,22 @@
 NF-chat;
 
+0.3.5; doin some final graphical stuff
+""""""
+    a) 
+	- changed the 'insensitive' styles for topic/namelist to look like
+	  sensitive
+	- added SIGINT to proper termination signals
+	- topic = scrollin nicely with fixed width font 
+	- makin spec file
+	- fixed transparency bug
+	
+*** Test spec file on Chris
+*** Very unlikely: prefs for colour defines of the widgets.
+*** Needs a decent gtk theme
+*** barely possible when theres NO! ircd runnin!
+    still needs testing on server errors & kicks & lines - reserve for
+    when an ircd is runnin
+
 0.3.4; final cleanups
 """"""
     a) various cleanups - tryin to fix that large bug
@@ -167,16 +184,6 @@ NF-chat;
 	- edited some stuff in text.c
 	- made fprintf uniform on whole prog
 	stripped size = 76420 bytes
-    g)
-
-*** make scrolling topic
-*** Add prefs for colour defines of the widgets.
-	add some extra prefs & code for my_widget_get_style(maingui.c)
-    	for/background - base colours!!!! -> seems to only affect inputbox
-
-*** barely possible when theres NO! ircd runnin!
-    still needs testing on server errors & kicks & lines - reserve for
-    when an ircd is runnin
 
 0.3.3;
 """"""

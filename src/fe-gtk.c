@@ -39,7 +39,6 @@ extern struct xchatprefs prefs;
 
 extern void PrintText (char *text);
 extern void notify_gui_update (void);
-extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, session_t *sess);
 extern void create_window (void);
 extern void init_userlist_xpm (void);
 
@@ -213,16 +212,51 @@ my_widget_get_style (char *bg_pic)
             gdk_imlib_destroy_image (img);
             style->bg_pixmap[GTK_STATE_NORMAL] = pixmap;
          }
-      } else
+      }
+      else
          fprintf (stderr, "NF-CHAT Error: Cannot access %s", bg_pic);
    }
    return style;
 }
 
+int 
+update_topic (void)
+{
+  int *position = malloc (sizeof (int));
+
+   if (session->topic->pos == session->topic->length)
+    session->topic->pos = 0;
+
+  *position = session->topic->length;
+
+  gtk_editable_insert_text ((GtkEditable *) session->gui->topicgad, session->topic->topic + session->topic->pos, 1, position);
+  free (position);
+  gtk_editable_delete_text ((GtkEditable *) session->gui->topicgad, 0, 1);
+
+  session->topic->pos++;
+  return (1);
+}
+
 void
 fe_set_topic (char *topic)
 {
-   gtk_entry_set_text (GTK_ENTRY (session->gui->topicgad), topic);
+  session->topic->length = strlen (topic);
+  strcpy (session->topic->topic, topic);
+  session->topic->pos = 0;
+  if ((((GtkWidgetAuxInfo *)session->gui->topicgad)->width / 6) <= gdk_string_width (session->gui->topicgad->style->font, topic))
+    {
+      strcat (session->topic->topic, "  ***  ");
+      session->topic->length += 7;
+      gtk_entry_set_text (GTK_ENTRY (session->gui->topicgad), session->topic->topic);
+     session->topic->tag = gtk_timeout_add (120, (GtkFunction) update_topic, session);
+    }
+  else
+    {
+      if (session->topic->tag)
+	gtk_timeout_remove (session->topic->tag);
+      
+      gtk_entry_set_text (GTK_ENTRY (session->gui->topicgad), topic);
+    }
 }
 
 static int

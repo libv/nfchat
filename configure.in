@@ -2,7 +2,7 @@
 
 AC_INIT(src)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(NF-chat, 0.3.4)
+AM_INIT_AUTOMAKE(NF-chat, 0.3.5)
 AC_PROG_CC
 
 AC_PATH_PROG(sedpath, sed)

@@ -109,7 +109,7 @@ fe_userlist_insert (struct user *newuser, int row)
    else
       gtk_clist_insert (GTK_CLIST (session->gui->namelistgad), row, &name);
    gtk_clist_set_row_data (GTK_CLIST (session->gui->namelistgad), row, (gpointer) newuser);
-   /*  gtk_clist_set_selectable (GTK_CLIST (session->gui->namelistgad), row, FALSE); */
+
    if (!strcmp (newuser->nick, server->nick))
    {
       if (newuser->op)
@@ -126,12 +126,12 @@ fe_userlist_insert (struct user *newuser, int row)
       }
    }
    if (newuser->op)
-      gtk_clist_set_pixtext ((GtkCList *) session->gui->namelistgad, row, 0, newuser->nick, 3, op_pixmap, op_mask_bmp);
+     gtk_clist_set_pixtext ((GtkCList *) session->gui->namelistgad, row, 0, newuser->nick, 3, op_pixmap, op_mask_bmp);
    else if (newuser->voice)
-         gtk_clist_set_pixtext ((GtkCList *) session->gui->namelistgad, row, 0, newuser->nick, 3, voice_pixmap, voice_mask_bmp);
+     gtk_clist_set_pixtext ((GtkCList *) session->gui->namelistgad, row, 0, newuser->nick, 3, voice_pixmap, voice_mask_bmp);
 
    gtk_adjustment_set_value (adj, val);
-
+   
    return row;
 }
 
@@ -152,7 +152,6 @@ nick_cmp_az_ops (struct user *user1, struct user *user2)
       return -1;
    if (!user1->op && user2->op)
       return +1;
-
    if (user1->voice && !user2->voice)
       return -1;
    if (!user1->voice && user2->voice)
