@@ -32,7 +32,6 @@
 #include "signals.h"
 #include "fe.h"
 
-extern GSList *sess_list;
 extern struct xchatprefs prefs;
 
 extern void auto_reconnect (int send_quit, int err);
@@ -40,11 +39,11 @@ extern void clear_channel (session_t *sess);
 extern void set_server_name (char *name);
 extern void flush_server_queue (void);
 extern int tcp_send (char *buf);
-extern void PrintText (session_t *sess, unsigned char *text);
 extern void read_data (gint sok);
 extern char *errorstring (int err);
 extern int waitline (int sok, char *buf, int bufsize);
-extern void notc_msg (session_t *sess);
+extern void notc_msg (void);
+extern void PrintText (char *text);
 
 static void
 server_cleanup (void)
@@ -64,7 +63,6 @@ server_cleanup (void)
 static void
 connected_signal (int sok)
 {
-   session_t *sess = server->session;
    char tbuf[128];
    char outbuf[512];
    char host[100];
@@ -77,14 +75,13 @@ connected_signal (int sok)
    case '1':                   /* unknown host */
       server_cleanup ();
       close (sok);
-      EMIT_SIGNAL (XP_TE_UKNHOST, sess, NULL, NULL, NULL, NULL, 0);
+      fire_signal (XP_TE_UKNHOST, NULL, NULL, NULL, NULL, 0);
       break;
    case '2':                   /* connection failed */
       waitline (server->childread, tbuf, sizeof tbuf);
       server_cleanup ();
       close (sok);
-      EMIT_SIGNAL (XP_TE_CONNFAIL, sess, errorstring (atoi (tbuf)), NULL, NULL,
-                   NULL, 0);
+      fire_signal (XP_TE_CONNFAIL, errorstring (atoi (tbuf)), NULL, NULL, NULL, 0);
       if (prefs.autoreconnectonfail)
          auto_reconnect (FALSE, -1);
       break;
@@ -92,17 +89,17 @@ connected_signal (int sok)
       waitline (server->childread, host, sizeof host);
       waitline (server->childread, ip, sizeof ip);
       waitline (server->childread, outbuf, sizeof outbuf);
-      EMIT_SIGNAL (XP_TE_CONNECT, sess, host, ip, outbuf, NULL, 0);
+      fire_signal (XP_TE_CONNECT, host, ip, outbuf, NULL, 0);
       strcpy (server->hostname, host);
       break;
    case '4':                   /* success */
      server_cleanup ();
      server->connected = TRUE;
     
-     server->iotag = fe_input_add (server->sok, 1, 0, 1, read_data, server);
+     server->iotag = fe_input_add (server->sok, 1, 0, 1, read_data);
      if (!server->no_login)
        {
-         EMIT_SIGNAL (XP_TE_CONNECTED, sess, NULL, NULL, NULL, NULL, 0);
+         fire_signal (XP_TE_CONNECTED, NULL, NULL, NULL, NULL, 0);
          if (server->password[0])
 	   {
 	     sprintf (outbuf, "PASS %s\r\n", server->password);
@@ -113,7 +110,7 @@ connected_signal (int sok)
          tcp_send (outbuf);
        }
      else
-       EMIT_SIGNAL (XP_TE_SERVERCONNECTED, sess, NULL, NULL, NULL, NULL, 0);
+       fire_signal (XP_TE_SERVERCONNECTED, NULL, NULL, NULL, NULL, 0);
       
      fcntl (server->sok, F_SETFL, O_NONBLOCK);
      set_server_name (server->servername);
@@ -129,13 +126,13 @@ connected_signal (int sok)
       break;*/
    case '7':                  /* gethostbyname (prefs.hostname) failed */
       sprintf (outbuf, "Cannot resolve hostname %s\nCheck your IP Settings!", prefs.hostname);
-      PrintText (sess, outbuf);
+      PrintText (outbuf);
       break;
    }
 }
 
 static int
-check_connecting (session_t *sess)
+check_connecting (void)
 {
    char tbuf[256];
 
@@ -143,7 +140,7 @@ check_connecting (session_t *sess)
    {
       kill (server->childpid, SIGKILL);
       sprintf (tbuf, "%d", server->childpid);
-      EMIT_SIGNAL (XP_TE_SCONNECT, sess, tbuf, NULL, NULL, NULL, 0);
+      fire_signal (XP_TE_SCONNECT, tbuf, NULL, NULL, NULL, 0);
       server_cleanup ();
       close (server->sok);
       return TRUE;
@@ -159,17 +156,14 @@ close_socket (int sok)
 }
 
 void
-disconnect_server (session_t *sess, int sendquit, int err)
+disconnect_server (int sendquit, int err)
 {
-   session_t *orig_sess = sess;
-   GSList *list;
-
-   if (check_connecting (sess))
+   if (check_connecting ())
       return;
 
    if (!server->connected)
    {
-      notc_msg (sess);
+      notc_msg ();
       return;
    }
    flush_server_queue ();
@@ -179,23 +173,15 @@ disconnect_server (session_t *sess, int sendquit, int err)
       fe_input_remove (server->iotag);
       server->iotag = -1;
    }
+   fire_signal (XP_TE_DISCON, errorstring (err), NULL, NULL, NULL, 0);
 
-   list = sess_list;
-   while (list)                 /* print "Disconnected" to each window using this server */
-   {
-      sess = (session_t *) list->data;
-      EMIT_SIGNAL (XP_TE_DISCON, sess, errorstring (err), NULL, NULL, NULL, 0);
-      list = list->next;
-   }
-
-   sess = orig_sess;
    if (sendquit)
    {
       char tbuf[256];
-      if (!sess->quitreason)
-         sess->quitreason = prefs.quitreason;
-      snprintf (tbuf, sizeof tbuf, "QUIT :%s\r\n", sess->quitreason);
-      sess->quitreason = 0;
+      if (!session->quitreason)
+         session->quitreason = prefs.quitreason;
+      snprintf (tbuf, sizeof tbuf, "QUIT :%s\r\n", session->quitreason);
+      session->quitreason = 0;
       tcp_send (tbuf);
    }
 
@@ -212,40 +198,25 @@ disconnect_server (session_t *sess, int sendquit, int err)
    server->no_login = FALSE;
    server->servername[0] = 0;
 
-   list = sess_list;
-   while (list)
-   {
-      sess = (session_t *) list->data;
-
-      if (sess->channel[0])
-	{
-	  if (!sess->is_server)
-	    clear_channel (sess);
-	} else
-	  clear_channel (sess);
-
-      list = list->next;
-   }
+   clear_channel (session);
 }
 
 void
-connect_server (session_t *sess, char *server_str, int port, int no_login)
+connect_server (char *server_str, int port, int no_login)
 {
    int sok, sw, pid, read_des[2];
 
    if (!server_str[0])
       return;
 
-   sess = server->session;
-
    if (server->connected)
-      disconnect_server (sess, TRUE, -1);
+      disconnect_server (TRUE, -1);
    else
-      check_connecting (sess);
+      check_connecting ();
 
    fe_progressbar_start ();
 
-   EMIT_SIGNAL (XP_TE_SERVERLOOKUP, sess, server_str, NULL, NULL, NULL, 0);
+   fire_signal (XP_TE_SERVERLOOKUP, server_str, NULL, NULL, NULL, 0);
 
    sok = socket (AF_INET, SOCK_STREAM, 0);
    if (sok == -1)
@@ -297,9 +268,7 @@ connect_server (session_t *sess, char *server_str, int port, int no_login)
                printf ("5\n%s\n", inet_ntoa (DSAddr.sin_addr));
                bind (sok, (struct sockaddr *) &DSAddr, sizeof (DSAddr));
             } else
-            {
                printf ("7\n");
-            }
             fflush (stdout);
          }
 
@@ -307,9 +276,7 @@ connect_server (session_t *sess, char *server_str, int port, int no_login)
          HostAddr = gethostbyname (server_str);
          if (HostAddr)
          {
-            printf ("3\n%s\n%s\n%d\n", HostAddr->h_name,
-                    inet_ntoa (*((struct in_addr *) HostAddr->h_addr)),
-                    port);
+            printf ("3\n%s\n%s\n%d\n", HostAddr->h_name, inet_ntoa (*((struct in_addr *) HostAddr->h_addr)), port);
             fflush (stdout);
             memset (&SAddr, 0, sizeof (SAddr));
             SAddr.sin_port = htons (port);
@@ -320,16 +287,13 @@ connect_server (session_t *sess, char *server_str, int port, int no_login)
             else
 	      printf ("4\n");
          } else
-         {
             printf ("1\n");
-         }
          fflush (stdout);
          _exit (0);
       }
    }
    server->childpid = pid;
-   server->iotag = fe_input_add (read_des[0], 1, 0, 0,
-                                       connected_signal, server);
+   server->iotag = fe_input_add (read_des[0], 1, 0, 0, connected_signal);
    server->childread = read_des[0];
    server->childwrite = read_des[1];
 }

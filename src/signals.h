@@ -2,7 +2,7 @@
 #ifndef SIGNAL_H
 #define SIGNAL_H
 
-#define XP_CALLBACK(x)	( (int (*) (void *, void *, void *, void *, void *, char) ) x )
+#define XP_CALLBACK(x)	( (int (*) (void *, void *, void *, void *, char) ) x )
 
 #define XP_USERCOMMAND	0
 #define XP_PRIVMSG	1
@@ -129,15 +129,12 @@
 
 #define NUM_XP		   142
 
-#define	EMIT_SIGNAL(s, a, b, c, d, e, f) (fire_signal(s, a, b, c, d, e, f))
-
 extern int current_signal;
 
 struct xp_signal
 {
    int signal;
-   int (**naddr) (void *, void *, void *, void *, void *, char);
-   int (*callback) (void *, void *, void *, void *, void *, char);
+   int (*callback) (void *, void *, void *, void *, char);
    /* These aren't used, but needed to keep compatibility --AGL */
    void *next, *last;
    void *data;
@@ -153,7 +150,7 @@ struct pevt_stage1
 
 #ifndef SIGNALS_C
 extern struct xp_signal *sigroots[NUM_XP];
-extern int fire_signal (int, void *, void *, void *, void *, void *, char);
+extern int fire_signal (int, void *, void *, void *, void *, char);
 #endif
 
 #endif /* SIGNAL_H */

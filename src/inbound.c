@@ -31,32 +31,16 @@
 #include "signals.h"
 #include "fe.h"
 
-/* xchat.c */
-
 extern int tcp_send (char *buf);
 struct away_msg *find_away_message (char *nick);
 void save_away_message (char *nick, char *msg);
-
-/* text.c */
-
 extern unsigned char *strip_color (unsigned char *text);
-extern void PrintText (session_t *sess, char *text);
-
-/* userlist.c */
-
-extern void change_nick (session_t *sess, char *oldnick, char *newnick);
-
-/* outbound.c */
-
-extern int handle_command (char *cmd, session_t *sess, int history, int nocommand);
+extern void PrintText(char *text);
+extern void change_nick (char *oldnick, char *newnick);
 extern void process_data_init (unsigned char *buf, char *cmd, char *word[], char *word_eol[]);
-
-/* ctcp.c */
-
 extern void handle_ctcp (char *outbuf, char *to, char *nick, char *msg, char *word[], char *word_eol[]);
-
 extern struct xchatprefs prefs;
-extern session_t *current_tab;
+
 
 #define find_word_to_end(a, b) word_eol[b]
 #define find_word(a, b) word[b]
@@ -76,9 +60,9 @@ clear_channel ()
 static void
 private_msg (char *tbuf, char *from, char *ip, char *text)
 {
-  if (EMIT_SIGNAL (XP_PRIVMSG, server, from, ip, text, NULL, 0) == 1)
+  if (fire_signal (XP_PRIVMSG, from, ip, text, NULL, 0) == 1)
     return;
-  EMIT_SIGNAL (XP_TE_PRIVMSG, session, from, text, NULL, NULL, 0);
+  fire_signal (XP_TE_PRIVMSG, from, text, NULL, NULL, 0);
 }
 
 void
@@ -87,7 +71,7 @@ channel_action (char *tbuf, char *chan, char *from, char *text, int fromme)
    if (!session)
       fprintf (stderr, "*** NFCHAT WARNING: sess = 0x0 in channel_action()\n");
 
-   if (EMIT_SIGNAL (XP_CHANACTION, session, chan, from, text, NULL, fromme) == 1)
+   if (fire_signal (XP_CHANACTION, chan, from, text, NULL, fromme) == 1)
       return;
 
    if (fromme)
@@ -95,7 +79,7 @@ channel_action (char *tbuf, char *chan, char *from, char *text, int fromme)
    else
      strcpy (tbuf, from);
    
-   EMIT_SIGNAL (XP_TE_CHANACTION, session, tbuf, text, NULL, NULL, 0);
+   fire_signal (XP_TE_CHANACTION, tbuf, text, NULL, NULL, 0);
 }
 
 static int
@@ -138,10 +122,10 @@ channel_msg (char *outbuf, char *chan, char *from, char *text, char fromme)
    if (!session)
       return;
 
-   user = find_name (session, from);
+   user = find_name (from);
    if (user) user->lasttalk = time (0);
 
-   if (EMIT_SIGNAL (XP_CHANMSG, server, chan, from, text, NULL, fromme) == 1)
+   if (fire_signal (XP_CHANMSG, chan, from, text, NULL, fromme) == 1)
       return;
 
    if (fromme)
@@ -151,15 +135,9 @@ channel_msg (char *outbuf, char *chan, char *from, char *text, char fromme)
 
       if (SearchNick (text, server->nick) || SearchNick (text, prefs.bluestring))
       {
-         if (EMIT_SIGNAL (XP_HIGHLIGHT, session, chan, from, text, NULL, fromme) == 1)
+         if (fire_signal (XP_HIGHLIGHT, chan, from, text, NULL, fromme) == 1)
             return;
          highlight = TRUE;
-
-         if (session != current_tab && session->is_tab)
-         {
-            session->nick_said = TRUE;
-            fe_set_hilight ();
-         }
       }
       if (highlight)
 	sprintf (outbuf, "\002\003%d%s\002\017", prefs.bt_color, from);
@@ -168,9 +146,9 @@ channel_msg (char *outbuf, char *chan, char *from, char *text, char fromme)
    }
 
    if (fromme)
-     EMIT_SIGNAL (XP_TE_UCHANMSG, session, real_outbuf, text, NULL, NULL, 0);
+     fire_signal (XP_TE_UCHANMSG, real_outbuf, text, NULL, NULL, 0);
    else 
-     EMIT_SIGNAL (XP_TE_CHANMSG, session, real_outbuf, text, NULL, NULL, 0);
+     fire_signal (XP_TE_CHANMSG, real_outbuf, text, NULL, NULL, 0);
 }
 
 void
@@ -187,19 +165,19 @@ user_new_nick (char *outbuf, char *nick, char *newnick, int quiet)
    } else
       me = FALSE;
 
-   if (EMIT_SIGNAL (XP_CHANGENICK, server, nick, newnick, NULL, NULL, me) == 1)
+   if (fire_signal (XP_CHANGENICK, nick, newnick, NULL, NULL, me) == 1)
       return;
 
-   if (me || find_name (session, nick))
+   if (me || find_name (nick))
      {
        if (!quiet)
 	 {
 	   if (me)
-	     EMIT_SIGNAL (XP_TE_UCHANGENICK, session, nick, newnick, NULL, NULL, 0);
+	     fire_signal (XP_TE_UCHANGENICK, nick, newnick, NULL, NULL, 0);
 	   else
-	     EMIT_SIGNAL (XP_TE_CHANGENICK, session, nick, newnick, NULL, NULL, 0);
+	     fire_signal (XP_TE_CHANGENICK, nick, newnick, NULL, NULL, 0);
 	 }
-       change_nick (session, nick, newnick);
+       change_nick (nick, newnick);
      }
    if (!strcasecmp (session->channel, nick))
      {
@@ -221,14 +199,14 @@ you_joined (char *outbuf, char *chan, char *nick, char *ip)
   session->end_of_names = FALSE;
   sprintf (outbuf, "MODE %s\r\n", chan);
   tcp_send (outbuf);
-  clear_user_list (session);
-  EMIT_SIGNAL (XP_TE_UJOIN, session, nick, chan, ip, NULL, 0);
+  clear_user_list ();
+  fire_signal (XP_TE_UJOIN, nick, chan, ip, NULL, 0);
 }
 
 static void
 you_kicked (char *tbuf, char *chan, char *kicker, char *reason)
 {
-  EMIT_SIGNAL (XP_TE_UKICK, session, server->nick, chan, kicker, reason, 0);
+  fire_signal (XP_TE_UKICK, server->nick, chan, kicker, reason, 0);
   clear_channel (session);
   if (prefs.autorejoin)
     {
@@ -245,10 +223,10 @@ static void
 you_parted (char *tbuf, char *chan, char *ip, char *reason)
 {
   if (*reason)
-    EMIT_SIGNAL (XP_TE_UPARTREASON, session, server->nick, ip, chan, reason, 0);
+    fire_signal (XP_TE_UPARTREASON, server->nick, ip, chan, reason, 0);
   else
-    EMIT_SIGNAL (XP_TE_UPART, session, server->nick, ip, chan, NULL, 0);
-  clear_channel (sess);
+    fire_signal (XP_TE_UPART, server->nick, ip, chan, NULL, 0);
+  clear_channel (session);
 }
 
 
@@ -260,16 +238,15 @@ names_list (char *tbuf, char *chan, char *names)
 
    if (session->channel != chan)
    {
-      EMIT_SIGNAL (XP_TE_USERSONCHAN, session, chan, names, NULL,
-                   NULL, 0);
+      fire_signal (XP_TE_USERSONCHAN, chan, names, NULL, NULL, 0);
       return;
    }
-   EMIT_SIGNAL (XP_TE_USERSONCHAN, session, chan, names, NULL, NULL, 0);
+   fire_signal (XP_TE_USERSONCHAN, chan, names, NULL, NULL, 0);
 
    if (session->end_of_names)
    {
       session->end_of_names = FALSE;
-      clear_user_list (session);
+      clear_user_list ();
    }
 
    while (1)
@@ -279,12 +256,12 @@ names_list (char *tbuf, char *chan, char *names)
       case 0:
          name[pos] = 0;
          if (pos != 0)
-            add_name (session, name, 0);
+            add_name (name, 0);
          return;
       case ' ':
          name[pos] = 0;
          pos = 0;
-         add_name (session, name, 0);
+         add_name (name, 0);
          break;
       default:
          name[pos] = *names;
@@ -307,46 +284,42 @@ topic (char *tbuf, char *buf)
       new_topic = strip_color (po + 2);
       fe_set_topic (new_topic);
       free (new_topic);
-      EMIT_SIGNAL (XP_TE_TOPIC, session, buf, po + 2, NULL, NULL, 0);
+      fire_signal (XP_TE_TOPIC, buf, po + 2, NULL, NULL, 0);
    }
 }
 
 static void
 new_topic (char *tbuf, char *nick, char *chan, char *topic)
 {
-   session_t *sess = session;
-   if (sess)
-   {
-      fe_set_topic (topic);
-      EMIT_SIGNAL (XP_TE_NEWTOPIC, sess, nick, topic, chan, NULL, 0);
-   }
+  fe_set_topic (topic);
+  fire_signal (XP_TE_NEWTOPIC, nick, topic, chan, NULL, 0);
 }
 
 static void
 user_joined (char *outbuf, char *chan, char *user, char *ip)
 {
-   if (EMIT_SIGNAL (XP_JOIN, server, chan, user, ip, NULL, 0) == 1)
+   if (fire_signal (XP_JOIN, chan, user, ip, NULL, 0) == 1)
       return;
 
-   EMIT_SIGNAL (XP_TE_JOIN, session, user, chan, ip, NULL, 0);
-   add_name (session, user, ip);
+   fire_signal (XP_TE_JOIN, user, chan, ip, NULL, 0);
+   add_name (user, ip);
 }
 
 static void
 user_kicked (char *outbuf, char *chan, char *user, char *kicker, char *reason)
 {
-  EMIT_SIGNAL (XP_TE_KICK, session, kicker, user, chan, reason, 0);
-  sub_name (session, user);
+  fire_signal (XP_TE_KICK, kicker, user, chan, reason, 0);
+  sub_name (user);
 }
 
 static void
 user_parted (char *chan, char *user, char *ip, char *reason)
 {
   if (*reason)
-    EMIT_SIGNAL (XP_TE_PARTREASON, session, user, ip, chan, reason, 0);
+    fire_signal (XP_TE_PARTREASON, user, ip, chan, reason, 0);
   else
-    EMIT_SIGNAL (XP_TE_PART, session, user, ip, chan, NULL, 0);
-  sub_name (session, user);
+    fire_signal (XP_TE_PART, user, ip, chan, NULL, 0);
+  sub_name (user);
 }
 
 static void
@@ -357,7 +330,7 @@ channel_date (session_t *sess, char *tbuf, char *chan, char *timestr)
    p = strchr (tim, '\n');
    if (p)
       *p = 0;
-   EMIT_SIGNAL (XP_TE_CHANDATE, sess, chan, tim, NULL, NULL, 0);
+   fire_signal (XP_TE_CHANDATE, chan, tim, NULL, NULL, 0);
 }
 
 static void
@@ -371,7 +344,7 @@ topic_nametime (char *tbuf, char *chan, char *nick, char *date)
    if (p)
       *p = 0;
 
-   EMIT_SIGNAL (XP_TE_TOPICDATE, session, chan, nick, tim, NULL, 0);
+   fire_signal(XP_TE_TOPICDATE, chan, nick, tim, NULL, 0);
 }
 
 void
@@ -394,8 +367,8 @@ set_server_name (char *name)
 static void
 user_quit (char *outbuf, char *nick, char *reason)
 {
-  if (sub_name (session, nick))
-    EMIT_SIGNAL (XP_TE_QUIT, session, nick, reason, NULL, NULL, 0);
+  if (sub_name (nick))
+    fire_signal (XP_TE_QUIT, nick, reason, NULL, NULL, 0);
 }
 
 static void
@@ -410,11 +383,11 @@ got_ping_reply (char *outbuf, char *timestring, char *from)
    dif = nowtim - tim;
 
    if (atol (timestring) == 0)
-      EMIT_SIGNAL (XP_TE_PINGREP, session, from, "?", NULL, NULL, 0);
+      fire_signal (XP_TE_PINGREP, from, "?", NULL, NULL, 0);
    else
    {
       sprintf (outbuf, "%ld.%ld", dif / 1000000, (dif / 100000) % 10);
-      EMIT_SIGNAL (XP_TE_PINGREP, session, from, outbuf, NULL, NULL, 0);
+      fire_signal (XP_TE_PINGREP, from, outbuf, NULL, NULL, 0);
    }
 }
 
@@ -435,18 +408,18 @@ notice (char *outbuf, char *to, char *nick, char *msg, char *ip)
    po = strchr (msg, '\001');
    if (po)
       po[0] = 0;
-   EMIT_SIGNAL (XP_TE_NOTICE, session, nick, msg, NULL, NULL, 0);
+   fire_signal (XP_TE_NOTICE, nick, msg, NULL, NULL, 0);
 }
 
 static void
 handle_away (char *outbuf, char *nick, char *msg)
 {
-   struct away_msg *away = find_away_message (nick);
- 
-   if (away && !strcmp (msg, away->message))  /* Seen the msg before? */
-      save_away_message (nick, msg);
+  struct away_msg *away = find_away_message (nick);
   
-   EMIT_SIGNAL (XP_TE_WHOIS5, session, nick, msg, NULL, NULL, 0);
+  if (away && !strcmp (msg, away->message))  /* Seen the msg before? */
+    save_away_message (nick, msg);
+  
+  fire_signal (XP_TE_WHOIS5, nick, msg, NULL, NULL, 0);
 }
 
 static void
@@ -460,50 +433,50 @@ channel_mode (char *outbuf, char *chan, char *nick, char sign, char mode, char *
       switch (mode)
 	{
 	case 'k':
-	  if (EMIT_SIGNAL (XP_CHANSETKEY, session, chan, nick, extra, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANSETKEY, chan, nick, extra, NULL, 0) == 1)
 	    return;
 	  strncpy (session->channelkey, extra, 60);
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANSETKEY, session, nick, extra, NULL, NULL, 0);
+	    fire_signal (XP_TE_CHANSETKEY, nick, extra, NULL, NULL, 0);
 	  return;
 	case 'l':
-	  if (EMIT_SIGNAL (XP_CHANSETLIMIT, session, chan, nick, extra, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANSETLIMIT, chan, nick, extra, NULL, 0) == 1)
 	    return;
 	  session->limit = atoi (extra);
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANSETLIMIT, session, nick, extra, NULL, NULL, 0);
+	    fire_signal (XP_TE_CHANSETLIMIT, nick, extra, NULL, NULL, 0);
 	  return;
 	case 'o':
-	  if (EMIT_SIGNAL (XP_CHANOP, session, chan, nick, extra, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANOP, chan, nick, extra, NULL, 0) == 1)
 	    return;
-	  ul_op_name (session, extra);
+	  ul_op_name (extra);
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANOP, session, nick, extra, NULL, NULL, 0);
+	    fire_signal (XP_TE_CHANOP, nick, extra, NULL, NULL, 0);
 	  return;
 	case 'v':
-	  if (EMIT_SIGNAL (XP_CHANVOICE, session, chan, nick, extra, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANVOICE, chan, nick, extra, NULL, 0) == 1)
 	    return;
-	  voice_name (session, extra);
+	  voice_name (extra);
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANVOICE, session, nick, extra, NULL, NULL, 0);
+	    fire_signal (XP_TE_CHANVOICE, nick, extra, NULL, NULL, 0);
 	  return;
 	case 'b':
-	  if (EMIT_SIGNAL (XP_CHANBAN, session, chan, nick, extra, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANBAN, chan, nick, extra, NULL, 0) == 1)
 	    return;
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANBAN, session, nick, extra, NULL, NULL, 0);
+	    fire_signal (XP_TE_CHANBAN, nick, extra, NULL, NULL, 0);
 	  return;
 	case 'e':
-	  if (EMIT_SIGNAL (XP_CHANEXEMPT, session, chan, nick, extra, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANEXEMPT, chan, nick, extra, NULL, 0) == 1)
 	    return;
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANEXEMPT, session, nick, extra, NULL, NULL, 0);
+	    fire_signal (XP_TE_CHANEXEMPT, nick, extra, NULL, NULL, 0);
 	  return;   
 	case 'I':
-	  if (EMIT_SIGNAL (XP_CHANINVITE, session, chan, nick, extra, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANINVITE, chan, nick, extra, NULL, 0) == 1)
 	    return;
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANINVITE, session, nick, extra, NULL, NULL, 0);
+	    fire_signal (XP_TE_CHANINVITE, nick, extra, NULL, NULL, 0);
 	  return;
 	}
       break;
@@ -511,51 +484,50 @@ channel_mode (char *outbuf, char *chan, char *nick, char sign, char mode, char *
       switch (mode)
 	{
 	case 'k':
-	  if (EMIT_SIGNAL (XP_CHANRMKEY, session, chan, nick, NULL, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANRMKEY, chan, nick, NULL, NULL, 0) == 1)
 	    return;
 	  session->channelkey[0] = 0;
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANRMKEY, session, nick, NULL, NULL, NULL, 0);
+	    fire_signal (XP_TE_CHANRMKEY, nick, NULL, NULL, NULL, 0);
 	  return;
 	case 'l':
-	  if (EMIT_SIGNAL (XP_CHANRMLIMIT, session, chan, nick, NULL, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANRMLIMIT, chan, nick, NULL, NULL, 0) == 1)
 	    return;
 	  session->limit = 0;
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANRMLIMIT, session, nick, NULL, NULL, NULL, 0);
+	    fire_signal (XP_TE_CHANRMLIMIT, nick, NULL, NULL, NULL, 0);
 	  return;
 	case 'o':
-	  if (EMIT_SIGNAL (XP_CHANDEOP, session, chan, nick, extra, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANDEOP, chan, nick, extra, NULL, 0) == 1)
 	    return;
-	  deop_name (session, extra);
+	  deop_name (extra);
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANDEOP, session, nick, extra, NULL, NULL, 0);
+	    fire_signal (XP_TE_CHANDEOP, nick, extra, NULL, NULL, 0);
 	  return;
 	case 'v':
-	  if (EMIT_SIGNAL (XP_CHANDEVOICE, session, chan, nick, extra, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANDEVOICE, chan, nick, extra, NULL, 0) == 1)
 	    return;
-	  devoice_name (session, extra);
+	  devoice_name (extra);
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANDEVOICE, session, nick, extra, NULL,
-			 NULL, 0);
+	    fire_signal (XP_TE_CHANDEVOICE, nick, extra, NULL, NULL, 0);
 	  return;
 	case 'b':
-	  if (EMIT_SIGNAL (XP_CHANUNBAN, session, chan, nick, extra, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANUNBAN, chan, nick, extra, NULL, 0) == 1)
 	    return;
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANUNBAN, session, nick, extra, NULL, NULL, 0);
+	    fire_signal (XP_TE_CHANUNBAN, nick, extra, NULL, NULL, 0);
 	  return;
 	case 'e':
-	  if (EMIT_SIGNAL (XP_CHANRMEXEMPT, session, chan, nick, extra, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANRMEXEMPT, chan, nick, extra, NULL, 0) == 1)
 	    return;
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANRMEXEMPT, session, nick, extra, NULL, NULL, 0);   
+	    fire_signal (XP_TE_CHANRMEXEMPT, nick, extra, NULL, NULL, 0);   
 	  return;
 	case 'I':
-	  if (EMIT_SIGNAL (XP_CHANRMINVITE, session, chan, nick, extra, NULL, 0) == 1)
+	  if (fire_signal (XP_CHANRMINVITE, chan, nick, extra, NULL, 0) == 1)
 	    return;
 	  if (!quiet)
-	    EMIT_SIGNAL (XP_TE_CHANRMINVITE, session, nick, extra, NULL, NULL, 0);
+	    fire_signal (XP_TE_CHANRMINVITE, nick, extra, NULL, NULL, 0);
 	  return;
 	}
       break;
@@ -568,9 +540,9 @@ channel_mode (char *outbuf, char *chan, char *nick, char sign, char mode, char *
       tbuf[1][0] = mode;
       tbuf[1][1] = 0;
       if (extra && *extra)
-	EMIT_SIGNAL (XP_TE_CHANMODEGEN, session, nick, tbuf[0], tbuf[1], extra, 0);
+	fire_signal (XP_TE_CHANMODEGEN, nick, tbuf[0], tbuf[1], extra, 0);
       else
-	EMIT_SIGNAL (XP_TE_CHANMODEGEN, session, nick, tbuf[0], tbuf[1], extra, 0);
+	fire_signal (XP_TE_CHANMODEGEN, nick, tbuf[0], tbuf[1], extra, 0);
     }
 }
 
@@ -673,15 +645,15 @@ next_nick (char *outbuf, char *nick)
     case 2:
       sprintf (outbuf, "NICK %s\r\n", prefs.nick2);
       tcp_send (outbuf);
-      EMIT_SIGNAL (XP_TE_NICKCLASH, session, nick, prefs.nick2, NULL, NULL, 0);
+      fire_signal (XP_TE_NICKCLASH, nick, prefs.nick2, NULL, NULL, 0);
       break;
     case 3:
       sprintf (outbuf, "NICK %s\r\n", prefs.nick3);
       tcp_send (outbuf);
-      EMIT_SIGNAL (XP_TE_NICKCLASH, session, nick, prefs.nick3, NULL, NULL, 0);
+      fire_signal (XP_TE_NICKCLASH, nick, prefs.nick3, NULL, NULL, 0);
       break;
     default:
-      EMIT_SIGNAL (XP_TE_NICKFAIL, session, NULL, NULL, NULL, NULL, 0);
+      fire_signal (XP_TE_NICKFAIL, NULL, NULL, NULL, NULL, 0);
     }
 }
 
@@ -708,7 +680,7 @@ process_line (void)
   buf = server->linebuf;
   process_data_init (pdibuf, buf + 1, word, word_eol);
   
-  if (EMIT_SIGNAL (XP_INBOUND, session, server, buf, NULL, NULL, 0) == 1)
+  if (fire_signal (XP_INBOUND, server, buf, NULL, NULL, 0) == 1)
     return;
   
   if (*buf != ':')
@@ -723,11 +695,10 @@ process_line (void)
 	}
       if (!strncmp (buf, "ERROR", 5))
 	{
-	  EMIT_SIGNAL (XP_TE_SERVERERROR, session, buf + 7, NULL,
-		       NULL, NULL, 0);
+	  fire_signal (XP_TE_SERVERERROR, buf + 7, NULL, NULL, NULL, 0);
 	  return;
 	}
-      EMIT_SIGNAL (XP_TE_SERVERGENMESSAGE, session, buf, NULL, NULL, NULL, 0);
+      fire_signal (XP_TE_SERVERGENMESSAGE, buf, NULL, NULL, NULL, 0);
     } else
       {
 	buf++;
@@ -754,13 +725,13 @@ process_line (void)
 		  case 303:
 		    break;
 		  case 312:
-		    EMIT_SIGNAL (XP_TE_WHOIS3, session, word[4], word_eol[5], NULL, NULL, 0);
+		    fire_signal (XP_TE_WHOIS3, word[4], word_eol[5], NULL, NULL, 0);
 		    break;
 		  case 311:
 		    server->inside_whois = 1;
 		    /* FALL THROUGH */
 		  case 314:
-		    EMIT_SIGNAL (XP_TE_WHOIS1, session, find_word (pdibuf, 4), find_word (pdibuf, 5), find_word (pdibuf, 6), find_word_to_end (buf, 8) + 1, 0);
+		    fire_signal (XP_TE_WHOIS1, find_word (pdibuf, 4), find_word (pdibuf, 5), find_word (pdibuf, 6), find_word_to_end (buf, 8) + 1, 0);
 		    break;
 		  case 317:
 		    {
@@ -769,29 +740,33 @@ process_line (void)
 		      char *po, *tim = ctime (&n);
 		      sprintf (outbuf, "%02ld:%02ld:%02ld", idle / 3600, (idle / 60) % 60, idle % 60);
 		      if (n == 0)
-			EMIT_SIGNAL (XP_TE_WHOIS4, session, find_word (pdibuf, 4), outbuf, NULL, NULL, 0);
+			fire_signal (XP_TE_WHOIS4, find_word (pdibuf, 4), outbuf, NULL, NULL, 0);
 		      else
-			EMIT_SIGNAL (XP_TE_WHOIS4T, session, find_word (pdibuf, 4), outbuf, tim, NULL, 0);
+			{
+			  if ((po = strchr (tim, '\n')))
+			    *po = 0;
+			fire_signal (XP_TE_WHOIS4T, find_word (pdibuf, 4), outbuf, tim, NULL, 0);
+			}
 		    }
 		    break;
 		  case 318:
 		    server->inside_whois = 0;
-		    EMIT_SIGNAL (XP_TE_WHOIS6, session, word[4], NULL, NULL, NULL, 0);
+		    fire_signal (XP_TE_WHOIS6, word[4], NULL, NULL, NULL, 0);
 		    break;
 		  case 313:
 		  case 319:
-		    EMIT_SIGNAL (XP_TE_WHOIS2, session, word[4], word_eol[5] + 1, NULL, NULL, 0);
+		    fire_signal (XP_TE_WHOIS2, word[4], word_eol[5] + 1, NULL, NULL, 0);
 		    break;
 		  case 321:
 		    break;
 		  case 322:
 		    sprintf (outbuf, "%-16.16s %-7d %s\017\n", find_word (pdibuf, 4), atoi (find_word (pdibuf, 5)), find_word_to_end (buf, 6) + 1);
-		    PrintText (session, outbuf);
+		    PrintText (outbuf);
 		    break;
 		  case 323:
 		    break;
 		  case 324:
-		    EMIT_SIGNAL (XP_TE_CHANMODES, session, word[4], word_eol[5], NULL, NULL, 0);
+		    fire_signal (XP_TE_CHANMODES, word[4], word_eol[5], NULL, NULL, 0);
 		    channel_modes (outbuf, word, word[3], 1);
 		    break;
 		  case 329:
@@ -807,7 +782,7 @@ process_line (void)
 		    if (!server->skip_next_who)
 		      {
 			sprintf (outbuf, "%s@%s", word[5], word[6]);
-			if (!userlist_add_hostname (session, word[8], outbuf, word_eol[11], word[7]) && !who_sess->doing_who)
+			if (!userlist_add_hostname (word[8], outbuf, word_eol[11], word[7]) && !session->doing_who)
 			  goto def;
 		      } else
 			if (!server->doing_who)
@@ -825,13 +800,15 @@ process_line (void)
 		      }
 		    break;
 		  case 353:          /* NAMES */
-		    char *names, *chan;
+		    {
+		      char *names, *chan;
 		    
-		    chan = word[5];
-		    names = word_eol[6];
-		    if (*names == ':')
-		      names++;
-		    names_list (outbuf, chan, names);
+		      chan = word[5];
+		      names = word_eol[6];
+		      if (*names == ':')
+			names++;
+		      names_list (outbuf, chan, names);
+		    }
 		    break;
 		  case 366:
 		    session->end_of_names = TRUE;
@@ -855,16 +832,16 @@ process_line (void)
 		      goto def;
 		    break;
 		  case 471:
-		    EMIT_SIGNAL (XP_TE_USERLIMIT, session, word[4], NULL, NULL, NULL, 0);
+		    fire_signal (XP_TE_USERLIMIT, word[4], NULL, NULL, NULL, 0);
 		    break;
 		  case 473:
-		    EMIT_SIGNAL (XP_TE_INVITE, session, word[4], NULL, NULL, NULL, 0);
+		    fire_signal (XP_TE_INVITE, word[4], NULL, NULL, NULL, 0);
 		    break;
 		  case 474:
-		    EMIT_SIGNAL (XP_TE_BANNED, session, word[4], NULL, NULL, NULL, 0);
+		    fire_signal (XP_TE_BANNED, word[4], NULL, NULL, NULL, 0);
 		    break;
 		  case 475:
-		    EMIT_SIGNAL (XP_TE_KEYWORD, session, word[4], NULL, NULL, NULL, 0);
+		    fire_signal (XP_TE_KEYWORD, word[4], NULL, NULL, NULL, 0);
 		    break;
 		    
 		  default:
@@ -876,13 +853,13 @@ process_line (void)
 			if (n == 376)
 			  {
 			    server->motd_skipped = TRUE;
-			    EMIT_SIGNAL (XP_TE_MOTDSKIP, session, NULL, NULL, NULL, NULL, 0);
+			    fire_signal (XP_TE_MOTDSKIP, NULL, NULL, NULL, NULL, 0);
 			    return;
 			  }
 		      }
 		    if (n == 375 || n == 372 || n == 376 || n == 422)
 		      {
-			EMIT_SIGNAL (XP_TE_MOTD, session, text, NULL, NULL, NULL, 0);
+			fire_signal (XP_TE_MOTD, text, NULL, NULL, NULL, 0);
 			return;
 		      }
 		    
@@ -894,7 +871,7 @@ process_line (void)
 			if (*chan == ':')
 			  chan++;
 		      }
-		    EMIT_SIGNAL (XP_TE_SERVTEXT, server->session, text, NULL, NULL, NULL, 0);
+		    fire_signal (XP_TE_SERVTEXT, text, NULL, NULL, NULL, 0);
 		  }
 	      }
 	  } else
@@ -934,7 +911,7 @@ process_line (void)
 		      
 		      if (!strcmp ("INVITE", cmd))
 			{
-			  EMIT_SIGNAL (XP_TE_INVITED, session, word[4] + 1, nick, NULL, NULL, 0);
+			  fire_signal (XP_TE_INVITED, word[4] + 1, nick, NULL, NULL, 0);
 			  return;
 			}
 		      if (!strcmp ("JOIN", cmd))
@@ -970,7 +947,7 @@ process_line (void)
 			    {
 			      char *msg = find_word_to_end (buf, 4) + 1;
 			      if (strcmp (nick, server->servername) == 0 || strchr (nick, '.'))
-				EMIT_SIGNAL (XP_TE_SERVERGENMESSAGE, session, msg, NULL, NULL, NULL, 0);
+				fire_signal (XP_TE_SERVERGENMESSAGE, msg, NULL, NULL, NULL, 0);
 			      else
 				notice (outbuf, to, nick, msg, ip);
 			      return;
@@ -1038,7 +1015,7 @@ process_line (void)
 			}
 		      if (!strcmp ("KILL", cmd))
 			{
-			  EMIT_SIGNAL (XP_TE_KILL, session, nick, word_eol[5], NULL,NULL, 0);
+			  fire_signal (XP_TE_KILL, nick, word_eol[5], NULL,NULL, 0);
 			  return;
 			}
 		      if (!strcmp ("WALLOPS", cmd))
@@ -1046,15 +1023,15 @@ process_line (void)
 			  char *msg = word_eol[3];
 			  if (*msg == ':')
 			    msg++;
-			  EMIT_SIGNAL (XP_TE_WALLOPS, session, nick, msg, NULL, NULL, 0);
+			  fire_signal (XP_TE_WALLOPS, nick, msg, NULL, NULL, 0);
 			  return;
 			}
 		      sprintf (outbuf, "(%s/%s) %s\n", nick, ip, find_word_to_end (buf, 2));
-		      PrintText (session, outbuf);
+		      PrintText (outbuf);
 		      return;
 		    }
 		}
-	      EMIT_SIGNAL (XP_TE_SERVERGENMESSAGE, session, buf, NULL, NULL, NULL, 0);
+	      fire_signal (XP_TE_SERVERGENMESSAGE, buf, NULL, NULL, NULL, 0);
 	    }
       }
 }

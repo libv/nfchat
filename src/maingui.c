@@ -37,22 +37,17 @@
 #include "xtext.h"
 
 GtkWidget *main_window = 0;
-GtkWidget *main_book;
-GtkStyle *normaltab_style = 0;
-GtkStyle *redtab_style;
-GtkStyle *bluetab_style;
 GtkStyle *inputgad_style;
 
-extern session_t *current_tab; 
 extern struct xchatprefs prefs;
 extern GtkStyle *channelwin_style;
 extern GdkFont *font_normal;
 extern gint xchat_is_quitting;
 
-extern int handle_multiline (session_t *sess, char *cmd, int history, int nocommand);
+extern int handle_multiline (char *cmd, int history, int nocommand);
 extern int kill_session_callback (void);
 extern gint gtk_kill_session_callback (GtkWidget *, void *blah);
-extern void clear_user_list (session_t *sess);
+extern void clear_user_list (void);
 extern void handle_inputgad (GtkWidget * igad, void *blah);
 int key_handle_key_press (GtkWidget *, GdkEventKey *, gpointer);
 
@@ -94,21 +89,11 @@ fe_set_title (void)
    char tbuf[200];
    if (!server->connected)
       strcpy (tbuf, "NF-Chat [" VERSION "]");
+   else if (session->channel[0] == 0 || session->is_server)
+     snprintf (tbuf, sizeof tbuf, "NF-Chat [" VERSION "]: %s", server->servername);
    else
-     {
-       if (session->channel[0] == 0 || session->is_server)
-         snprintf (tbuf, sizeof tbuf, "NF-Chat [" VERSION "]: %s", server->servername);
-       else
-         snprintf (tbuf, sizeof tbuf, "NF-Chat [" VERSION "]: %s / %s", server->servername, session->channel);
-     }
-   if (session->is_tab)
-     {
-       if (!main_window)
-         return;
-       if (current_tab == sess)
-         gtk_window_set_title ((GtkWindow *) main_window, tbuf);
-     } else
-       gtk_window_set_title ((GtkWindow *) session->gui->window, tbuf);
+     snprintf (tbuf, sizeof tbuf, "NF-Chat [" VERSION "]: %s / %s", server->servername, session->channel);
+   gtk_window_set_title ((GtkWindow *) session->gui->window, tbuf);
 }
 
 void
@@ -124,7 +109,7 @@ fe_clear_channel (void)
    gtk_label_set_text (GTK_LABEL (session->gui->namelistinfo), " ");
    gtk_label_set_text (GTK_LABEL (session->gui->changad), "<none>");
 
-   clear_user_list (session);
+   clear_user_list ();
 
    if (session->gui->op_xpm)
       gtk_widget_destroy (session->gui->op_xpm);
@@ -193,132 +178,10 @@ maingui_create_textlist (GtkWidget *leftpane)
 }
 
 static void
-gui_new_tab ()
-{
-   fe_set_title ();
-   gtk_widget_grab_focus (session->gui->inputgad);
-
-   if (session->new_data || session->nick_said)
-   {
-      session->nick_said = FALSE;
-      session->new_data = FALSE;
-      gtk_widget_set_rc_style (session->gui->changad);
-   }
-}
-
-static void
-gui_new_tab_callback (GtkWidget * widget, GtkNotebookPage * nbpage, guint page)
-{
-   if (xchat_is_quitting)
-      return;
-   if (session->gui->window == nbpage->child)
-     {
-       gui_new_tab ();
-       return;
-     }
-}
-
-static void
-gui_mainbook_invalid (GtkWidget * w, GtkWidget * main_window)
-{
-   main_book = NULL;
-   gtk_widget_destroy (main_window);
-}
-
-static void
-gui_main_window_kill (GtkWidget * win, void *blah)
-{
-   xchat_is_quitting = TRUE;
-   if (!sess->is_tab)
-     {
-       xchat_is_quitting = FALSE;
-       break;
-     }
-   main_window = 0;
-}
-
-static void
 maingui_userlist_selected (GtkWidget *clist, gint row, gint column,
                            GdkEventButton *even)
 {
    gtk_clist_unselect_all (GTK_CLIST (clist));
-}
-
-void
-maingui_set_tab_pos (int pos)
-{
-   gtk_notebook_set_show_tabs ((GtkNotebook*) main_book, TRUE);
-   switch (pos)
-   {
-   case 0:
-      gtk_notebook_set_tab_pos ((GtkNotebook *) main_book, GTK_POS_BOTTOM);
-      break;
-   case 1:
-      gtk_notebook_set_tab_pos ((GtkNotebook *) main_book, GTK_POS_TOP);
-      break;
-   case 2:
-      gtk_notebook_set_tab_pos ((GtkNotebook *) main_book, GTK_POS_LEFT);
-      break;
-   case 3:
-      gtk_notebook_set_tab_pos ((GtkNotebook *) main_book, GTK_POS_RIGHT);
-      break;
-   case 4:
-      gtk_notebook_set_show_tabs ((GtkNotebook*) main_book, FALSE);
-      break;
-   }
-}
-
-static void
-gui_make_tab_window ()
-{
-   GtkWidget *main_box;
- 
-   if (!main_window)
-   {
-      current_tab = 0;
-      main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-
-      gtk_widget_realize (main_window);
-      gtk_signal_connect ((GtkObject *) main_window, "destroy",
-                          GTK_SIGNAL_FUNC (gui_main_window_kill), session);
-      gtk_signal_connect ((GtkObject *) main_window, "focus_in_event",
-                          GTK_SIGNAL_FUNC (focus_in), 0);
-      gtk_window_set_policy ((GtkWindow *) main_window, TRUE, TRUE, FALSE);
-
-      main_box = gtk_vbox_new (0, 0);
-
-      gtk_container_add (GTK_CONTAINER (main_window), main_box);
-
-      gtk_widget_show (main_box);
-
-      main_book = gtk_notebook_new ();
-
-      maingui_set_tab_pos (prefs.tabs_position);
-
-      gtk_notebook_set_scrollable ((GtkNotebook *) main_book, TRUE);
-      gtk_signal_connect ((GtkObject *) main_book, "switch_page",
-                          GTK_SIGNAL_FUNC (gui_new_tab_callback), 0);
-      gtk_signal_connect ((GtkObject *) main_book, "destroy",
-                          GTK_SIGNAL_FUNC (gui_mainbook_invalid), main_window);
-    
-      gtk_container_add (GTK_CONTAINER (main_box), main_book);
-      gtk_widget_show (main_book);
-   }
-}
-
-static void
-maingui_init_styles (GtkStyle * style)
-{
-   normaltab_style = gtk_style_new ();
-   normaltab_style->font = style->font;
-
-   redtab_style = gtk_style_new ();
-   redtab_style->font = style->font;
-   memcpy (redtab_style->fg, &colors[4], sizeof (GdkColor));
-
-   bluetab_style = gtk_style_new ();
-   bluetab_style->font = style->font;
-   memcpy (bluetab_style->fg, &colors[12], sizeof (GdkColor));
 }
 
 void
@@ -386,9 +249,9 @@ create_window (void)
    gtk_widget_show (session->gui->namelistinfo);
 
    maingui_create_textlist (leftpane);
-   sess->gui->leftpane = leftpane;
+   session->gui->leftpane = leftpane;
 
-   sess->gui->namelistgad = gtkutil_clist_new (1, 0, nlbox, GTK_POLICY_AUTOMATIC, maingui_userlist_selected, session, 0, 0, GTK_SELECTION_MULTIPLE);
+   session->gui->namelistgad = gtkutil_clist_new (1, 0, nlbox, GTK_POLICY_AUTOMATIC, maingui_userlist_selected, session, 0, 0, GTK_SELECTION_MULTIPLE);
    
    gtk_clist_set_column_width (GTK_CLIST (session->gui->namelistgad), 0, 10);
    gtk_widget_set_usize (session->gui->namelistgad->parent, 115, 0);
@@ -417,66 +280,8 @@ create_window (void)
 
    gtk_widget_show (session->gui->window);
 
-   if (!normaltab_style)
-     maingui_init_styles (gtk_widget_get_style (session->gui->changad));
    if (prefs.mainwindow_left || prefs.mainwindow_top)
      gdk_window_move (session->gui->window->window, prefs.mainwindow_left, prefs.mainwindow_top);
-}
-
-static int
-maingui_box_close (GtkWidget *wid, struct relink_data *rld)
-{
-	if (rld->win)
-	   gtk_widget_destroy (rld->win);
-	if (rld->hbox)
-	   gtk_widget_destroy (rld->hbox);
-	
-	if (rld->close_callback)
-	   rld->close_callback (NULL, rld->userdata);
-   
-   free (rld->ltitle);
-	g_free (rld);
-	return 1;
-}
-
-GtkWidget *
-maingui_new_tab (char *title, char *name, void *close_callback, void *userdata)
-{
-   /* int page; */
-   GtkWidget *wid, *box, *label, *topbox;
-   struct relink_data *rld = g_new0 (struct relink_data, 1);
-   char *buf;
-
-   topbox = gtk_hbox_new (0, 0);
-   gtk_widget_show (topbox);
-
-   box = gtk_vbox_new (0, 0);
-   gtk_box_pack_start (GTK_BOX(box), topbox, 0, 0, 0);
-   gtk_widget_show (box);
-
-   wid = gtk_label_new (title);
-   gtk_container_add (GTK_CONTAINER(topbox), wid);
-   gtk_widget_show (wid);
-   
-   gtk_signal_connect (GTK_OBJECT(box), "destroy",
-		       GTK_SIGNAL_FUNC(maingui_box_close), rld);
-
-   buf = malloc (strlen(name) + 3);
-   sprintf (buf, "(%s)", name);
-   label = gtk_label_new (buf);
-   free (buf);
-   gtk_widget_show (label);
-
-   gtk_notebook_append_page (GTK_NOTEBOOK (main_book), box, label);
-
-   rld->win = NULL;
-   rld->stitle = name;
-   rld->ltitle = strdup (title);
-   rld->close_callback = close_callback;
-   rld->userdata = userdata;
-   
-   gtk_object_set_user_data (GTK_OBJECT (box), rld);
-   return box;
 }
 
 gint
@@ -494,8 +299,6 @@ fe_session_callback (void)
       fe_progressbar_end ();
       server->connecting = TRUE;
    }
-   if (session->is_tab && main_book && gtk_notebook_get_nth_page (GTK_NOTEBOOK (main_book), 0) == NULL)
-     gtk_widget_destroy (main_book);
 }
 
 void
@@ -506,7 +309,7 @@ handle_inputgad (GtkWidget * igad, void *blah)
    if (cmd[0] == 0)
       return;
 
-   handle_multiline (session, cmd, TRUE, FALSE);
+   handle_multiline (cmd, TRUE, FALSE);
 
    gtk_entry_set_text (GTK_ENTRY (igad), "");
 }

@@ -1960,31 +1960,6 @@ gtk_xtext_set_background (GtkXText *xtext, GdkPixmap *pixmap, int trans, int sha
    }
 }
 
-gchar* gtk_xtext_get_chars(GtkXText *xtext)
-{
-    int lenght=0;
-    gchar *chars;
-    textentry *tentry=xtext->text_first;
-    while(tentry!=NULL)
-    {
-        lenght+=tentry->str_len+1;
-        tentry=tentry->next;
-    }
-    if (lenght==0) return NULL;
-    chars=g_malloc (lenght+1);
-    *chars = 0;
-
-    tentry=xtext->text_first;
-    while(tentry!=NULL)
-    {
-        strcat(chars,tentry->str);
-        strcat(chars,"\n");
-        tentry=tentry->next;
-    }
-
-    return chars;
-}
-
 static int
 gtk_xtext_lines_taken (GtkXText *xtext, textentry *ent)
 {
@@ -2285,20 +2260,6 @@ gtk_xtext_render_page (GtkXText *xtext, int startline)
    gtk_xtext_draw_sep (xtext, -1);
 }
 
-void
-gtk_xtext_refresh (GtkXText *xtext)
-{
-   if (GTK_WIDGET_REALIZED (GTK_WIDGET (xtext)))
-   {
-      if (xtext->transparent)
-      {
-         gtk_xtext_free_trans (xtext);
-         gtk_xtext_load_trans (xtext);
-      }
-      gtk_xtext_render_page (xtext, xtext->adj->value);
-   }
-}
-
 /* remove the topline from the list */
 
 static void
@@ -2311,28 +2272,6 @@ gtk_xtext_remove_top (GtkXText *xtext)
    xtext->last_line = -1;
    xtext->text_first = ent->next;
    free (ent);
-}
-
-void
-gtk_xtext_remove_lines (GtkXText *xtext, int lines, int refresh)
-{
-   textentry *next;
-
-   while (xtext->text_first && lines)
-   {
-      next = xtext->text_first->next;
-      free (xtext->text_first);
-      xtext->text_first = next;
-      lines--;
-   }
-   if (!xtext->text_first)
-      xtext->text_last = NULL;
-
-   if (refresh)
-   {
-      gtk_xtext_calc_lines (xtext, TRUE);
-      gtk_xtext_refresh (xtext);
-   }
 }
 
 static int
@@ -2445,24 +2384,3 @@ gtk_xtext_append_indent (GtkXText *xtext,
 
    gtk_xtext_append_entry (xtext, ent);
 }
-
-void
-gtk_xtext_append (GtkXText *xtext, char *text, int len)
-{
-   textentry *ent;
-
-   if (len == -1)
-      len = strlen (text);
-
-   ent = malloc (len + 1 + sizeof (textentry));
-   ent->str = (char *)ent + sizeof (textentry);
-   ent->str_len = len;
-   if (len)
-      memcpy (ent->str, text, len);
-   ent->str[len] = 0;
-   ent->indent = 0;
-   ent->left_len = -1;
-
-   gtk_xtext_append_entry (xtext, ent);
-}
-

@@ -31,41 +31,16 @@
 #include "signals.h"
 #include "fe.h"
 #include "util.h"
+#include "xtext.h"
 
-extern GSList *sess_list;
 extern struct xchatprefs prefs;
 
 extern unsigned char *strip_color (unsigned char *text);
-extern void check_special_chars (char *);
+extern void check_special_chars (char *text);
 extern char **environ;
+extern void PrintText (char *text);
 
 int pevt_build_string (char *input, char **output, int *max_arg);
-
-int
-timecat (char *buf)
-{
-   time_t timval = time (0);
-   char *tim = ctime (&timval) + 10;
-   tim[0] = '[';
-   tim[9] = ']';
-   tim[10] = ' ';
-   tim[11] = 0;
-   strcat (buf, tim);
-   return 11;
-}
-
-void
-PrintText (session_t *sess, unsigned char *text)
-{
-   if (!sess)
-   {
-      if (!sess_list)
-         return;
-      sess = (session_t *) sess_list->data;
-   }
-
-   fe_print_text (text);
-}
 
 /* Print Events stuff here --AGL */
 
@@ -130,8 +105,8 @@ PrintText (session_t *sess, unsigned char *text)
    --AGL
  */
 
-char **pntevts_text;
-char **pntevts;
+static char **pntevts_text;
+static char **pntevts;
 
 static char *pevt_join_help[] =
 {
@@ -838,7 +813,7 @@ load_text_events ()
 }
 
 static void
-display_event (char *i, session_t *sess, int numargs, char **args)
+display_event (char *i, int numargs, char **args)
 {
    int len, oi, ii, *ar;
    char o[4096], d, a, done_all = FALSE;
@@ -895,7 +870,7 @@ display_event (char *i, session_t *sess, int numargs, char **args)
    o[oi] = 0;
    if (*o == '\n')
       return;
-   PrintText (sess, o);
+   PrintText (o);
 }
 
 int
@@ -1075,8 +1050,7 @@ pevt_build_string (char *input, char **output, int *max_arg)
 }
 
 static int
-textsignal_handler (session_t *sess, void *b, void *c,
-             void *d, void *e, char f)
+textsignal_handler (void *b, void *c, void *d, void *e, char f)
 {
    /* This handler *MUST* always be the last in the chain
       because it doesn't call the next handler
@@ -1084,9 +1058,6 @@ textsignal_handler (session_t *sess, void *b, void *c,
 
    char *args[8];
    int numargs, i;
-
-   if (!sess)
-      return 0;
 
    if (!text_event (current_signal))
    {
@@ -1101,7 +1072,7 @@ textsignal_handler (session_t *sess, void *b, void *c,
    args[2] = d;
    args[3] = e;
 
-   display_event (pntevts[(int) current_signal], sess, numargs, args);
+   display_event (pntevts[(int) current_signal], numargs, args);
    return 0;
 }
 
@@ -1114,7 +1085,6 @@ printevent_setup ()
    sig = (struct xp_signal *) malloc (sizeof (struct xp_signal));
 
    sig->signal = -1;
-   sig->naddr = NULL;
    sig->callback = XP_CALLBACK (textsignal_handler);
    
    for (evt = 0; evt < NUM_XP; evt++)
@@ -1125,8 +1095,3 @@ printevent_setup ()
       sigroots[evt] = (struct xp_signal *)g_slist_prepend ((void *)sigroots[evt], sig);
    }
 }
-
-
-
-
-

@@ -30,13 +30,12 @@
 #include "gtkutil.h"
 #include "xtext.h"
 
-extern GtkWidget *main_window, *main_book;
+extern GtkWidget *main_window;
 extern int waitline (int sok, char *buf, int bufsize);
-extern int handle_multiline (session_t *sess, char *cmd, int history, int nocommand);
+extern int handle_multiline (char *cmd, int history, int nocommand);
 
 extern struct commands cmds[1];
-
-extern void PrintText (session_t *sess, unsigned char *text);
+extern void PrintText (char *text);
 extern int buf_get_line (char *, char **, int *, int len);
 
 static void
@@ -118,6 +117,121 @@ tab_nick_comp_next (GtkWidget * wid, char *b4, char *nick, char *c5, int shift)
    gtk_entry_set_text (GTK_ENTRY (wid), buf);
 
    return 1;
+}
+
+static void
+tab_comp_find_common (char *a, char *b)
+{
+   int c;
+   int alen = strlen (a), blen = strlen (b),
+       len;
+
+   if (blen > alen)
+      len = alen;
+   else
+      len = blen;
+   for (c = 0; c < len; c++)
+   {
+      if (a[c] != b[c])
+      {
+         a[c] = 0;
+         return;
+      }
+   }
+   a[c] = 0;
+}
+
+static void
+tab_comp_cmd (GtkWidget * t)
+{
+   char *text, *last = NULL, *cmd, *postfix = NULL;
+   int len, i, slen;
+   char buf[2048];
+   char lcmd[2048];
+
+   text = gtk_entry_get_text (GTK_ENTRY (t));
+
+   text++;
+   len = strlen (text);
+   if (len == 0)
+      return;
+   for (i = 0; i < len; i++)
+   {
+      if (text[i] == ' ')
+      {
+         postfix = &text[i + 1];
+         text[i] = 0;
+         len = strlen (text);
+         break;
+      }
+   }
+
+   i = 0;
+   while (cmds[i].name != NULL)
+   {
+      cmd = cmds[i].name;
+      slen = strlen (cmd);
+      if (len > slen)
+      {
+         i++;
+         continue;
+      }
+      if (strncasecmp (cmd, text, len) == 0)
+      {
+         if (last == NULL)
+         {
+            last = cmd;
+            snprintf (lcmd, sizeof (lcmd), "%s", last);
+         } else if (last > (char *) 1)
+         {
+            snprintf (buf, sizeof (buf), "%s %s ", last, cmd);
+            PrintText (buf);
+            last = (void *) 1;
+            tab_comp_find_common (lcmd, cmd);
+         } else if (last == (void *) 1)
+         {
+            PrintText (cmd);
+            tab_comp_find_common (lcmd, cmd);
+         }
+      }
+      i++;
+   }
+
+   if (last == NULL)
+      return;
+   if (last == (void *) 1)
+     PrintText ("\n");
+
+   if (last > (char *) 1)
+   {
+      if (strlen (last) > (sizeof (buf) - 1))
+         return;
+      if (postfix == NULL)
+         snprintf (buf, sizeof (buf), "/%s ", last);
+      else
+         snprintf (buf, sizeof (buf), "/%s %s", last, postfix);
+      gtk_entry_set_text (GTK_ENTRY (t), buf);
+      return;
+   } else if (strlen (lcmd) > (sizeof (buf) - 1))
+      return;
+   if (postfix == NULL)
+      snprintf (buf, sizeof (buf), "/%s", lcmd);
+   else
+      snprintf (buf, sizeof (buf), "/%s %s", lcmd, postfix);
+   gtk_entry_set_text (GTK_ENTRY (t), buf);
+}
+
+static int
+text_is_more_than_just_nick (char *tx)
+{
+   int c, len = strlen (tx);
+
+   for (c = 0; c < len; c++)
+   {
+      if (tx[c] == ' ' || tx[c] == ':' || tx[c] == '.' || tx[c] == '?')
+         return 1;
+   }
+   return 0;
 }
 
 static int
@@ -270,19 +384,6 @@ replace_handle (GtkWidget * t)
 }
 
 static int
-text_is_more_than_just_nick (char *tx)
-{
-   int c, len = strlen (tx);
-
-   for (c = 0; c < len; c++)
-   {
-      if (tx[c] == ' ' || tx[c] == ':' || tx[c] == '.' || tx[c] == '?')
-         return 1;
-   }
-   return 0;
-}
-
-static int
 nick_comp_get_nick (char *tx, char *n)
 {
    int c, len = strlen (tx);
@@ -352,114 +453,6 @@ nick_comp_chng (GtkWidget * t, int updown)
       last = user;
       list = list->next;
    }
-}
-
-static void
-tab_comp_find_common (char *a, char *b)
-{
-   int c;
-   int alen = strlen (a), blen = strlen (b),
-       len;
-
-   if (blen > alen)
-      len = alen;
-   else
-      len = blen;
-   for (c = 0; c < len; c++)
-   {
-      if (a[c] != b[c])
-      {
-         a[c] = 0;
-         return;
-      }
-   }
-   a[c] = 0;
-}
-
-static void
-tab_comp_cmd (GtkWidget * t)
-{
-   char *text, *last = NULL, *cmd, *postfix = NULL;
-   int len, i, slen;
-   char buf[2048];
-   char lcmd[2048];
-
-   text = gtk_entry_get_text (GTK_ENTRY (t));
-
-   text++;
-   len = strlen (text);
-   if (len == 0)
-      return;
-   for (i = 0; i < len; i++)
-   {
-      if (text[i] == ' ')
-      {
-         postfix = &text[i + 1];
-         text[i] = 0;
-         len = strlen (text);
-         break;
-      }
-   }
-
-   i = 0;
-   while (cmds[i].name != NULL)
-   {
-      cmd = cmds[i].name;
-      slen = strlen (cmd);
-      if (len > slen)
-      {
-         i++;
-         continue;
-      }
-      if (strncasecmp (cmd, text, len) == 0)
-      {
-         if (last == NULL)
-         {
-            last = cmd;
-            snprintf (lcmd, sizeof (lcmd), "%s", last);
-         } else if (last > (char *) 1)
-         {
-            snprintf (buf, sizeof (buf), "%s %s ", last, cmd);
-            PrintText (session, buf);
-            /*PrintText (sess, last);
-            PrintText (sess, "\t");
-            PrintText (sess, cmd);
-            PrintText (sess, "\t");*/
-            last = (void *) 1;
-            tab_comp_find_common (lcmd, cmd);
-         } else if (last == (void *) 1)
-         {
-            PrintText (session, cmd);
-            /*PrintText (sess, cmd);
-            PrintText (sess, "\t");*/
-            tab_comp_find_common (lcmd, cmd);
-         }
-      }
-      i++;
-   }
-
-   if (last == NULL)
-      return;
-   if (last == (void *) 1)
-      PrintText (session, "\n");
-
-   if (last > (char *) 1)
-   {
-      if (strlen (last) > (sizeof (buf) - 1))
-         return;
-      if (postfix == NULL)
-         snprintf (buf, sizeof (buf), "/%s ", last);
-      else
-         snprintf (buf, sizeof (buf), "/%s %s", last, postfix);
-      gtk_entry_set_text (GTK_ENTRY (t), buf);
-      return;
-   } else if (strlen (lcmd) > (sizeof (buf) - 1))
-      return;
-   if (postfix == NULL)
-      snprintf (buf, sizeof (buf), "/%s", lcmd);
-   else
-      snprintf (buf, sizeof (buf), "/%s %s", lcmd, postfix);
-   gtk_entry_set_text (GTK_ENTRY (t), buf);
 }
 
 /***************** Key Binding Code ******************/
@@ -930,12 +923,12 @@ key_action_handle_command (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d
    }
    out[oi] = 0;
 
-   handle_multiline (session, out, 0, 0);
+   handle_multiline (out, 0, 0);
    return 0;
 }
 
 static int
-key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,)
+key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2)
 {
    int len, i, num;
 
@@ -962,18 +955,6 @@ key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1, char *d2,)
    num = atoi (d1);
    if (!d2)
       num--;
-   if (!d2 || d2[0] == 0)
-      gtk_notebook_set_page (GTK_NOTEBOOK (main_book), num);
-   else
-   {
-      len = g_list_length ( ((GtkNotebook *) main_book)->children);
-      i = gtk_notebook_get_current_page (GTK_NOTEBOOK (main_book)) + num;
-      if (i >= len)
-         i = 0;
-      if (i < 0)
-	 i = len - 1;
-      gtk_notebook_set_page (GTK_NOTEBOOK (main_book), i);
-   }
    return 0;
 }
 

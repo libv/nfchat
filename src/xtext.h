@@ -16,10 +16,7 @@
 
 #endif
 
-/*#define GTK_XTEXT(obj)          GTK_CHECK_CAST (obj, gtk_xtext_get_type (), GtkXText)*/
 #define GTK_XTEXT(obj) ((GtkXText*)obj)
-#define GTK_XTEXT_CLASS(klass)  GTK_CHECK_CLASS_CAST (klass, gtk_xtext_get_type (), GtkXTextClass)
-#define GTK_IS_XTEXT(obj)       GTK_CHECK_TYPE (obj, gtk_xtext_get_type ())
 
 #define FONT_1BYTE 0
 #define FONT_2BYTE 1
@@ -157,16 +154,12 @@ struct _GtkXTextClass
 
 GtkWidget* gtk_xtext_new         (int indent);
 guint      gtk_xtext_get_type    (void);
-void       gtk_xtext_append      (GtkXText *xtext, char *text, int len);
 void       gtk_xtext_append_indent (GtkXText *xtext,
                                     char *left_text, int left_len,
                                     char *right_text, int right_len);
 void       gtk_xtext_set_font    (GtkXText *xtext, GdkFont *font, char *name);
 void       gtk_xtext_set_background (GtkXText *xtext, GdkPixmap *pixmap, int trans, int shaded);
 void       gtk_xtext_set_palette (GtkXText *xtext, GdkColor palette[]);
-void       gtk_xtext_remove_lines (GtkXText *xtext, int lines, int refresh);
-gchar*     gtk_xtext_get_chars   (GtkXText *xtext);
-void       gtk_xtext_refresh     (GtkXText *xtext);
 char*      gtk_xtext_strip_color (unsigned char *text, int len);
 
 #endif

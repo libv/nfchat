@@ -29,7 +29,7 @@
 #include "signals.h"
 #include "util.h"
 
-extern int handle_command (char *cmd, void *sess, int history, int nocommand);
+extern int handle_command (char *cmd, int history, int nocommand);
 extern int tcp_send (char *buf);
 extern void channel_action (char *tbuf, char *chan, char *from, char *text, int fromme);
 
@@ -81,7 +81,7 @@ ctcp_reply (char *tbuf, char *nick, char *word[], char *word_eol[], char *conf)
       case 0:
        jump:
          tbuf[j] = 0;
-         handle_command (tbuf, session, 0, 0);
+         handle_command (tbuf, 0, 0);
          return;
       default:
          tbuf[j] = conf[i];
@@ -124,11 +124,10 @@ void
 handle_ctcp (char *outbuf, char *to, char *nick, char *msg, char *word[], char *word_eol[])
 {
    char *po;
-   session_t *chansess;
 
    if (!strncasecmp (msg, "VERSION", 7))
    {
-      sprintf (outbuf, "NOTICE %s :\001VERSION NF-Chat "VERSION" %s: http://www.netforce.be\001\r\n", nick);
+      sprintf (outbuf, "NOTICE %s :\001VERSION NF-Chat "VERSION" : http://www.netforce.be\001\r\n", nick);
       tcp_send (outbuf);
    }
 
@@ -147,15 +146,7 @@ handle_ctcp (char *outbuf, char *to, char *nick, char *msg, char *word[], char *
    if (po)
       po[0] = 0;
    if (!is_channel (to))
-   {
-      EMIT_SIGNAL (XP_TE_CTCPGEN, server->session, msg, nick, NULL, NULL, 0);
-   } else
-   {
-      if (session)
-      {
-         EMIT_SIGNAL (XP_TE_CTCPGENC, session, msg, nick, to, NULL, 0);
-         return;
-      }
-      EMIT_SIGNAL (XP_TE_CTCPGENC, server->session, msg, nick, to, NULL, 0);
-   }
+      fire_signal (XP_TE_CTCPGEN, msg, nick, NULL, NULL, 0);
+   else
+      fire_signal (XP_TE_CTCPGENC, msg, nick, to, NULL, 0);
 }

@@ -143,13 +143,97 @@ NF-chat;
 	- maingui.c
 	  - removed sess_list
 	  - edited fe_set_title in inbound.c, fe.h
+	  - edited fe_set_channel in inbound.c fe.h
+	  - edited fe_clear_channel in inbound.c fe.h
+	  - edited fe_set_nick
+	  - edited focus_in, maingui_create_textlist, gui_new_tab,
+	    gui_new_tab_callback, gui_main_window_kill, 
+	    gui_make_tab_window
+	  - edited create_window & xchat.c
+	  - edited gtk_kill_session_callback
+	  - edited fe_session_callback & fe.h, xchat.c
+	  - edited handle_inputgad
+	- outbound.c
+	  - removed sess_list
+	  - edited notj_msg
+	  - edited notc_msg & server.c
+	  - edited help
+	  - edited cmd_debug, cmd_quit, cmd_help, cmd_join, cmd_me,
+	    cmd_part, cmd_reconnect, cmd_server, check_nick_completion
+	  - edited handle_command & ctcp.c
+	  - edited handle_multiline & fkeys.c, maingui.c
+	- server.c
+	  - removed sess_list
+	  - edited connected_signal, check_connecting
+	  - edited disconnect_server & outbound.c, xchat.c
+	  - edited connect_server & outbound.c, xchat.c
+	- signals.c/h = clean
+	- text.c
+	  - removed sess_list
+	  - removed PrintText & fe-gtk.c, fkeys.c, inbound.c, outbound.c
+            server.c	  
+	  - edited display_event, textsignal_handler
+	- userlist.c/h
+	  - removed sess_list
+	  - edited userlist_add_hostname & inbound.c
+	  - edited clear_user_list & maingui.c, inbound.c
+	  - removed find_name_global
+	  - edited find_name & inbound.c
+	  - edited update_entry
+	  - edited ul_op_name, deop_name, voice_name, devoice_name
+	    change_nick, sub_name & inbound.c
+	  - edited userlist_insertname_sorted
+	  - edited add_name & inbound.c
+	  - removed update_all_of
+	- userlistgui.c
+	  - edited init_userlist_xpm & fe-gtk.c
+	  - edited voice_myself, op_myself
+	  - edited fe_userlist_numbers, fe_userlist_remove,
+	    fe_userlist_insert, fe_userlist_move, fe_userlist_clear
+	    & userlist.c
+	  - removed userlist stuff from fe.h
+	  - merged userlistgui.c with userlistgui
+	  - deleted userlistgui.c & edited Makefile.am
+	- util.c/h = clean
+	- xtext.c
+	  - removed GTK_XTEXT_CLASS, GTK_IS_XTEXT
+	  - removed gtk_xtext_get_chars, gtk_xtext_remove_lines
+	    gtk_xtext_refresh, gtk_xtext_append
+	- removing naddr from xp_signal & text.c
+	- moving EMIT_SIGNAL to fire_signal in 
+	  ctcp.c, inbound.c, outbound.c
+	- deleting gui_make_tab_window
+	- removing session from server struct
+	- edited fe_input_add in fe-gtk.c, fe.h, server.c
+	- removed maingui_new_tab from maingui.c, maingui_box_close
+	- removed fe_print_text
+	- edited PrintTextLine, PrintTextRaw in textgui.c, moved
+	  PrintTextLine to PrintText.
+	- Replacing fe_print_text with PrintText
+	  fe.h, fe-gtk.c, fkeys.c, inbound.c, outbound.c, server.c
+	  text.c
+	- removing timecat from text.c
+	- merging textgui.c with fe-gtk.c
+	- deleted textgui.c
+	- removed tab stuff in channel_msg (inbound.c)
+	- removed fe_hilight from fe-gtk.c
+	- removed tabstyles & maingui_init_styles, maingui_set_tab_pos 
+	  from maingui.c
+	- removed currenttab from fe-gtk.c, inbound.c, outbound.c,
+          maingui.c, xchat.c
+	- removed main_book & is_tab from maingui.c
+	- removed is_tab from xchat.h
+	- removed main_book from fkeys.c
+### remove key_action_page_switch
+### is_server
+### main_window
+### ctcpreply.conf
+### clean up chans; theres only 1 channel out there
 ### clean up fe
-### new_session
 ### prefs.use_server_tab
 ### struct user
 ### clean up fkeys.c
 ### struct session_gui  
-### cleanup current_tab
 
 0.3.2;
 """"""

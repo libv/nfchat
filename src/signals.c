@@ -43,22 +43,18 @@ signal_setup ()
 }
 
 int
-fire_signal (int s, char *a, char *b, char *c, char *d,
-             char *e, char f)
+fire_signal (int s, char *a, char *b, char *c, char *d, char e)
 {
    GSList *cur;
    struct xp_signal *sig;
    int flag = 0;
-   if (s == 81)
-     fprintf(stderr, "Firesignal: int s %d, a %s, b %s, c %s, d %s, e %s, f %c\n", s, a, b, c, d, e, f);
-   
    cur = sigroots[s];
    current_signal = s;
    while (cur) {
       sig = cur->data;
 
       signal_data = sig->data;
-      if (sig->callback (a, b, c, d, e, f))
+      if (sig->callback (a, b, c, d, e))
 	 flag = 1;
       
       cur = cur->next;

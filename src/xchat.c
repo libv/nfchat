@@ -42,10 +42,8 @@ GSList *away_list = 0;
 
 int xchat_is_quitting = 0;
 
-extern GSList *ctcp_list;
+/* extern GSList *ctcp_list; */
 
-session_t *current_tab;
-session_t *menu_sess = 0;
 struct xchatprefs prefs;
 
 void xchat_cleanup (void);
@@ -61,13 +59,8 @@ extern void signal_setup ();
 /* server.c */
 
 extern int close_socket (int sok);
-extern void connecting_fin (session_t *sess);
-extern void connect_server (session_t *sess, char *server, int port, int quiet);
-extern void disconnect_server (session_t *sess, int sendquit, int err);
-
-/* userlist.c */
-
-extern struct user *find_name (session_t *sess, char *name);
+extern void connect_server (char *server, int port, int quiet);
+extern void disconnect_server (int sendquit, int err);
 
 /* editlist.c */
 
@@ -114,7 +107,7 @@ tcp_send_queue (void)
       if (server->bytes_sent > SEND_MAX)
          return 1;              /* don't remove the timeout handler */
 
-      if (!EMIT_SIGNAL (XP_IF_SEND, (void *)server->sok, buf, (void *)len, NULL, NULL, 0))
+      if (!fire_signal (XP_IF_SEND, buf, (void *)len, NULL, NULL, 0))
 		  send (server->sok, buf, len, 0);
 
       server->outbound_queue = g_slist_remove (server->outbound_queue, buf);
@@ -149,7 +142,7 @@ tcp_send_len (char *buf, int len)
       return 1;
    }
 
-   if (!EMIT_SIGNAL (XP_IF_SEND, (void *)server->sok, buf, (void *)len, NULL, NULL, 0))
+   if (!fire_signal (XP_IF_SEND, buf, (void *)len, NULL, NULL, 0))
 	   return send (server->sok, buf, len, 0);
    return 1;
 }
@@ -163,36 +156,37 @@ tcp_send (char *buf)
 static int
 timeout_auto_reconnect (void)
 {
-  /*if (is_server (serv)) make sure it hasnt been closed during the delay */
-  if (!server->connected && !server->connecting && server->session)
-      connect_server (server->session, server->hostname, server->port, FALSE);
+  if (!server->connected && !server->connecting)
+      connect_server (server->hostname, server->port, FALSE);
   return 0;         /* returning 0 should remove the timeout handler */
 }
 
 void
 auto_reconnect (int send_quit, int err)
 {
-  if (server->session == NULL)
-    return;
-  
-  disconnect_server (server->session, send_quit, err);
+  disconnect_server (send_quit, err);
   
   if (prefs.recon_delay)
     fe_timeout_add (prefs.recon_delay * 1000, timeout_auto_reconnect, server);
   else
-      connect_server (server->session, server->hostname, server->port, FALSE);
+      connect_server (server->hostname, server->port, FALSE);
 }
 
 void
-read_data (void *blah, int sok)
+read_data (int blah, int sok)
 {
    int err, i, len;
    char lbuf[2050];
 
    while (1)
    {
-     if (!EMIT_SIGNAL (XP_IF_RECV, &len, (void *)sok, &lbuf, (void *)((sizeof lbuf) - 2), NULL, 0))
-       len = recv (sok, lbuf, sizeof lbuf - 2, 0);
+     if (!fire_signal (XP_IF_RECV, (void *)sok, &lbuf, (void *)((sizeof lbuf) - 2), NULL, 0))
+	 len = recv (sok, lbuf, sizeof lbuf - 2, 0);
+     else
+       {
+	 fprintf(stderr, "Error: read_data: unable to write to socket\n");
+	 exit (70);
+       }
      if (len < 1)
        {
          if (len < 0)
@@ -205,7 +199,7 @@ read_data (void *blah, int sok)
          if (prefs.autoreconnect)
 	   auto_reconnect (FALSE, err);
          else
-	   disconnect_server (server->session, FALSE, err);
+	   disconnect_server (FALSE, err);
          return;
        } else
 	 {
@@ -258,23 +252,15 @@ flush_server_queue (void)
    server->bytes_sent = 0;
 }
 
-session_t *
-new_session (void)
+void
+init_session (void)
 {
-  session_t *sess;
-  
   if (session)
-    {
-      fprintf(stderr, "What? Dont call new_session twice!\n");
-      return (NULL);
-    }
-
-  sess = malloc (sizeof (session_t));
-  memset (sess, 0, sizeof (session_t));
+     fprintf(stderr, "What? Dont call new_session twice!\n");
+  session = malloc (sizeof (session_t));
+  memset (session, 0, sizeof (session_t));
   
   fe_new_window ();
-  
-  return sess;
 }
 
 static void
@@ -286,12 +272,6 @@ init_server (void)
    server->sok = -1;
    server->iotag = -1;
    strcpy (server->nick, prefs.nick1);
-   
-   if (prefs.use_server_tab)
-     {
-       server->session = new_session ();
-       server->session->is_server = TRUE;
-     }
 }
 
 static void
@@ -334,15 +314,15 @@ send_quit_or_part (void)
          if (!server->sent_quit)
          {
             flush_server_queue ();
-            snprintf (tbuf, sizeof tbuf, "QUIT :%s\r\n", killsess->quitreason);
+            snprintf (tbuf, sizeof tbuf, "QUIT :%s\r\n", session->quitreason);
             tcp_send (tbuf);
             server->sent_quit = TRUE;
          }
       } else
       {
-         if (!killsess->is_server && killsess->channel[0])
+         if (!session->is_server && session->channel[0])
          {
-            snprintf (tbuf, sizeof tbuf, "PART %s\r\n", killsess->channel);
+            snprintf (tbuf, sizeof tbuf, "PART %s\r\n", session->channel);
             tcp_send (tbuf); 
          }
       }
@@ -352,14 +332,8 @@ send_quit_or_part (void)
 void
 kill_session_callback (void)
 {
-   session_t *sess;
-   GSList *list;
-
    if (!session->quitreason)
       session->quitreason = prefs.quitreason;
-
-   if (current_tab == session)
-      current_tab = NULL;
 
    fe_session_callback ();
 
@@ -430,10 +404,7 @@ xchat_init (void)
   list_loadconf ("ctcpreply.conf", &ctcp_list, defaultconf_ctcp);
   
   init_server ();
-  if (prefs.use_server_tab)
-    session = server->session;
-  else
-    session = new_session ();
+  init_session ();
 }
 
 void

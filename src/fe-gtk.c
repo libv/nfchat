@@ -32,25 +32,19 @@ static int autoconnect = 0;
 GdkFont *font_normal;
 
 extern GdkColor colors[];
-extern GtkStyle *redtab_style;
-extern GtkStyle *bluetab_style;
 extern GtkStyle *inputgad_style;
 GtkStyle *channelwin_style;
 
 extern char *xdir;
-extern session_t *current_tab;
 extern struct xchatprefs prefs;
 
 extern char *get_cpu_str (int color);
-extern void PrintTextRaw (GtkWidget * textwidget, unsigned char *text);
+extern void PrintText (char *text);
 extern void notify_gui_update (void);
-extern void update_all_of (char *name);
 extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, session_t *sess);
 extern void key_init (void);
 extern void create_window (void);
-extern void PrintText (session_t *, char *);
-extern session_t *new_session (void);
-extern void init_userlist_xpm (session_t *sess);
+extern void init_userlist_xpm (void);
 
 GdkFont *my_font_load (char *fontname);
 GtkStyle *my_widget_get_style (char *bg_pic);
@@ -141,21 +135,15 @@ fe_new_window (void)
 {
   char buf[512];
 
-  if (session->gui)
-    {
-      fprintf(stderr, "dont define 2 windows please!!!\n");
-      return;
-    }
-
   session->gui = malloc (sizeof (struct session_gui));
   memset (session->gui, 0, sizeof (struct session_gui));
-  create_window (void);
+  create_window ();
 
-  init_userlist_xpm (session);
+  init_userlist_xpm ();
   
   snprintf (buf, sizeof buf, "Welcome to \002NF\002-Chat %s; An irc-client for dancings, clubs and discos.\n Written by \0032_Death_\003 for \0034NetForce\003 (\002www.netforce.be\002)\n\n\n", VERSION );
   
-  PrintText (session, buf);
+  PrintText (buf);
   
   while (gtk_events_pending ())
     gtk_main_iteration ();
@@ -168,7 +156,7 @@ fe_input_remove (int tag)
 }
 
 int
-fe_input_add (int sok, int read, int write, int ex, void *func, void *data)
+fe_input_add (int sok, int read, int write, int ex, void *func)
 {
    int type = 0;
 
@@ -179,7 +167,7 @@ fe_input_add (int sok, int read, int write, int ex, void *func, void *data)
    if (ex)
       type |= GDK_INPUT_EXCEPTION;
 
-   return gdk_input_add (sok, type, func, data);
+   return gdk_input_add (sok, type, func, 0);
 }
 
 GdkFont *
@@ -247,12 +235,6 @@ fe_set_topic (char *topic)
    gtk_entry_set_text (GTK_ENTRY (session->gui->topicgad), topic);
 }
 
-void
-fe_set_hilight (void)
-{
-   gtk_widget_set_style (session->gui->changad, bluetab_style);
-}
-
 static int
 updatedate_bar (void)
 {
@@ -301,15 +283,47 @@ fe_progressbar_end (void)
     }
 }
 
-void
-fe_print_text (char *text)
+static void
+PrintTextLine (char *text, int len)
 {
-   PrintTextRaw (session->gui->textgad, text);
+  char *tab;
+  int leftlen;
+  if (len == -1)
+    len = strlen (text);
+  
+  if (len == 0)
+    len = 1;
 
-   if (!session->new_data && session != current_tab &&
-     session->is_tab && !session->nick_said)
+  tab = strchr (text, '\t');
+  if (tab && (unsigned long)tab < (unsigned long)(text + len))
+    {
+      leftlen = (unsigned long)tab - (unsigned long)text;
+      gtk_xtext_append_indent (GTK_XTEXT (session->gui->textgad), text, leftlen, tab+1, len - (leftlen + 1));
+    } else
+      gtk_xtext_append_indent (GTK_XTEXT (session->gui->textgad), 0, 0, text, len);
+}
+
+void
+PrintText (char *text)
+{
+   char *cr;
+
+   cr = strchr (text, '\n');
+   if (cr)
    {
-      session->new_data = TRUE;
-      gtk_widget_set_style (session->gui->changad, redtab_style);
-   }
+      while (1)
+      {
+         PrintTextLine (text, (unsigned long)cr - (unsigned long)text);
+         text = cr + 1;
+         if (*text == 0)
+            break;
+         cr = strchr (text, '\n');
+         if (!cr)
+         {
+            PrintTextLine (text, -1);
+            break;
+         }
+      }
+   } else
+      PrintTextLine (text, -1);
 }

@@ -20,21 +20,159 @@
 #include <stdlib.h>
 #include <string.h>
 #include "xchat.h"
-#include "fe.h"
+#include "fe-gtk.h"
+#include "util.h"
+#include "userlist.h"
+#include "gtkutil.h"
+#include <gdk_imlib.h>
 
+#include "op.xpm"
+#include "voice.xpm"
+
+extern GdkColor colors[]; 
 extern struct xchatprefs prefs;
-extern GSList *sess_list;
+GdkPixmap *op_pixmap, *voice_pixmap;
+GdkBitmap *op_mask_bmp, *voice_mask_bmp;
 
-int add_name (session_t *sess, char *name, char *hostname);
-int sub_name (session_t *sess, char *name);
+static GdkPixmap *
+create_pixmap_from_data (GtkWidget *window, GdkBitmap **mask, GtkWidget *style_widget, char **data)
+{
+  GdkPixmap *pixmap = 0;
 
+  gdk_imlib_data_to_pixmap (data, &pixmap, mask);
+
+  return(pixmap);
+}
+
+void
+init_userlist_xpm (void)
+{
+  op_pixmap = create_pixmap_from_data (session->gui->window, &op_mask_bmp, session->gui->window, op_xpm);
+  voice_pixmap = create_pixmap_from_data (session->gui->window, &voice_mask_bmp, session->gui->window, voice_xpm);
+}
+
+static void
+voice_myself (void)
+{
+   if (session->gui->op_xpm)
+      gtk_widget_destroy (session->gui->op_xpm);
+   session->gui->op_xpm = gtk_pixmap_new (voice_pixmap, voice_mask_bmp);
+   gtk_box_pack_start (GTK_BOX (session->gui->op_box), session->gui->op_xpm, 0, 0, 0);
+   gtk_widget_show (session->gui->op_xpm);
+}
+
+static void
+op_myself (void)
+{
+   if (session->gui->op_xpm)
+      gtk_widget_destroy (session->gui->op_xpm);
+   session->gui->op_xpm = gtk_pixmap_new (op_pixmap, op_mask_bmp);
+   gtk_box_pack_start (GTK_BOX (session->gui->op_box), session->gui->op_xpm, 0, 0, 0);
+   gtk_widget_show (session->gui->op_xpm);
+}
+
+static void
+fe_userlist_numbers (void)
+{
+   char tbuf[42];
+   sprintf (tbuf, "%d ops, %d total", session->ops, session->total);
+   gtk_label_set_text (GTK_LABEL (session->gui->namelistinfo), tbuf);
+}
+
+static void
+fe_userlist_remove (struct user *user)
+{
+   gint row = gtk_clist_find_row_from_data (GTK_CLIST (session->gui->namelistgad), (gpointer) user);
+   GtkAdjustment *adj;
+   gfloat val, end;
+
+   adj = gtk_clist_get_vadjustment (GTK_CLIST (session->gui->namelistgad));
+   val = adj->value;
+
+   gtk_clist_remove (GTK_CLIST (session->gui->namelistgad), row);
+
+   end = adj->upper - adj->lower - adj->page_size;
+   if (val > end)
+      val = end;
+   gtk_adjustment_set_value (adj, val);
+}
+
+static int
+fe_userlist_insert (struct user *newuser, int row)
+{
+   char *name = newuser->nick;
+   GtkAdjustment *adj;
+   gfloat val;
+
+   adj = gtk_clist_get_vadjustment (GTK_CLIST (session->gui->namelistgad));
+   val = adj->value;
+
+   if (row == -1)
+      row = gtk_clist_append (GTK_CLIST (session->gui->namelistgad), &name);
+   else
+      gtk_clist_insert (GTK_CLIST (session->gui->namelistgad), row, &name);
+   gtk_clist_set_row_data (GTK_CLIST (session->gui->namelistgad), row, (gpointer) newuser);
+
+   if (!strcmp (newuser->nick, server->nick))
+   {
+      if (newuser->op)
+         op_myself ();
+      else if (newuser->voice)
+         voice_myself ();
+      if (!newuser->voice && !newuser->op)
+      {
+         if (session->gui->op_xpm)
+         {
+            gtk_widget_destroy (session->gui->op_xpm);
+            session->gui->op_xpm = 0;
+         }
+      }
+   }
+   if (newuser->op)
+   {
+      gtk_clist_set_pixtext ((GtkCList *) session->gui->namelistgad, row, 0,
+                             newuser->nick, 3, op_pixmap, op_mask_bmp);
+   } else if (newuser->voice)
+   {
+         gtk_clist_set_pixtext ((GtkCList *) session->gui->namelistgad, row, 0,
+                                newuser->nick, 3, voice_pixmap, voice_mask_bmp);
+   }
+
+   gtk_adjustment_set_value (adj, val);
+
+   return row;
+}
+
+static void
+fe_userlist_move (struct user *user, int new_row)
+{
+   gint old_row;
+   int sel = FALSE;
+
+   old_row = gtk_clist_find_row_from_data (GTK_CLIST (session->gui->namelistgad), (gpointer) user);
+
+   if (old_row == gtkutil_clist_selection (session->gui->namelistgad))
+      sel = TRUE;
+
+   gtk_clist_remove (GTK_CLIST (session->gui->namelistgad), old_row);
+   new_row = fe_userlist_insert (user, new_row);
+
+   if (sel)
+      gtk_clist_select_row ((GtkCList *) session->gui->namelistgad, new_row, 0);
+}
+
+static void
+fe_userlist_clear (void)
+{
+   gtk_clist_clear (GTK_CLIST (session->gui->namelistgad));
+}
 
 int
-userlist_add_hostname (session_t *sess, char *nick, char *hostname, char *realname, char *servername)
+userlist_add_hostname (char *nick, char *hostname, char *realname, char *servername)
 {
    struct user *user;
 
-   user = find_name (sess, nick);
+   user = find_name (nick);
    if (user && !user->hostname)
    {
       user->hostname = strdup (hostname);
@@ -64,12 +202,12 @@ nick_cmp_az_ops (struct user *user1, struct user *user2)
 }
 
 void
-clear_user_list (session_t *sess)
+clear_user_list (void)
 {
    struct user *user;
-   GSList *list = sess->userlist;
+   GSList *list = session->userlist;
 
-   fe_userlist_clear (sess);
+   fe_userlist_clear ();
    while (list)
    {
       user = (struct user *)list->data;
@@ -82,18 +220,18 @@ clear_user_list (session_t *sess)
       free (user);
       list = g_slist_remove (list, user);
    }
-   sess->userlist = 0;
-   sess->ops = 0;
-   sess->total = 0;
+   session->userlist = 0;
+   session->ops = 0;
+   session->total = 0;
 }
 
 struct user *
-find_name (session_t *sess, char *name)
+find_name (char *name)
 {
    struct user *user;
    GSList *list;
 
-   list = sess->userlist;
+   list = session->userlist;
    while (list)
    {
       user = (struct user *)list -> data;
@@ -104,106 +242,111 @@ find_name (session_t *sess, char *name)
    return FALSE;
 }
 
-struct user *
-find_name_global (char *name)
+static int
+userlist_insertname_sorted (struct user *newuser)
 {
+   int row = 0;
    struct user *user;
-   session_t *sess;
-   GSList *list = sess_list;
+   GSList *list = session->userlist;
+
    while (list)
    {
-      sess = (session_t *)list -> data;
-      user = find_name (sess, name);
-      if (user)
-	return user;
+      user = (struct user *)list -> data;
+      if (nick_cmp_az_ops (newuser, user) < 1)
+      {
+         session->userlist = g_slist_insert (session->userlist, newuser, row);
+         return row;
+      }
+      row++;
       list = list -> next;
    }
-   return 0;
+   session->userlist = g_slist_append (session->userlist, newuser);
+   return -1;
 }
 
-void
-update_entry (session_t *sess, struct user *user)
+static void
+update_entry (struct user *user)
 {
    int row;
 
-   sess->userlist = g_slist_remove (sess->userlist, user);
-   row = userlist_insertname_sorted (sess, user);
+   session->userlist = g_slist_remove (session->userlist, user);
+   row = userlist_insertname_sorted (user);
 
-   fe_userlist_move (sess, user, row);
-   fe_userlist_numbers (sess);
+   fe_userlist_move (user, row);
+   fe_userlist_numbers ();
 }
 
 void
-ul_op_name (session_t *sess, char *name)
+ul_op_name (char *name)
 {
-   struct user *user = find_name (sess, name);
+   struct user *user = find_name (name);
    if (user && !user->op)
    {
-      sess->ops++;
+      session->ops++;
       user->op = TRUE;
-      update_entry (sess, user);
+      update_entry (user);
    }
 }
 
 void
-deop_name (session_t *sess, char *name)
+deop_name (char *name)
 {
-   struct user *user = find_name (sess, name);
+   struct user *user = find_name (name);
    if (user && user->op)
    {
-      sess->ops--;
+      session->ops--;
       user->op = FALSE;
-      update_entry (sess, user);
+      update_entry (user);
    }
 }
 
 void
-voice_name (session_t *sess, char *name)
+voice_name (char *name)
 {
-   struct user *user = find_name (sess, name);
+   struct user *user = find_name (name);
    if (user)
    {
       user->voice = TRUE;
-      update_entry (sess, user);
+      update_entry (user);
    }
 }
 
 void
-devoice_name (session_t *sess, char *name)
+devoice_name (char *name)
 {
-   struct user *user = find_name (sess, name);
+   struct user *user = find_name (name);
    if (user)
    {
       user->voice = FALSE;
-      update_entry (sess, user);
+      update_entry (user);
    }
 }
 
 void
-change_nick (session_t *sess, char *oldname, char *newname)
+change_nick (char *oldname, char *newname)
 {
-   struct user *user = find_name (sess, oldname);
+   struct user *user = find_name (oldname);
    if (user)
    {
       strcpy (user->nick, newname);
-      update_entry (sess, user);
+      update_entry (user);
    }
 }
 
 int
-sub_name (session_t *sess, char *name)
+sub_name (char *name)
 {
    struct user *user;
 
-   user = find_name (sess, name);
+   user = find_name (name);
    if (!user)
       return FALSE;
 
    if (user->op)
-      sess->ops--;
-   sess->total--;
-   fe_userlist_numbers (sess);
-   fe_userlist_remove (sess, user);
+      session->ops--;
+   session->total--;
+   fe_userlist_numbers ();
+   fe_userlist_remove (user);
 
    if (user->realname)
       free (user->realname);
@@ -212,35 +355,13 @@ sub_name (session_t *sess, char *name)
    if (user->servername)
       free (user->servername);
    free (user);
-   sess->userlist = g_slist_remove (sess->userlist, user);
+   session->userlist = g_slist_remove (session->userlist, user);
 
    return TRUE;
 }
 
 int
-userlist_insertname_sorted (session_t *sess, struct user *newuser)
-{
-   int row = 0;
-   struct user *user;
-   GSList *list = sess->userlist;
-
-   while (list)
-   {
-      user = (struct user *)list -> data;
-      if (nick_cmp_az_ops (newuser, user) < 1)
-      {
-         sess->userlist = g_slist_insert (sess->userlist, newuser, row);
-         return row;
-      }
-      row++;
-      list = list -> next;
-   }
-   sess->userlist = g_slist_append (sess->userlist, newuser);
-   return -1;
-}
-
-int
-add_name (session_t *sess, char *name, char *hostname)
+add_name (char *name, char *hostname)
 {
    struct user *user;
    int row;
@@ -256,9 +377,9 @@ add_name (session_t *sess, char *name, char *hostname)
    {
       name++;
       user->op = TRUE;
-      sess->ops++;
+      session->ops++;
    }
-   sess->total++;
+   session->total++;
    if (*name == '+')
    {
       name++;
@@ -267,28 +388,10 @@ add_name (session_t *sess, char *name, char *hostname)
    if (hostname)
       user->hostname = strdup (hostname);
    strcpy (user->nick, name);
-   row = userlist_insertname_sorted (sess, user);
+   row = userlist_insertname_sorted (user);
 
-   fe_userlist_insert (sess, user, row);
-   fe_userlist_numbers (sess);
+   fe_userlist_insert (user, row);
+   fe_userlist_numbers ();
 
    return row;
-}
-
-void
-update_all_of (char *name)
-{
-   struct user *user;
-   session_t *sess;
-   GSList *list = sess_list;
-   while (list)
-   {
-      sess = (session_t *) list->data;
-      user = find_name (sess, name);
-      if (user)
-      {
-         update_entry (sess, user);
-      }
-      list = list->next;
-   }
 }

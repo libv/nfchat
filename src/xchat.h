@@ -116,7 +116,6 @@ struct session_t
 
    struct session_gui *gui;	     /* initialized by fe_new_window */
 
-   int is_tab:1;                /* is this a tab or toplevel window? */
    int is_server:1;		  /* for use_server_tab feature */
    int new_data:1;              /* new data avail? (red tab) */
    int nick_said:1;             /* your nick mentioned? (green tab) */
@@ -147,8 +146,6 @@ struct server_t
    time_t last_send;
    int bytes_sent;              /* this second only */
 
-   session_t *session;
-
    int motd_skipped:1;
    int connected:1;
    int connecting:1;
@@ -165,7 +162,7 @@ typedef struct server_t server_t;
 extern server_t *server;
 extern session_t *session;
 
-typedef int (*cmd_callback) (session_t * sess, char *tbuf, char *word[], char *word_eol[]);
+typedef int (*cmd_callback) (char *tbuf, char *word[], char *word_eol[]);
 
 struct commands
 {

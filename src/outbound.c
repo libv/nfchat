@@ -34,41 +34,33 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include "popup.h"
 
-
-int handle_command (char *cmd, session_t *sess, int history, int);
-void handle_multiline (session_t *sess, char *cmd, int history, int);
-void check_special_chars (char *cmd);
-
-extern GSList *sess_list;
 extern struct xchatprefs prefs;
-extern session_t *current_tab;
 
 extern void auto_reconnect (int send_quit, int err);
 extern void do_dns (session_t *sess, char *tbuf, char *nick, char *host);
 extern int tcp_send (char *buf);
-extern void PrintText (session_t *sess, char *text);
-extern void connect_server (session_t *sess, char *server, int port, int quiet);
+extern void connect_server (char *server, int port, int quiet);
 extern void channel_action (char *tbuf, char *chan, char *from, char *text, int fromme);
 extern void user_new_nick (char *outbuf, char *nick, char *newnick, int quiet);
 extern void channel_msg (char *outbuf, char *chan, char *from, char *text, char fromme);
-extern void disconnect_server (session_t *sess, int sendquit, int err);
+extern void disconnect_server (int sendquit, int err);
+extern void PrintText (char *text);
 
 #ifdef MEMORY_DEBUG
 extern int current_mem_usage;
 #endif
 
-void
-notj_msg (session_t *sess)
+static void
+notj_msg (void)
 {
-   PrintText (sess, "No channel joined. Try /join #<channel>\n");
+   PrintText ("No channel joined. Try /join #<channel>\n");
 }
 
 void
-notc_msg (session_t *sess)
+notc_msg (void)
 {
-   PrintText (sess, "Not connected. Try /server <host> [<port>]\n");
+  PrintText ("Not connected. Try /server <host> [<port>]\n");
 }
 
 void
@@ -129,17 +121,16 @@ process_data_init (unsigned char *buf, char *cmd, char *word[], char *word_eol[]
    }
 }
 
-static int cmd_debug (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
-
-int cmd_help (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_join (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_me (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_msg (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_nick (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_part (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_quit (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_reconnect (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_server (session_t *sess, char *tbuf, char *word[], char *word_eol[]);
+static int cmd_debug (char *tbuf, char *word[], char *word_eol[]);
+static int cmd_help (char *tbuf, char *word[], char *word_eol[]);
+static int cmd_join (char *tbuf, char *word[], char *word_eol[]);
+static int cmd_me (char *tbuf, char *word[], char *word_eol[]);
+static int cmd_msg (char *tbuf, char *word[], char *word_eol[]);
+static int cmd_nick (char *tbuf, char *word[], char *word_eol[]);
+static int cmd_part (char *tbuf, char *word[], char *word_eol[]);
+static int cmd_quit (char *tbuf, char *word[], char *word_eol[]);
+static int cmd_reconnect (char *tbuf, char *word[], char *word_eol[]);
+static int cmd_server (char *tbuf, char *word[], char *word_eol[]);
 
 struct commands cmds[] =
 {
@@ -157,7 +148,7 @@ struct commands cmds[] =
 };
 
 static void
-help (session_t *sess, char *helpcmd, int quiet)
+help (char *helpcmd, int quiet)
 {
    int i = 0;
    while (1)
@@ -168,168 +159,150 @@ help (session_t *sess, char *helpcmd, int quiet)
       {
          if (cmds[i].help)
          {
-            PrintText (sess, "Usage:");
-            PrintText (sess, cmds[i].help);
+            PrintText ("Usage:");
+            PrintText (cmds[i].help);
             return;
          } else
          {
             if (!quiet)
-               PrintText (sess, "\nNo help available on that command.\n");
+	      PrintText ("\nNo help available on that command.\n");
             return;
          }
       }
       i++;
    }
    if (!quiet)
-      PrintText (sess, "No such command.\n");
+     PrintText ("No such command.\n");
 }
 
 #define find_word_to_end(a, b) word_eol[b]
 #define find_word(a, b) word[b]
 
 int
-cmd_debug (session_t *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_debug (char *tbuf, char *word[], char *word_eol[])
 {
-   session_t *s;
-   server_t *v;
-   GSList *list = sess_list;
+   PrintText ("Session   Channel    WaitChan  WillChan  Server\n");
+   sprintf (tbuf, "0x%lx %-10.10s %-10.10s %-10.10s 0x%lx\n", (unsigned long) session, session->channel, session->waitchannel, session->willjoinchannel, (unsigned long) server);
+   PrintText (tbuf);
 
-   PrintText (sess, "Session   Channel    WaitChan  WillChan  Server\n");
-   while (list)
-   {
-      s = (session_t *) list->data;
-      sprintf (tbuf, "0x%lx %-10.10s %-10.10s %-10.10s 0x%lx\n",
-               (unsigned long) s, s->channel, s->waitchannel, s->willjoinchannel,
-           (unsigned long) server);
-      PrintText (sess, tbuf);
-      list = list->next;
-   }
+   PrintText ("Server    Sock  Name\n");
+   
+   sprintf (tbuf, "0x%lx %-5ld %s\n", (unsigned long) server, (unsigned long) server->sok, server->servername);
+   PrintText (tbuf);
 
-
-   PrintText (sess, "Server    Sock  Name\n");
-
-   v = (server_t *) server;
-   sprintf (tbuf, "0x%lx %-5ld %s\n",
-	    (unsigned long) v, (unsigned long) v->sok, v->servername);
-   PrintText (sess, tbuf);
-
-   sprintf (tbuf,
-            "\nsession: %lx\n"
-            "current_tab: %lx\n\n",
-            (unsigned long) server->session,
-         (unsigned long) current_tab);
-   PrintText (sess, tbuf);
+   sprintf (tbuf, "\nsession: %lx\n\n", (unsigned long) session);
+    PrintText (tbuf);
 #ifdef MEMORY_DEBUG
    sprintf (tbuf, "current mem: %d\n\n", current_mem_usage);
-   PrintText (sess, tbuf);
+   PrintText (tbuf);
 #endif /* MEMORY_DEBUG */
 
    return TRUE;
 }
 
 int
-cmd_quit (session_t *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_quit (char *tbuf, char *word[], char *word_eol[])
 {
    if (*word_eol[2])
-      sess->quitreason = word_eol[2];
+      session->quitreason = word_eol[2];
    else
-      sess->quitreason = prefs.quitreason;
-   disconnect_server (sess, TRUE, -1);
+      session->quitreason = prefs.quitreason;
+   disconnect_server (TRUE, -1);
    return 2;
 }
 
 int
-cmd_help (session_t *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_help (char *tbuf, char *word[], char *word_eol[])
 {
-   int i = 0, longfmt = 0;
-   char *helpcmd = "";
-
-   if (tbuf)
-      helpcmd = find_word (pdibuf, 2);
-   if (*helpcmd && strcmp (helpcmd, "-l") == 0)
-      longfmt = 1;
-
-   if (*helpcmd && !longfmt)
-   {
-      help (sess, helpcmd, FALSE);
-   } else
-   {
-      char *buf = malloc (4096);
-      int t = 1, j;
-      strcpy (buf, "\nCommands Available:\n\n  ");
-      if (longfmt)
+  int i = 0, longfmt = 0;
+  char *helpcmd = "";
+  
+  if (tbuf)
+    helpcmd = find_word (pdibuf, 2);
+  if (*helpcmd && strcmp (helpcmd, "-l") == 0)
+    longfmt = 1;
+  
+  if (*helpcmd && !longfmt)
+    {
+      help (helpcmd, FALSE);
+    } else
       {
-         while (1)
-         {
-            if (!cmds[i].name)
-               break;
-            if (!cmds[i].help)
-               snprintf (buf, 4096, "   \0034%s\003 :\n", cmds[i].name);
-            else
-               snprintf (buf, 4096, "   \0034%s\003 : %s", cmds[i].name,
-                         cmds[i].help);
-            PrintText (sess, buf);
-            i++;
-         }
-      } else
-      {
-         while (1)
-         {
-            if (!cmds[i].name)
-               break;
-            strcat (buf, cmds[i].name);
-            t++;
-            if (t == 6)
-            {
-               t = 1;
-               strcat (buf, "\n  ");
-            } else
-               for (j = 0; j < (10 - strlen (cmds[i].name)); j++)
-                  strcat (buf, " ");
-            i++;
-         }
-      }
-      strcat (buf, "\n\nType /HELP <command> for more information, or /HELP -l\n\n");
+	char *buf = malloc (4096);
+	int t = 1, j;
+	strcpy (buf, "\nCommands Available:\n\n  ");
+	if (longfmt)
+	  {
+	    while (1)
+	      {
+		if (!cmds[i].name)
+		  break;
+		if (!cmds[i].help)
+		  snprintf (buf, 4096, "   \0034%s\003 :\n", cmds[i].name);
+		else
+		  snprintf (buf, 4096, "   \0034%s\003 : %s", cmds[i].name,
+			    cmds[i].help);
+		PrintText (buf);
+		i++;
+	      }
+	  } else
+	    {
+	      while (1)
+		{
+		  if (!cmds[i].name)
+		    break;
+		  strcat (buf, cmds[i].name);
+		  t++;
+		  if (t == 6)
+		    {
+		      t = 1;
+		      strcat (buf, "\n  ");
+		    } else
+		      for (j = 0; j < (10 - strlen (cmds[i].name)); j++)
+			strcat (buf, " ");
+		  i++;
+		}
+	    }
+	strcat (buf, "\n\nType /HELP <command> for more information, or /HELP -l\n\n");
 
-      PrintText (sess, buf);
+      PrintText (buf);
       free (buf);
-   }
-   return TRUE;
+      }
+  return TRUE;
 }
 
 int
-cmd_join (session_t *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_join (char *tbuf, char *word[], char *word_eol[])
 {
-   char *chan = find_word (pdibuf, 2);
-   if (*chan)
-   {
+  char *chan = find_word (pdibuf, 2);
+  if (*chan)
+    {
       char *po, *pass = find_word (pdibuf, 3);
       if (*pass)
-         sprintf (tbuf, "JOIN %s %s\r\n", chan, pass);
+	sprintf (tbuf, "JOIN %s %s\r\n", chan, pass);
       else
-         sprintf (tbuf, "JOIN %s\r\n", chan);
+	sprintf (tbuf, "JOIN %s\r\n", chan);
       tcp_send (tbuf);
-      if (sess->channel[0] == 0)
-      {
-         po = strchr (chan, ',');
-         if (po)
+      if (session->channel[0] == 0)
+	{
+	  po = strchr (chan, ',');
+	  if (po)
             *po = 0;
-         strncpy (sess->waitchannel, chan, 200);
-      }
+	  strncpy (session->waitchannel, chan, 200);
+	}
       return TRUE;
-   }
-   return FALSE;
+    }
+  return FALSE;
 }
 
 int
-cmd_me (session_t *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_me (char *tbuf, char *word[], char *word_eol[])
 {
    char *act = find_word_to_end (cmd, 2);
    if (*act)
    {
-      channel_action (tbuf, sess->channel, server->nick, act, TRUE);
+      channel_action (tbuf, session->channel, server->nick, act, TRUE);
       sprintf (tbuf, "\001ACTION %s\001\r", act);
-      sprintf (tbuf, "PRIVMSG %s :\001ACTION %s\001\r\n", sess->channel, act);
+      sprintf (tbuf, "PRIVMSG %s :\001ACTION %s\001\r\n", session->channel, act);
       tcp_send (tbuf);
       return TRUE;
    }
@@ -337,79 +310,79 @@ cmd_me (session_t *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 int
-cmd_msg (session_t *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_msg (char *tbuf, char *word[], char *word_eol[])
 {
-   char *nick = find_word (pdibuf, 2);
-   char *msg = find_word_to_end (cmd, 3);
-
-   if (*nick)
-   {
+  char *nick = find_word (pdibuf, 2);
+  char *msg = find_word_to_end (cmd, 3);
+  
+  if (*nick)
+    {
       if (*msg)
-      {
-         if (strcmp (nick, ".") == 0)
-         {                      /* /msg the last nick /msg'ed */
-            if (sess->lastnick[0])
-               nick = sess->lastnick;
-         } else
-            strcpy (sess->lastnick, nick);  /* prime the last nick memory */
+	{
+	  if (strcmp (nick, ".") == 0)
+	    {                      /* /msg the last nick /msg'ed */
+	      if (session->lastnick[0])
+		nick = session->lastnick;
+	    } else
+	      strcpy (session->lastnick, nick);  /* prime the last nick memory */
+	  
+	  if (*nick == '=')
+	    {
+	      nick++;
+	      return TRUE;
+	    } else
+	      {
+		if (!server->connected)
+		  {
+		    notc_msg ();
+		    return TRUE;
+		  }
+		sprintf (tbuf, "PRIVMSG %s :%s\r\n", nick, msg);
+		tcp_send (tbuf);
+	      }
+	  fire_signal (XP_TE_MSGSEND, nick, msg, NULL, NULL, 0);
 
-         if (*nick == '=')
-         {
-            nick++;
-            return TRUE;
-         } else
-         {
-            if (!server->connected)
-            {
-               notc_msg (sess);
-               return TRUE;
-            }
-            sprintf (tbuf, "PRIVMSG %s :%s\r\n", nick, msg);
-            tcp_send (tbuf);
-         }
-         EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, msg, NULL, NULL, 0);
-
-         return TRUE;
-      }
-   }
-   return FALSE;
+	  return TRUE;
+	}
+    }
+  return FALSE;
 }
 
 int
-cmd_nick (session_t *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_nick (char *tbuf, char *word[], char *word_eol[])
 {
-   char *nick = find_word (pdibuf, 2);
-   if (*nick)
-   {
+  char *nick = find_word (pdibuf, 2);
+  if (*nick)
+    {
       if (server->connected)
-      {
-         sprintf (tbuf, "NICK %s\r\n", nick);
-         tcp_send (tbuf);
-      } else
-         user_new_nick (tbuf, server->nick, nick, TRUE);
+	{
+	  sprintf (tbuf, "NICK %s\r\n", nick);
+	  tcp_send (tbuf);
+	} else
+	  user_new_nick (tbuf, server->nick, nick, TRUE);
       return TRUE;
-   }
-   return FALSE;
+    }
+  return FALSE;
 }
 
 int
-cmd_part (session_t *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_part (char *tbuf, char *word[], char *word_eol[])
 {
-   char *chan = find_word (pdibuf, 2);
-   char *reason = word_eol[3];
-   if (!*chan)
-      chan = sess->channel;
-   if ((*chan) && is_channel (chan))
-   {
+  char *chan = find_word (pdibuf, 2);
+  char *reason = word_eol[3];
+  if (!*chan)
+    chan = session->channel;
+  if ((*chan) && is_channel (chan))
+    {
       sprintf (tbuf, "PART %s :%s\r\n", chan, reason);
       tcp_send (tbuf);
       return TRUE;
-   }
-   return FALSE;
+    }
+  return FALSE;
 }
 
 int
-cmd_reconnect (session_t *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_reconnect (char *tbuf, char *word[], char *word_eol[])
 {
    int tmp = prefs.recon_delay;
   
@@ -423,7 +396,7 @@ cmd_reconnect (session_t *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 int
-cmd_server (session_t *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_server (char *tbuf, char *word[], char *word_eol[])
 {
    char *server_str = find_word (pdibuf, 2);
    char *port = find_word (pdibuf, 3);
@@ -441,13 +414,13 @@ cmd_server (session_t *sess, char *tbuf, char *word[], char *word_eol[])
          *co = 0;
          pass = find_word (pdibuf, 3);
       }
-      sess->willjoinchannel[0] = 0;
+      session->willjoinchannel[0] = 0;
       if (pass)
          strcpy (server->password, pass);
       if (*port)
-         connect_server (sess, server_str, atoi (port), FALSE);
+         connect_server (server_str, atoi (port), FALSE);
       else
-         connect_server (sess, server_str, 6667, FALSE);
+         connect_server (server_str, 6667, FALSE);
       return TRUE;
    }
    return FALSE;
@@ -528,7 +501,7 @@ check_special_chars (char *cmd) /* check for %X */
 #endif
 
 static void
-check_nick_completion (session_t *sess, char *cmd, char *tbuf)
+check_nick_completion (char *cmd, char *tbuf)
 {
    long len;
    char *space = strchr (cmd, ' ');
@@ -548,7 +521,7 @@ check_nick_completion (session_t *sess, char *cmd, char *tbuf)
             memcpy (nick, cmd, len);
             nick[len] = 0;
 
-            list = sess->userlist;
+            list = session->userlist;
             while (list)
             {
                user = (struct user *)list->data;
@@ -579,7 +552,7 @@ check_nick_completion (session_t *sess, char *cmd, char *tbuf)
 }
 
 int
-handle_command (char *cmd, session_t *sess, int history, int nocommand)
+handle_command (char *cmd, int history, int nocommand)
 {
    int user_cmd = FALSE, i;
    unsigned char pdibuf[2048];
@@ -587,11 +560,11 @@ handle_command (char *cmd, session_t *sess, int history, int nocommand)
    char *word[32];
    char *word_eol[32];
 
-   if (!sess || !*cmd)
+   if (!session || !*cmd)
       return TRUE;
 
    if (history)
-      history_add (&sess->history, cmd);
+      history_add (&session->history, cmd);
 
    if (cmd[0] == '/' && !nocommand)
    {
@@ -599,7 +572,7 @@ handle_command (char *cmd, session_t *sess, int history, int nocommand)
 
       process_data_init (pdibuf, cmd, word, word_eol);
 
-      if (EMIT_SIGNAL (XP_USERCOMMAND, sess, pdibuf, word, word_eol, NULL, 0) == 1)
+      if (fire_signal (XP_USERCOMMAND, pdibuf, word, word_eol, NULL, 0) == 1)
          return TRUE;
 
       if (user_cmd)
@@ -616,18 +589,18 @@ handle_command (char *cmd, session_t *sess, int history, int nocommand)
          {
             if (cmds[i].needserver && !server->connected)
             {
-               notc_msg (sess);
+               notc_msg ();
                return TRUE;
             }
-            if (cmds[i].needchannel && sess->channel[0] == 0)
+            if (cmds[i].needchannel && session->channel[0] == 0)
             {
-               notj_msg (sess);
+               notj_msg ();
                return TRUE;
             }
-            switch (cmds[i].callback (sess, tbuf, word, word_eol))
+            switch (cmds[i].callback (tbuf, word, word_eol))
             {
             case FALSE:
-               help (sess, cmds[i].name, TRUE);
+               help (cmds[i].name, TRUE);
                break;
             case 2:
                return FALSE;
@@ -638,7 +611,7 @@ handle_command (char *cmd, session_t *sess, int history, int nocommand)
       }
       if (!server->connected)
       {
-         PrintText (sess, "Unknown Command. Try /help\n");
+         PrintText ("Unknown Command. Try /help\n");
          return TRUE;
       }
       sprintf (tbuf, "%s\r\n", cmd);
@@ -648,68 +621,63 @@ handle_command (char *cmd, session_t *sess, int history, int nocommand)
    {
       check_special_chars (cmd);
 
-      if (sess->channel[0] && !sess->is_server)
+      if (session->channel[0] && !session->is_server)
       {
          char newcmd[4096];
          if (prefs.nickcompletion)
-            check_nick_completion (sess, cmd, newcmd);
+            check_nick_completion (cmd, newcmd);
          else
             newcmd[0] = 0;
          if (!newcmd[0])
 	   {
 	     if (server->connected)
                {
-		 channel_msg (tbuf, sess->channel, server->nick, cmd, TRUE);
-		 sprintf (tbuf, "PRIVMSG %s :%s\r\n", sess->channel, cmd);
+		 channel_msg (tbuf, session->channel, server->nick, cmd, TRUE);
+		 sprintf (tbuf, "PRIVMSG %s :%s\r\n", session->channel, cmd);
                } else
 		 {
-		   notc_msg (sess);
+		   notc_msg ();
 		   return TRUE;
 		 }
 	   } else
 	     {
 	       if (server->connected)
 		 {
-		   channel_msg (tbuf, sess->channel, server->nick, newcmd, TRUE);
-		   sprintf (tbuf, "PRIVMSG %s :%s\r\n", sess->channel, newcmd);
+		   channel_msg (tbuf, session->channel, server->nick, newcmd, TRUE);
+		   sprintf (tbuf, "PRIVMSG %s :%s\r\n", session->channel, newcmd);
 		 } else
 		   {
-		     notc_msg (sess);
+		     notc_msg ();
 		     return TRUE;
 		   }
 	     }
          tcp_send (tbuf);
       } else
-	notj_msg (sess);
+	notj_msg ();
    }
    return TRUE;
 }
 
 void
-handle_multiline (session_t *sess, char *cmd, int history, int nocommand)
+handle_multiline (char *cmd, int history, int nocommand)
 {
-   char *cr;
-
-   cr = strchr (cmd, '\n');
-   if (cr)
-   {
-      while (1)
+  char *cr;
+  
+  cr = strchr (cmd, '\n');
+  if (cr)
+    while (1)
       {
-         if (cr)
-            *cr = 0;
-         if (!handle_command (cmd, sess, history, nocommand))
-            return;
-         if (!cr)
-            break;
-         cmd = cr + 1;
-         if (*cmd == 0)
-            break;
-         cr = strchr (cmd, '\n');
+	if (cr)
+	  *cr = 0;
+	if (!handle_command (cmd, history, nocommand))
+	  return;
+	if (!cr)
+	  break;
+	cmd = cr + 1;
+	if (*cmd == 0)
+	  break;
+	cr = strchr (cmd, '\n');
       }
-   } else
-   {
-      if (!handle_command (cmd, sess, history, nocommand))
-         return;
-   }
-
+  else if (!handle_command (cmd, history, nocommand))
+    return;
 }
