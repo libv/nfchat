@@ -1,5 +1,10 @@
 NF-chat;
-
+0.3.0; Starting work on the actual client
+""""""
+   a) small cleanup
+     - removed all in the plugins dir
+     - edited po files
+     - removed all in the scripts-perl dir
 0.2.5;
 """"""
    a) cleanin up menu.c
