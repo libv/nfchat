@@ -51,6 +51,10 @@ dnl *********************************************************************
 dnl ** GLIB *************************************************************
 dnl *********************************************************************
 
+AC_MSG_RESULT($CFLAGS)
+
+CFLAGS=""
+
 AC_PATH_PROG(glibpath, glib12-config)
 if test "_$glibpath" = _ ; then
   AC_PATH_PROG(glibpath, glib-config)

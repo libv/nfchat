@@ -15,7 +15,7 @@ struct user
 extern int userlist_insertname_sorted (struct session *sess, struct user *newuser);
 extern int userlist_add_hostname (struct session *sess, char *nick, char *hostname, char *realname, char *servername);
 extern struct user *find_name (struct session *sess, char *name);
-extern struct user *find_name_global (struct server *serv, char *name);
+extern struct user *find_name_global (server_t *serv, char *name);
 extern void update_user_list (struct session *sess);
 extern void clear_user_list (struct session *sess);
 extern void sort_namelist (struct session *sess);

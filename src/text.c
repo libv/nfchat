@@ -36,10 +36,7 @@ extern GSList *sess_list;
 extern struct xchatprefs prefs;
 
 extern unsigned char *strip_color (unsigned char *text);
-extern void my_system (char *cmd);
 extern void check_special_chars (char *);
-extern int child_handler (int pid);
-
 extern char **environ;
 
 int pevt_build_string (char *input, char **output, int *max_arg);

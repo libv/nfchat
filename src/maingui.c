@@ -133,7 +133,7 @@ fe_clear_channel (struct session *sess)
 }
 
 void
-fe_set_nick (struct server *serv, char *newnick)
+fe_set_nick (server_t *serv, char *newnick)
 {
    GSList *list = sess_list;
    struct session *sess;
@@ -391,36 +391,36 @@ create_window (struct session *sess)
       sess->server->front_session = sess;
 
    if (prefs.tabchannels)
-   {
-      sess->is_tab = TRUE;
-      if (!main_window)
-      {
-         justopened = TRUE;
-         gui_make_tab_window (sess);
-      }
-      sess->gui->window = gtk_hbox_new (0, 0);
-      gtk_signal_connect ((GtkObject *) sess->gui->window, "destroy",
-                          GTK_SIGNAL_FUNC (gtk_kill_session_callback), sess);
-      if (!current_tab)
-      {
-         current_tab = sess;
-         fe_set_title (sess);
-      }
-   } else
-   {
-      sess->gui->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-
-      fe_set_title (sess);
-      gtk_widget_realize (sess->gui->window);
-      gtk_signal_connect ((GtkObject *) sess->gui->window, "destroy",
-                          GTK_SIGNAL_FUNC (gtk_kill_session_callback), sess);
-      gtk_signal_connect ((GtkObject *) sess->gui->window, "focus_in_event",
-                          GTK_SIGNAL_FUNC (focus_in), sess);
-      gtk_window_set_policy ((GtkWindow *) sess->gui->window, TRUE, TRUE, FALSE);
-   }
-
+     {
+       sess->is_tab = TRUE;
+       if (!main_window)
+	 {
+	   justopened = TRUE;
+	   gui_make_tab_window (sess);
+	 }
+       sess->gui->window = gtk_hbox_new (0, 0);
+       gtk_signal_connect ((GtkObject *) sess->gui->window, "destroy",
+			   GTK_SIGNAL_FUNC (gtk_kill_session_callback), sess);
+       if (!current_tab)
+	 {
+	   current_tab = sess;
+	   fe_set_title (sess);
+	 }
+     } else
+       { 
+	 sess->gui->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	 
+	 fe_set_title (sess);
+	 gtk_widget_realize (sess->gui->window);
+	 gtk_signal_connect ((GtkObject *) sess->gui->window, "destroy",
+			     GTK_SIGNAL_FUNC (gtk_kill_session_callback), sess);
+	 gtk_signal_connect ((GtkObject *) sess->gui->window, "focus_in_event",
+			     GTK_SIGNAL_FUNC (focus_in), sess);
+	 gtk_window_set_policy ((GtkWindow *) sess->gui->window, TRUE, TRUE, FALSE);
+       }
+   
    palette_alloc (sess->gui->window);
-
+   
    vbox = gtk_vbox_new (FALSE, 0);
    sess->gui->vbox = vbox;
    gtk_container_set_border_width ((GtkContainer *) vbox, 2);

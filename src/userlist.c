@@ -105,7 +105,7 @@ find_name (struct session *sess, char *name)
 }
 
 struct user *
-find_name_global (struct server *serv, char *name)
+find_name_global (server_t *serv, char *name)
 {
    struct user *user;
    session *sess;

@@ -30,11 +30,10 @@
 #include "util.h"
 
 
-extern void my_system (char *cmd);
 extern int handle_command (char *cmd, void *sess, int history, int nocommand);
-extern int tcp_send (struct server *serv, char *buf);
+extern int tcp_send (server_t *serv, char *buf);
 extern void channel_action (struct session *sess, char *tbuf, char *chan, char *from, char *text, int fromme);
-extern struct session *find_session_from_channel (char *chan, struct server *serv);
+extern struct session *find_session_from_channel (char *chan, server_t *serv);
 
 
 extern GSList *ctcp_list;

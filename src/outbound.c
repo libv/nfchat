@@ -47,21 +47,19 @@ extern struct xchatprefs prefs;
 extern struct session *current_tab;
 
 extern int is_session (session *sess);
-extern struct server *new_server (void);
-extern int child_handler (int pid);
-extern void auto_reconnect (struct server *serv, int send_quit, int err);
+extern void auto_reconnect (server_t *serv, int send_quit, int err);
 extern void do_dns (struct session *sess, char *tbuf, char *nick, char *host);
-extern int tcp_send_len (struct server *serv, char *buf, int len);
-extern int tcp_send (struct server *serv, char *buf);
-extern struct session *tab_msg_session (char *target, struct server *serv);
-extern struct session *find_session_from_channel (char *chan, struct server *serv);
+extern int tcp_send_len (server_t *serv, char *buf, int len);
+extern int tcp_send (server_t *serv, char *buf);
+extern struct session *tab_msg_session (char *target, server_t *serv);
+extern struct session *find_session_from_channel (char *chan, server_t *serv);
 extern int list_delentry (GSList ** list, char *name);
 extern void list_addentry (GSList ** list, char *cmd, char *name);
 extern void PrintText (struct session *sess, char *text);
 extern void connect_server (struct session *sess, char *server, int port, int quiet);
 extern void channel_action (struct session *sess, char *tbuf, char *chan, char *from, char *text, int fromme);
-extern void user_new_nick (struct server *serv, char *outbuf, char *nick, char *newnick, int quiet);
-extern void channel_msg (struct server *serv, char *outbuf, char *chan, char *from, char *text, char fromme);
+extern void user_new_nick (server_t *serv, char *outbuf, char *nick, char *newnick, int quiet);
+extern void channel_msg (server_t *serv, char *outbuf, char *chan, char *from, char *text, char fromme);
 extern void disconnect_server (struct session *sess, int sendquit, int err);
 
 #ifdef MEMORY_DEBUG
@@ -200,7 +198,7 @@ int
 cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
    struct session *s;
-   struct server *v;
+   server_t *v;
    GSList *list = sess_list;
 
    PrintText (sess, "Session   Channel    WaitChan  WillChan  Server\n");
@@ -218,7 +216,7 @@ cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[])
    PrintText (sess, "Server    Sock  Name\n");
    while (list)
    {
-      v = (struct server *) list->data;
+      v = (server_t *) list->data;
       sprintf (tbuf, "0x%lx %-5ld %s\n",
                (unsigned long) v, (unsigned long) v->sok, v->servername);
       PrintText (sess, tbuf);
@@ -425,7 +423,7 @@ cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
    int tmp = prefs.recon_delay;
    GSList *list;
-   server *serv;
+   server_t *serv;
 
    prefs.recon_delay = 0;
 

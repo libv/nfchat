@@ -19,7 +19,13 @@ NF-chat;
 ### this means that i can remove mouse stuff, multiple windows stuff
 ### this will mean a huge cut in size
 
-     b) 
+     b) - removed my_system, child_handler from xchat.c
+	- saving, huge change ahead...
+	- there will be only one server from now on.
+	- changed all server structs to server_t
+ 
+
+### cleanup current_tab
 
 0.3.2;
 """"""

@@ -51,9 +51,9 @@ extern void my_gtk_entry_set_text (GtkWidget * wid, char *text, struct session *
 extern void key_init (void);
 extern void create_window (struct session *);
 extern void PrintText (struct session *, char *);
-extern struct session *new_session (struct server *serv);
+extern struct session *new_session (server_t *serv);
 extern void init_userlist_xpm (struct session *sess);
-extern struct session *find_session_from_waitchannel (char *target, struct server *serv);
+extern struct session *find_session_from_waitchannel (char *target, server_t *serv);
 
 
 GdkFont *my_font_load (char *fontname);
@@ -254,7 +254,7 @@ my_widget_get_style (char *bg_pic)
    return style;
 }
 static struct session *
-find_unused_session (struct server *serv)
+find_unused_session (server_t *serv)
 {
    struct session *sess;
    GSList *list = sess_list;
@@ -269,9 +269,10 @@ find_unused_session (struct server *serv)
 }
 
 struct session *
-fe_new_window_popup (char *target, struct server *serv)
+fe_new_window_popup (char *target, server_t *serv)
 {
    struct session *sess = find_session_from_waitchannel (target, serv);
+   fprintf(stderr, "passed fe_new_window_popup, just called find_session_from_waitchannel\n");
    if (!sess)
    {
       sess = find_unused_session (serv);
@@ -285,7 +286,7 @@ fe_new_window_popup (char *target, struct server *serv)
       fe_set_title (sess);
    }
    return sess;
-}
+   }
 
 void
 fe_set_topic (struct session *sess, char *topic)
@@ -353,7 +354,7 @@ fe_progressbar_start (struct session *sess)
 void
 fe_progressbar_end (struct session *sess)
 {
-   struct server *serv;
+   server_t *serv;
    GSList *list = sess_list;
 
    if (sess)

@@ -91,7 +91,7 @@ void key_load_defaults ();
 static int key_action_handle_command (GtkWidget * wid, GdkEventKey * evt, char *d1,
       char *d2, struct session *sess);
 static int key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1,
-      char *d2, struct session *sess);
+char *d2, struct session *sess);
 int key_action_insert (GtkWidget * wid, GdkEventKey * evt, char *d1,
       char *d2, struct session *sess);
 static int key_action_scroll_page (GtkWidget * wid, GdkEventKey * evt, char *d1,
@@ -114,7 +114,7 @@ static struct key_binding *keys_root = NULL;
 static struct key_action key_actions[KEY_MAX_ACTIONS + 1] =
 {
    {key_action_handle_command, "Run Command", "The \002Run Command\002 action runs the data in Data 1 as if it has been typed into the entry box where you pressed the key sequence. Thus it can contain text (which will be sent to the channel/person), commands or user commands. When run all \002\\n\002 charactors in Data 1 are used to deliminate seperate commands so it is possible to run more than one command. If you want a \002\\\002 in the actual text run then enter \002\\\\\002"},
-   {key_action_page_switch, "Change Page", "The \002Change Page\002 command switchs between pages in the notebook. Set Data 1 to the page you want to switch to. If Data 2 is set to anything then the switch will be relative to the current position"},
+       {key_action_page_switch, "Change Page", "The \002Change Page\002 command switchs between pages in the notebook. Set Data 1 to the page you want to switch to. If Data 2 is set to anything then the switch will be relative to the current position"},
    {key_action_insert, "Insert in Buffer", "The \002Insert in Buffer\002 command will insert the contents of Data 1 into the entry where the key sequence was pressed at the current cursor position"},
    {key_action_scroll_page, "Scroll Page", "The \002Scroll Page\002 command scrolls the text widget up or down one page. If Data 1 is set to anything the page scrolls up, else it scrolls down"},
    {key_action_set_buffer, "Set Buffer", "The \002Set Buffer\002 command sets the entry where the key sequence was entered to the contents of Data 1"},
@@ -490,6 +490,7 @@ key_load_kbs (void)
 /* See the NOTES above --AGL */
 
 /* "Run command" */
+
 int
 key_action_handle_command (GtkWidget * wid, GdkEventKey * evt, char *d1,
        char *d2, struct session *sess)

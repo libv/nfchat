@@ -35,20 +35,20 @@
 extern GSList *sess_list;
 extern struct xchatprefs prefs;
 
-extern void auto_reconnect (struct server *serv, int send_quit, int err);
+extern void auto_reconnect (server_t *serv, int send_quit, int err);
 extern void clear_channel (struct session *sess);
-extern void set_server_name (struct server *serv, char *name);
-extern void flush_server_queue (struct server *serv);
-extern int tcp_send_len (struct server *serv, char *buf, int len);
-extern int tcp_send (struct server *serv, char *buf);
+extern void set_server_name (server_t *serv, char *name);
+extern void flush_server_queue (server_t *serv);
+extern int tcp_send_len (server_t *serv, char *buf, int len);
+extern int tcp_send (server_t *serv, char *buf);
 extern void PrintText (struct session *sess, unsigned char *text);
-extern void read_data (struct server *serv, gint sok);
+extern void read_data (server_t *serv, gint sok);
 extern char *errorstring (int err);
 extern int waitline (int sok, char *buf, int bufsize);
 extern void notc_msg (struct session *sess);
 
 static void
-server_cleanup (server *serv)
+server_cleanup (server_t *serv)
 {
    if (serv->iotag != -1)
    {
@@ -63,7 +63,7 @@ server_cleanup (server *serv)
 }
 
 static void
-connected_signal (server *serv, int sok)
+connected_signal (server_t *serv, int sok)
 {
    session *sess = serv->front_session;
    char tbuf[128];
@@ -162,7 +162,7 @@ void
 disconnect_server (struct session *sess, int sendquit, int err)
 {
    struct session *orig_sess = sess;
-   struct server *serv = sess->server;
+   server_t *serv = sess->server;
    GSList *list;
 
    if (check_connecting (sess))

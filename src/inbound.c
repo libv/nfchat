@@ -33,13 +33,12 @@
 
 /* xchat.c */
 
-extern int tcp_send_len (struct server *serv, char *buf, int len);
-extern int tcp_send (struct server *serv, char *buf);
-extern struct session *find_session_from_nick (char *nick, struct server *serv);
-extern struct session *find_session_from_channel (char *chan, struct server *serv);
-extern struct session *find_session_from_waitchannel (char *chan, struct server *serv);
-struct away_msg *find_away_message (struct server *serv, char *nick);
-void save_away_message (struct server *serv, char *nick, char *msg);
+extern int tcp_send_len (server_t *serv, char *buf, int len);
+extern int tcp_send (server_t *serv, char *buf);
+extern struct session *find_session_from_nick (char *nick, server_t *serv);
+extern struct session *find_session_from_channel (char *chan, server_t *serv);
+struct away_msg *find_away_message (server_t *serv, char *nick);
+void save_away_message (server_t *serv, char *nick, char *msg);
 
 /* text.c */
 
@@ -68,7 +67,7 @@ extern struct session *current_tab;
 #define find_word(a, b) word[b]
 
 
-void channel_msg (struct server *serv, char *outbuf, char *chan, char *from, char *text, char fromme);
+void channel_msg (server_t *serv, char *outbuf, char *chan, char *from, char *text, char fromme);
 
 
 /* black n white(0/1) are bad colors for nicks, and we'll use color 2 for us */
@@ -84,7 +83,7 @@ clear_channel (struct session *sess)
 }
 
 void
-private_msg (struct server *serv, char *tbuf, char *from, char *ip, char *text)
+private_msg (server_t *serv, char *tbuf, char *from, char *ip, char *text)
 {
    struct session *sess;
 
@@ -151,7 +150,7 @@ SearchNick (char *text, char *nicks)
 }
 
 void
-channel_msg (struct server *serv, char *outbuf, char *chan, char *from, char *text, char fromme)
+channel_msg (server_t *serv, char *outbuf, char *chan, char *from, char *text, char fromme)
 {
    struct user *user;
    char *real_outbuf = outbuf;
@@ -198,7 +197,7 @@ channel_msg (struct server *serv, char *outbuf, char *chan, char *from, char *te
 }
 
 void
-user_new_nick (struct server *serv, char *outbuf, char *nick, char *newnick, int quiet)
+user_new_nick (server_t *serv, char *outbuf, char *nick, char *newnick, int quiet)
 {
    int me;
    struct session *sess;
@@ -248,9 +247,10 @@ user_new_nick (struct server *serv, char *outbuf, char *nick, char *newnick, int
 }
 
 static void
-you_joined (struct server *serv, char *outbuf, char *chan, char *nick, char *ip)
+you_joined (server_t *serv, char *outbuf, char *chan, char *nick, char *ip)
 {
   struct session *sess = fe_new_window_popup (chan, serv);
+
   if (sess)
     {
       sess->waitchannel[0] = 0;
@@ -263,7 +263,7 @@ you_joined (struct server *serv, char *outbuf, char *chan, char *nick, char *ip)
 }
 
 static void
-you_kicked (struct server *serv, char *tbuf, char *chan, char *kicker, char *reason)
+you_kicked (server_t *serv, char *tbuf, char *chan, char *kicker, char *reason)
 {
    struct session *sess = find_session_from_channel (chan, serv);
    if (sess)
@@ -283,7 +283,7 @@ you_kicked (struct server *serv, char *tbuf, char *chan, char *kicker, char *rea
 }
 
 static void
-you_parted (struct server *serv, char *tbuf, char *chan, char *ip, char *reason)
+you_parted (server_t *serv, char *tbuf, char *chan, char *ip, char *reason)
 {
    struct session *sess = find_session_from_channel (chan, serv);
    if (sess)
@@ -297,7 +297,7 @@ you_parted (struct server *serv, char *tbuf, char *chan, char *ip, char *reason)
 }
 
 static void
-names_list (struct server *serv, char *tbuf, char *chan, char *names)
+names_list (server_t *serv, char *tbuf, char *chan, char *names)
 {
    struct session *sess;
    char name[64];
@@ -342,7 +342,7 @@ names_list (struct server *serv, char *tbuf, char *chan, char *names)
 }
 
 static void
-topic (struct server *serv, char *tbuf, char *buf)
+topic (server_t *serv, char *tbuf, char *buf)
 {
    session *sess;
    char *po, *new_topic;
@@ -363,7 +363,7 @@ topic (struct server *serv, char *tbuf, char *buf)
 }
 
 static void
-new_topic (struct server *serv, char *tbuf, char *nick, char *chan, char *topic)
+new_topic (server_t *serv, char *tbuf, char *nick, char *chan, char *topic)
 {
    struct session *sess = find_session_from_channel (chan, serv);
    if (sess)
@@ -374,7 +374,7 @@ new_topic (struct server *serv, char *tbuf, char *nick, char *chan, char *topic)
 }
 
 static void
-user_joined (struct server *serv, char *outbuf, char *chan, char *user, char *ip)
+user_joined (server_t *serv, char *outbuf, char *chan, char *user, char *ip)
 {
    struct session *sess = find_session_from_channel (chan, serv);
 
@@ -389,7 +389,7 @@ user_joined (struct server *serv, char *outbuf, char *chan, char *user, char *ip
 }
 
 static void
-user_kicked (struct server *serv, char *outbuf, char *chan, char *user, char *kicker, char *reason)
+user_kicked (server_t *serv, char *outbuf, char *chan, char *user, char *kicker, char *reason)
 {
    struct session *sess = find_session_from_channel (chan, serv);
    if (sess)
@@ -400,7 +400,7 @@ user_kicked (struct server *serv, char *outbuf, char *chan, char *user, char *ki
 }
 
 static void
-user_parted (struct server *serv, char *chan, char *user, char *ip, char *reason)
+user_parted (server_t *serv, char *chan, char *user, char *ip, char *reason)
 {
    struct session *sess = find_session_from_channel (chan, serv);
    if (sess)
@@ -426,7 +426,7 @@ channel_date (struct session *sess, char *tbuf, char *chan, char *timestr)
 }
 
 static void
-topic_nametime (struct server *serv, char *tbuf, char *chan, char *nick, char *date)
+topic_nametime (server_t *serv, char *tbuf, char *chan, char *nick, char *date)
 {
    long n = atol (date);
    char *tim = ctime (&n);
@@ -441,7 +441,7 @@ topic_nametime (struct server *serv, char *tbuf, char *chan, char *nick, char *d
 }
 
 void
-set_server_name (struct server *serv, char *name)
+set_server_name (server_t *serv, char *name)
 {
    GSList *list = sess_list;
    struct session *sess;
@@ -465,7 +465,7 @@ set_server_name (struct server *serv, char *name)
 }
 
 static void
-user_quit (struct server *serv, char *outbuf, char *nick, char *reason)
+user_quit (server_t *serv, char *outbuf, char *nick, char *reason)
 {
    GSList *list = sess_list;
    struct session *sess;
@@ -502,7 +502,7 @@ got_ping_reply (struct session *sess, char *outbuf,
 }
 
 static void
-notice (struct server *serv, char *outbuf, char *to, char *nick, char *msg, char *ip)
+notice (server_t *serv, char *outbuf, char *to, char *nick, char *msg, char *ip)
 {
    char *po;
    struct session *sess = 0;
@@ -533,7 +533,7 @@ notice (struct server *serv, char *outbuf, char *to, char *nick, char *msg, char
 }
 
 static void
-handle_away (struct server *serv, char *outbuf, char *nick, char *msg)
+handle_away (server_t *serv, char *outbuf, char *nick, char *msg)
 {
    struct away_msg *away = find_away_message (serv, nick);
    struct session *sess = NULL;
@@ -550,7 +550,7 @@ handle_away (struct server *serv, char *outbuf, char *nick, char *msg)
 }
 
 static void
-channel_mode (struct server *serv, char *outbuf, char *chan, char *nick, char sign, char mode, char *extra, int quiet)
+channel_mode (server_t *serv, char *outbuf, char *chan, char *nick, char sign, char mode, char *extra, int quiet)
 {
    struct session *sess = find_session_from_channel (chan, serv);
    char tbuf[2][2];
@@ -696,7 +696,7 @@ channel_mode (struct server *serv, char *outbuf, char *chan, char *nick, char si
 }
 
 static void
-channel_modes (struct server *serv, char *outbuf, char *word[], char *nick, int displacement)
+channel_modes (server_t *serv, char *outbuf, char *word[], char *nick, int displacement)
 {
    char *chan = find_word (pdibuf, 3 + displacement);
    if (*chan)
@@ -769,7 +769,7 @@ stupidcode:
 }
 
 static void
-end_of_names (struct server *serv, char *outbuf, char *chan, char *text)
+end_of_names (server_t *serv, char *outbuf, char *chan, char *text)
 {
    struct session *sess;
    GSList *list;
@@ -796,7 +796,7 @@ end_of_names (struct server *serv, char *outbuf, char *chan, char *text)
 }
 
 static void
-check_willjoin_channels (struct server *serv, char *tbuf)
+check_willjoin_channels (server_t *serv, char *tbuf)
 {
    struct session *sess;
    GSList *list = sess_list;
@@ -848,7 +848,7 @@ next_nick (struct session *sess, char *outbuf, char *nick)
 }
 
 static void
-set_default_modes (server *serv, char *outbuf)
+set_default_modes (server_t *serv, char *outbuf)
 {
   if (!prefs.invisible)
     return;
@@ -859,7 +859,7 @@ set_default_modes (server *serv, char *outbuf)
 /* process_line() */
 
 void
-process_line (struct session *sess, struct server *serv, char *buf)
+process_line (struct session *sess, server_t *serv, char *buf)
 {
    char pdibuf[4096];
    char outbuf[4096];
@@ -1197,8 +1197,8 @@ process_line (struct session *sess, struct server *serv, char *buf)
                   if (*chan == ':')
                      chan++;
                   if (!strcasecmp (nick, serv->nick))
-                     you_joined (serv, outbuf, chan, nick, ip);
-                  else
+		    you_joined (serv, outbuf, chan, nick, ip);
+		  else 
                      user_joined (serv, outbuf, chan, nick, ip);
                   return;
                }
