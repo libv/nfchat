@@ -66,7 +66,6 @@ extern struct server *new_server (void);
 extern struct session *new_session (struct server *, char *from);
 extern void PrintText (struct session *, char *);
 extern void open_rawlog (struct server *);
-extern void open_server_list (GtkWidget * wid, gpointer sess);
 extern void settings_opengui (struct session *sess);
 extern char *find_selected_nick (struct session *sess);
 extern int handle_command (char *cmd, struct session *sess, int, int);
@@ -499,12 +498,6 @@ menu_chanmenu (struct session *sess, GdkEventButton * event, char *chan)
 
    gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
           event->button, event->time);
-}
-
-static void
-menu_open_server_list (GtkWidget * wid, gpointer none)
-{
-   open_server_list (0, menu_sess);
 }
 
 static void
@@ -976,8 +969,6 @@ menu_webpage ()
 static struct mymenu mymenu[] =
 {
    {M_NEWMENU, N_ ("X-Chat"), 0, 0, 1},
-   {M_MENU, N_ ("Server List.."), (menucallback)menu_open_server_list, 0, 1},
-   {M_SEP, 0, 0, 0, 0},
    {M_MENU, N_ ("New Server Tab.."), (menucallback)menu_newserver_tab, 0, 1},
    {M_MENU, N_ ("New Server Window.."), (menucallback)menu_newserver_window, 0, 1},
    {M_MENU, N_ ("New Channel Tab.."), (menucallback)menu_newchannel_tab, 0, 1},

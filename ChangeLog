@@ -2,25 +2,35 @@ NF-chat;
 
 start gtk strip
 
-0.0.2;
+0.1.0;
 """"""
-removing all gnome/panel/python stuff
-     notably; 
- -USE_PYTHON from
-     src/common/outbound.c
-     src/common/python.c (+ 2 prototypes)
-     src/common/xchat.c
-     src/fe-gtk/fe-gtk.c
-     src/fe-gtk/menu.c
- -USE_PANEL
-    src/common/cfgfiles.c
-    src/common/xchat.panel
-    src/fe-gtk/dialog.c
-    src/fe-gtk/fe-gtk.c
+ - dismantled/removed serverlist.c serverlist.h
+ - removed open_server_list / serverlist_autoconnect from
+    /src/fe-gtk/fe-gtk.c
+    /src/fe-gtk/menu.c (entire menu item)
+ - removed the file out of /src/fe-gtk/Makefile.am
+ 
+### remember prefs autoconnect/prefs.skipserverlist
+
+
+
+Starting new level in development - strippin gtk frontend
+
+0.0.5;
+""""""
+ - removed fake_gnome.c and edited the following files
     src/fe-gtk/fe-gtk.h
-    src/fe-gtk/maingui.c
-    src/fe-gtk/settings.c
-    configure.in
+    src/fe-gtk/chanlist.c
+    src/fe-gtk/editlist.c
+    src/fe-gtk/ignoregui.c
+    src/fe-gtk/notifygui.c
+    src/fe-gtk/palette.c
+    src/fe-gtk/serverlist.c
+    src/fe-gtk/themes.c
+    src/fe-gtk/urlgrab.c
+
+0.0.4;
+""""""
  -USE_GNOME
     src/common/xchat.c
     src/fe-gtk/about.c
@@ -40,18 +50,30 @@ removing all gnome/panel/python stuff
     src/fe-gtk/usermenu.c
     configure.in
 ## Lost dcc receive window??? - it has to be removed anyway ;)
+## this already existed on 0.0.2
 ## Check out dnd*
- - removed fake_gnome.c and edited the following files
-    src/fe-gtk/fe-gtk.h
-    src/fe-gtk/chanlist.c
-    src/fe-gtk/editlist.c
-    src/fe-gtk/ignoregui.c
-    src/fe-gtk/notifygui.c
-    src/fe-gtk/palette.c
-    src/fe-gtk/serverlist.c
-    src/fe-gtk/themes.c
-    src/fe-gtk/urlgrab.c
 
+0.0.3;
+""""""
+ -USE_PANEL
+    src/common/cfgfiles.c
+    src/common/xchat.panel
+    src/fe-gtk/dialog.c
+    src/fe-gtk/fe-gtk.c
+    src/fe-gtk/fe-gtk.h
+    src/fe-gtk/maingui.c
+    src/fe-gtk/settings.c
+    configure.in
+
+
+0.0.2;
+"""""" 
+ -USE_PYTHON from
+     src/common/outbound.c
+     src/common/python.c (+ 2 prototypes)
+     src/common/xchat.c
+     src/fe-gtk/fe-gtk.c
+     src/fe-gtk/menu.c
 
 0.0.1;
 """"""

@@ -61,8 +61,6 @@ extern void PrintText (struct session *, char *);
 extern struct session *new_session (struct server *serv, char *from);
 extern void url_autosave (void);
 extern void init_userlist_xpm (struct session *sess);
-extern void open_server_list (GtkWidget * wid, gpointer sess);
-extern void serverlist_autoconnect (struct session *sess);
 extern struct session *find_session_from_waitchannel (char *target, struct server *serv);
 extern void tree_blue_style (struct session *);
 extern void tree_red_style (struct session *);
@@ -150,12 +148,6 @@ init_sess (void)
    done_intro = 1;
 
    init_userlist_xpm (sess_list->data);
-
-   if (!prefs.skipserverlist || autoconnect)
-      open_server_list (0, sess_list->data);
-
-   if (autoconnect)
-      serverlist_autoconnect (sess_list->data);
 
    PrintText (sess,
 "\n"
