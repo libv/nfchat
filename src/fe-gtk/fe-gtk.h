@@ -76,13 +76,11 @@ struct session_gui
    GtkWidget *nickgad;
    GtkWidget *inputgad;
    GtkWidget *namelistinfo;
-   GtkWidget *paned;
    GtkWidget *vscrollbar;
    GtkWidget *op_box;
    GtkWidget *op_xpm;
    GtkWidget *userlistbox;
    GtkWidget *nl_box;
-   /* GtkWidget *button_box; */
    GtkWidget *bar;
    GtkWidget *leftpane;
    GtkWidget *delink_button;

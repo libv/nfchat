@@ -28,6 +28,12 @@ NF-chat;
      - maingui.c
        - removed buttons from maingui_new_tab
        - removed maingui_delink_nontab
+   d) removing panes
+### prefs.nopaned
+     - removed paned from session_gui from fe-gtk.h
+     - removed sess->gui->paned calls from maingui.c in
+         userlist_hide, 
+     - prefs.nopaned calls from create_window
  
 0.2.1; removing dialog windows
 """"""

@@ -662,24 +662,16 @@ userlist_hide (GtkWidget * igad, struct session *sess)
    {
       if (igad)
          gtk_label_set (GTK_LABEL (GTK_BIN (igad)->child), ">");
-      if (sess->gui->paned)
-         gtk_paned_set_position (GTK_PANED (sess->gui->paned), sess->userlisthidden);
-      else
-         gtk_widget_show (sess->gui->userlistbox);
+     
+      gtk_widget_show (sess->gui->userlistbox);
       sess->userlisthidden = FALSE;
    } else
    {
       if (igad)
          gtk_label_set (GTK_LABEL (GTK_BIN (igad)->child), "<");
-      if (sess->gui->paned)
-      {
-         sess->userlisthidden = GTK_PANED (sess->gui->paned)->handle_xpos;
-         gtk_paned_set_position (GTK_PANED (sess->gui->paned), 1200);
-      } else
-      {
-         sess->userlisthidden = TRUE;
-         gtk_widget_hide (sess->gui->userlistbox);
-      }
+     
+      sess->userlisthidden = TRUE;
+      gtk_widget_hide (sess->gui->userlistbox);
    }
 }
 
@@ -872,29 +864,15 @@ create_window (struct session *sess)
    leftpane = gtk_hbox_new (FALSE, 0);
    gtk_widget_show (leftpane);
 
-   if (!prefs.nopaned)
-   {
-      sess->gui->paned = gtk_hpaned_new ();
-      gtk_container_add (GTK_CONTAINER (vbox), sess->gui->paned);
-      gtk_widget_show (sess->gui->paned);
-   }
    rightpane = gtk_hbox_new (FALSE, 8);
    gtk_widget_show (rightpane);
    sess->gui->userlistbox = rightpane;
 
-   if (!prefs.nopaned)
-   {
-      gtk_paned_pack1 (GTK_PANED (sess->gui->paned), leftpane, TRUE, TRUE);
-      gtk_paned_pack2 (GTK_PANED (sess->gui->paned), rightpane, FALSE, TRUE);
-      gtk_paned_set_gutter_size (GTK_PANED (sess->gui->paned), 10);
-   } else
-   {
-      wid = gtk_hbox_new (0, 2);
-      gtk_container_add (GTK_CONTAINER (vbox), wid);
-      gtk_widget_show (wid);
-      gtk_container_add (GTK_CONTAINER (wid), leftpane);
-      gtk_box_pack_end (GTK_BOX (wid), rightpane, 0, 0, 0);
-   }
+   wid = gtk_hbox_new (0, 2);
+   gtk_container_add (GTK_CONTAINER (vbox), wid);
+   gtk_widget_show (wid);
+   gtk_container_add (GTK_CONTAINER (wid), leftpane);
+   gtk_box_pack_end (GTK_BOX (wid), rightpane, 0, 0, 0);
 
    sess->gui->nl_box = nlbox = gtk_vbox_new (FALSE, 2);
    gtk_container_add (GTK_CONTAINER (rightpane), nlbox);
