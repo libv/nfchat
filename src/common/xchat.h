@@ -78,7 +78,6 @@ struct xchatprefs
    char soundcmd[PATHLEN + 1];
    char background[PATHLEN + 1];
    char background_dialog[PATHLEN + 1];
-   char dccdir[PATHLEN + 1];
    char bluestring[64];
    char dnsprogram[72];
    char hostname[127];
@@ -97,23 +96,18 @@ struct xchatprefs
    int max_auto_indent;
    int indent_pixels;
    int dialog_indent_pixels;
-   int dcc_blocksize;
    int max_lines;
    int notify_timeout;
-   int dcctimeout;
-   int dccstalltimeout;
    int mainwindow_left;
    int mainwindow_top;
    int mainwindow_width;
    int mainwindow_height;
-   int dccpermissions;
    int recon_delay;
    int bantype;
    int userlist_sort;
    int nu_color;
    int bt_color;
    unsigned long local_ip;
-   unsigned long dcc_ip;
 
    unsigned int use_trans;
    unsigned int autosave;
@@ -133,26 +127,18 @@ struct xchatprefs
    unsigned int nickcompletion;
    unsigned int tabchannels;
    unsigned int nopaned;
-   unsigned int autodccchat;
-   unsigned int autodccsend;
-   unsigned int autoresume;
-   unsigned int noautoopendccsendwindow;
-   unsigned int noautoopendccrecvwindow;
-   unsigned int noautoopendccchatwindow;
    unsigned int transparent;
    unsigned int tint;
    unsigned int dialog_transparent;
    unsigned int dialog_tint;
    unsigned int stripcolor;
    unsigned int timestamp;
-   unsigned int fastdccsend;
    unsigned int skipserverlist;
    unsigned int filterbeep;
    unsigned int beepmsg;
    unsigned int privmsgtab;
    unsigned int logging;
    unsigned int newtabstofront;
-   unsigned int dccwithnick;
    unsigned int hilitenotify;
    unsigned int hidever;
    unsigned int ip_from_server;
@@ -256,37 +242,6 @@ struct server
 };
 
 typedef struct server server;
-
-struct DCC
-{
-   struct server *serv;
-   struct dccdraw *dccdraw;
-   struct dcc_chat *dccchat;
-   struct sockaddr_in SAddr;
-   int fp;                      /* file pointer */
-   int sok;
-   int iotag;
-   int wiotag;
-   int port;
-   int cps;
-   float perc;
-   unsigned long addr;
-   unsigned long size;
-   unsigned long resumable;
-   unsigned long ack;
-   unsigned long oldack;
-   unsigned long pos;
-   unsigned long oldpos;
-   unsigned long starttime;
-   unsigned long offertime;
-   unsigned long lasttime;
-   char *file;
-   char *destfile;
-   char *nick;
-   char type;                   /* 0 = SEND  1 = RECV  2 = CHAT */
-   char dccstat;                /* 0 = QUEUED  1 = ACTIVE  2 = FAILED  3 = DONE */
-   unsigned int fastsend:1;
-};
 
 typedef int (*cmd_callback) (struct session * sess, char *tbuf, char *word[], char *word_eol[]);
 

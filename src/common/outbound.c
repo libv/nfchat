@@ -44,7 +44,6 @@ void check_special_chars (char *cmd);
 
 extern GSList *sess_list;
 extern GSList *serv_list;
-/* extern GSList *dcc_list; */
 extern GSList *command_list;
 extern GSList *button_list;
 extern struct xchatprefs prefs;
@@ -1645,7 +1644,6 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
          if (*nick == '=')
          {
             nick++;
-            EMIT_SIGNAL (XP_TE_NODCC, sess, NULL, NULL, NULL, NULL, 0);
             return TRUE;
          } else
          {

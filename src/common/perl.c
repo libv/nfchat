@@ -43,7 +43,6 @@
 
 extern GSList *sess_list;
 extern GSList *serv_list;
-extern GSList *dcc_list;
 extern GSList *ignore_list;
 
 extern int is_session (session *sess);
@@ -116,7 +115,6 @@ XS (XS_IRC_server_list);
 XS (XS_IRC_user_list);
 XS (XS_IRC_user_info);
 XS (XS_IRC_ignore_list);
-XS (XS_IRC_dcc_list);
 XS (XS_IRC_get_info);
 
 
@@ -276,7 +274,6 @@ perl_init (struct session *default_sess, int autoload)
    newXS ("IRC::user_list", XS_IRC_user_list, "IRC");
    newXS ("IRC::user_info", XS_IRC_user_info, "IRC");
    newXS ("IRC::ignore_list", XS_IRC_ignore_list, "IRC");
-   newXS ("IRC::dcc_list", XS_IRC_dcc_list, "IRC");
    newXS ("IRC::get_info", XS_IRC_get_info, "IRC");
 
    if (autoload)
@@ -388,32 +385,6 @@ perl_inbound (struct session *sess, struct server *serv, char *buf)
    }
    if (tmp_mtype)
       free (tmp_mtype);
-   return 0;
-}
-
-int 
-perl_dcc_chat (struct session *sess, struct server *serv, char *buf)
-{
-   GSList *handler;
-   struct _perl_inbound_handlers *data;
-   SV *handler_return;
-
-   if (!buf)
-      return 0;
-   perl_sess = sess;
-
-   for (handler = perl_inbound_handlers; handler != NULL; handler = handler->next)
-   {
-      data = handler->data;
-      if (!strcmp ("DCC", data->message_type) || !strcmp ("INBOUND", data->message_type))
-      {
-         handler_return = execute_perl (data->handler_name, buf);
-         if (SvIV (handler_return))
-         {
-            return SvIV (handler_return);
-         }
-      }
-   }
    return 0;
 }
 
@@ -933,47 +904,6 @@ XS (XS_IRC_user_list)
       }
       list = list->next;
    }
-   XSRETURN (i);
-}
-
-XS (XS_IRC_dcc_list)
-{
-   struct DCC *dcc;
-   GSList *list = dcc_list;
-   int i = 0;
-   dXSARGS;
-   items = 0;
-
-   while (list)
-   {
-      dcc = (struct DCC *) list->data;
-      XST_mPV (i, dcc->nick);
-      i++;
-      if (dcc->file)
-         XST_mPV (i, dcc->file);
-      else
-         XST_mPV (i, "");
-      i++;
-      XST_mIV (i, dcc->type);
-      i++;
-      XST_mIV (i, dcc->dccstat);
-      i++;
-      XST_mIV (i, dcc->cps);
-      i++;
-      XST_mIV (i, dcc->size);
-      i++;
-      XST_mIV (i, dcc->resumable);
-      i++;
-      XST_mIV (i, dcc->addr);
-      i++;
-      if (dcc->destfile)
-         XST_mPV (i, dcc->destfile);
-      else
-         XST_mPV (i, "");
-      i++;
-      list = list->next;
-   }
-
    XSRETURN (i);
 }
 

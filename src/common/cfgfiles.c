@@ -274,14 +274,12 @@ static struct prefs vars[] = {
 {"soundcmd",            PREFS_OFFSET(soundcmd),          TYPE_STR},
 {"background_pic",      PREFS_OFFSET(background),        TYPE_STR},
 {"background_dialog_pic",PREFS_OFFSET(background_dialog),TYPE_STR},
-{"dccdir",              PREFS_OFFSET(dccdir),            TYPE_STR},
 {"doubleclickuser",     PREFS_OFFSET(doubleclickuser),   TYPE_STR},
 {"bluestring",          PREFS_OFFSET(bluestring),        TYPE_STR},
 {"dnsprogram",          PREFS_OFFSET(dnsprogram),        TYPE_STR},
 {"hostname",            PREFS_OFFSET(hostname),          TYPE_STR},
 {"trans_file",          PREFS_OFFSET(trans_file),        TYPE_STR},
 {"logmask",             PREFS_OFFSET(logmask),           TYPE_STR},
-
 {"autosave",            PREFS_OFFINT(autosave),          TYPE_BOOL},
 {"autodialog",          PREFS_OFFINT(autodialog),        TYPE_BOOL},
 {"autoreconnect",       PREFS_OFFINT(autoreconnect),     TYPE_BOOL},
@@ -297,21 +295,14 @@ static struct prefs vars[] = {
 {"nickcompletion",      PREFS_OFFINT(nickcompletion),    TYPE_BOOL},
 {"tabchannels",         PREFS_OFFINT(tabchannels),       TYPE_BOOL},
 {"nopaned",             PREFS_OFFINT(nopaned),           TYPE_BOOL},
-{"autodccchat",         PREFS_OFFINT(autodccchat),       TYPE_BOOL},
-{"autodccsend",         PREFS_OFFINT(autodccsend),       TYPE_BOOL},
-{"noautoopendccsendwindow", PREFS_OFFINT(noautoopendccsendwindow),TYPE_BOOL},
-{"noautoopendccrecvwindow", PREFS_OFFINT(noautoopendccrecvwindow),TYPE_BOOL},
-{"noautoopendccchatwindow", PREFS_OFFINT(noautoopendccchatwindow),TYPE_BOOL},
 {"transparent",         PREFS_OFFINT(transparent),       TYPE_BOOL},
 {"tint",                PREFS_OFFINT(tint),              TYPE_BOOL},
 {"dialog_transparent",  PREFS_OFFINT(dialog_transparent),TYPE_BOOL},
 {"dialog_tint",         PREFS_OFFINT(dialog_tint),       TYPE_BOOL},
 {"stripcolor",          PREFS_OFFINT(stripcolor),        TYPE_BOOL},
 {"timestamp",           PREFS_OFFINT(timestamp),         TYPE_BOOL},
-{"fastdccsend",         PREFS_OFFINT(fastdccsend),       TYPE_BOOL},
 {"skipserverlist",      PREFS_OFFINT(skipserverlist),    TYPE_BOOL},
 {"filterbeep",          PREFS_OFFINT(filterbeep),        TYPE_BOOL},
-{"dccwithnick",         PREFS_OFFINT(dccwithnick),       TYPE_BOOL},
 {"hilight_notify",      PREFS_OFFINT(hilitenotify),      TYPE_BOOL},
 {"beep_msg",            PREFS_OFFINT(beepmsg),           TYPE_BOOL},
 {"priv_msg_tabs",       PREFS_OFFINT(privmsgtab),        TYPE_BOOL},
@@ -325,7 +316,6 @@ static struct prefs vars[] = {
 {"autosaveurl",         PREFS_OFFINT(autosave_url),      TYPE_BOOL},
 {"ip_from_server",      PREFS_OFFINT(ip_from_server),    TYPE_BOOL},
 {"use_server_tab",      PREFS_OFFINT(use_server_tab),    TYPE_BOOL},
-{"auto_resume",         PREFS_OFFINT(autoresume),        TYPE_BOOL},
 {"style_inputbox",      PREFS_OFFINT(style_inputbox),    TYPE_BOOL},
 {"windows_as_tabs",     PREFS_OFFINT(windows_as_tabs),   TYPE_BOOL},
 {"use_fontset",         PREFS_OFFINT(use_fontset),       TYPE_BOOL},
@@ -341,22 +331,17 @@ static struct prefs vars[] = {
 {"dialog_wordwrap",     PREFS_OFFINT(dialog_wordwrap),   TYPE_BOOL},
 {"mail_check",          PREFS_OFFINT(mail_check),        TYPE_BOOL},
 {"double_buffer",       PREFS_OFFINT(double_buffer),     TYPE_BOOL},
-
 {"notify_timeout",      PREFS_OFFINT(notify_timeout),    TYPE_INT},
 {"nu_color",            PREFS_OFFINT(nu_color),          TYPE_INT},
-{"dcc_timeout",         PREFS_OFFINT(dcctimeout),        TYPE_INT},
-{"dcc_stall_timeout",   PREFS_OFFINT(dccstalltimeout),   TYPE_INT},
 {"mainwindow_left",     PREFS_OFFINT(mainwindow_left),   TYPE_INT},
 {"mainwindow_top",      PREFS_OFFINT(mainwindow_top),    TYPE_INT},
 {"mainwindow_width",    PREFS_OFFINT(mainwindow_width),  TYPE_INT},
 {"mainwindow_height",   PREFS_OFFINT(mainwindow_height), TYPE_INT},
 {"max_lines",           PREFS_OFFINT(max_lines),         TYPE_INT},
-{"dcc_permissions",     PREFS_OFFINT(dccpermissions),    TYPE_INT},
 {"bt_color",            PREFS_OFFINT(bt_color),          TYPE_INT},
 {"reconnect_delay",     PREFS_OFFINT(recon_delay),       TYPE_INT},
 {"ban_type",            PREFS_OFFINT(bantype),           TYPE_INT},
 {"userlist_sort",       PREFS_OFFINT(userlist_sort),     TYPE_INT},
-{"dcc_blocksize",       PREFS_OFFINT(dcc_blocksize),     TYPE_INT},
 {"tint_red",            PREFS_OFFINT(tint_red),          TYPE_INT},
 {"tint_green",          PREFS_OFFINT(tint_green),        TYPE_INT},
 {"tint_blue",           PREFS_OFFINT(tint_blue),         TYPE_INT},
@@ -375,8 +360,7 @@ load_config (void)
 {
    struct stat st;
    char *cfg, *username;
-   int res, val, i, fh, am_root = 0;
-/*   char version[32];*/
+   int res, val, i, fh;
 
    memset (&prefs, 0, sizeof (struct xchatprefs));
    /* Just for ppl upgrading --AGL */
@@ -387,7 +371,6 @@ load_config (void)
    prefs.show_separator = 1;
    prefs.dialog_show_separator = 1;
    prefs.double_buffer = 1;
-   prefs.dcc_blocksize = 1024;
 
    check_prefs_dir ();
    username = g_get_user_name ();
@@ -418,40 +401,11 @@ load_config (void)
       }
       while (vars[i].type != 0);
 
-/*      cfg_get_str (cfg, "version", version);
-      if (strcmp (version, VERSION) != 0)
-      {
-         fe_message (
-"Welcome to X-Chat 1.4!\n\n"
-"Alot of changes have been made since 1.2. You may want to delete\n"
-"your ~/.xchat directory and start with the new defaults (saving\n"
-"your serverlist.conf might be a good idea). Make sure you do it\n"
-"while X-Chat isn't running.\n"
-                  , TRUE);
-      }*/
-
       free (cfg);
 
    } else
    {
-#ifndef __EMX__
-      if (getuid () == 0)
-      {
-         am_root = TRUE;
-         fe_message ("* Running IRC as root is stupid! You should\n"
-                     "  create a User Account and use that to login.\n\n"
-                     "* The default DCC receive directory is your\n"
-                     "  home dir, you should change this at some stage.", TRUE);
-      }
-#endif
-      if (!am_root)
-      {
-         fe_message ("The default DCC receive directory is your\n"
-                     "home dir, you should change this at some stage.", TRUE);
-      }
       /* put in default values, anything left out is automatically zero */
-      prefs.noautoopendccchatwindow = 1;
-      prefs.autoresume = 1;
       prefs.show_away_once = 1;
       prefs.show_away_message = 1;
       prefs.indent_pixels = 80;
@@ -459,7 +413,6 @@ load_config (void)
       prefs.indent_nicks = 1;
       prefs.dialog_indent_nicks = 1;
       prefs.thin_separator = 1;
-      prefs.fastdccsend = 1;
       prefs.autosave = 1;
       prefs.autodialog = 1;
       prefs.autorejoin = 1;
@@ -472,12 +425,9 @@ load_config (void)
       prefs.style_inputbox = 1;
       prefs.nu_color = 4;
       prefs.bt_color = 8;
-      prefs.dccpermissions = 0600;
       prefs.max_lines = 300;
       prefs.mainwindow_width = 601;
       prefs.mainwindow_height = 422;
-      prefs.dcctimeout = 240;
-      prefs.dccstalltimeout = 180;
       prefs.notify_timeout = 15;
       prefs.tint_red =
       prefs.tint_green =
@@ -492,7 +442,6 @@ load_config (void)
       strcat (prefs.nick3, "__");
       strcpy (prefs.realname, username);
       strcpy (prefs.username, username);
-      strcpy (prefs.dccdir, g_get_home_dir ());
       strcpy (prefs.doubleclickuser, "/QUOTE WHOIS %s");
       strcpy (prefs.awayreason, "I'm busy");
       strcpy (prefs.quitreason, "[x]chat");

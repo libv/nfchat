@@ -34,7 +34,40 @@ NF-chat;
        dcc_check_timeouts from xchat_misc_checks, dcc.h include
      - deleted dcc.c, dcc.h, edited Makefile.am & Potfiles.in
    c)
-
+     - removed dcc stuff from cfgfiles.c
+       - dccdir, autodccchat, autodccsend, noautoopendccsendwindow,
+         noautoopendccrecvwindow, noautoopendccchatwindow, 
+         fastdccsend, dccwithnick, dcc_timeout, dcc_stall_timeout,
+         dcc_permissions, dcc_blocksize, auto_resume from struct prefs
+       - prefs.dcc_blocksize, prefs.noautoopendccchatwindow, 
+         prefs.autoresume, prefs.fastdccsend, prefs.dccpermissions,
+         prefs.dcctimeout, prefs.dccstalltimeout, prefs.dccdir
+         from load_config
+       - removed rootcheck in load_config
+     - removed from inbound.c
+       - prefs.dcc_ip from process_line
+     - removed *dcc_list and EMIT_SIGNAL from cmd_msg from outbound.c
+     - removed from perl.c
+       XS_IRC_dcc_list, dcc_list, perl_dcc_chat
+     - removed DCC pp calls in plugin.h
+     - removed DCC stuff from signalmapping in pys_signals.h
+     - removed van text.c
+       *pevt_dccchaterr_help, *pevt_dccstall_help, *pevt_generic_file_help,
+       *pevt_dccrecverr_help, *pevt_dccrecvcomp_help, *pevt_dccconfail_help,
+       *pevt_dcccon_help, *pevt_dccsendfail_help, *pevt_dccsendcomp_help,
+       *pevt_dccoffer_help, *pevt_dccabort_help, *pevt_dccresumeoffer_help
+       *pevt_dccsendoffer_help, *pevt_dccgenericoffer_help, *pevt_dccrename_help
+       *pevt_dccmalformed_help, 
+     - removed from xchat.c
+       *dcc_list, some stuff from defaultconf_popup, defaultconf_buttons,
+       defaultconf_commands
+     - removed from xchat.h
+       - from xchatprefs
+         dccdir, dcc_blocksize, dcctimeout, dccstalltimeout, dccpermissions, 
+         autodccchat, autodccsend, autoresume, noautoopendccsendwindow, 
+         noautoopendccrecvwindow, noautoopendccchatwindow, dccwithnick
+         dcc_ip, fastdccsend
+       - removed struct DCC
 0.2.5;
 """"""
    a) cleanin up menu.c

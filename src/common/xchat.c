@@ -43,7 +43,6 @@ GSList *ctcp_list = 0;
 GSList *replace_list = 0;
 GSList *sess_list = 0;
 GSList *serv_list = 0;
-GSList *dcc_list = 0;
 GSList *url_list = 0;
 GSList *away_list = 0;
 GSList *ignore_list = 0;
@@ -850,13 +849,7 @@ xchat_misc_checks (void) /* this gets called every 2 seconds */
                            "NAME Ping\nCMD /ping %s\n\n"\
                            "NAME Time\nCMD /ctcp %s TIME\n\n"\
                            "NAME Finger\nCMD /ctcp %s FINGER\n\n"\
-                           "NAME XDCC List\nCMD /ctcp %s XDCC LIST\n\n"\
-                           "NAME CDCC List\nCMD /ctcp %s CDCC LIST\n\n"\
                            "NAME ENDSUB\nCMD \n\n"\
-                           "NAME SUB\nCMD DCC\n\n"\
-                           "NAME Send File\nCMD /dcc send %s\n\n"\
-                           "NAME Offer Chat\nCMD /dcc chat %s\n\n"\
-                           "NAME Abort Chat\nCMD /dcc close chat %s\n\n"\
                            "NAME ENDSUB\nCMD \n\n"\
                            "NAME SUB\nCMD Oper\n\n"\
                            "NAME Kill\nCMD /quote KILL %s :die!\n\n"\
@@ -890,7 +883,6 @@ xchat_misc_checks (void) /* this gets called every 2 seconds */
                               "NAME DeOp\nCMD /deop %a\n\n"\
                               "NAME Ban\nCMD /ban %s\n\n"\
                               "NAME Kick\nCMD /kick %s\n\n"\
-                              "NAME Send\nCMD /dcc send %s\n\n"\
                               "NAME Dialog\nCMD /query %s\n\n"\
                               "NAME Lookup\nCMD /dns %s\n\n"\
                               "NAME Whois\nCMD /whois %s\n"
@@ -903,7 +895,6 @@ xchat_misc_checks (void) /* this gets called every 2 seconds */
    "NAME ACTION\nCMD /me &2\n\n"\
    "NAME ALIAS\nCMD /echo See \002User Commands\002 in the Settings menu.\n\n"\
    "NAME BANLIST\nCMD /quote MODE %c +b\n\n"\
-   "NAME CHAT\nCMD /dcc chat %2\n\n"\
    "NAME DIALOG\nCMD /query %2\n\n"\
    "NAME DMSG\nCMD /msg =%2 &3\n\n"\
    "NAME EXIT\nCMD /quit\n\n"\
