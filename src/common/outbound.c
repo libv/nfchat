@@ -22,7 +22,6 @@
 #include <ctype.h>
 #include "xchat.h"
 #include "plugin.h"
-#include "ignore.h"
 #include "util.h"
 #include "fe.h"
 #include <sys/time.h>
@@ -247,7 +246,6 @@ static int cmd_execw (struct session *sess, char *tbuf, char *word[], char *word
 #endif
 static int cmd_gate (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 int cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_ignore (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_invite (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_join (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_kick (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -282,7 +280,6 @@ static int cmd_servchan (struct session *sess, char *tbuf, char *word[], char *w
 static int cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_topic (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_unban (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
-static int cmd_unignore (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 int cmd_unloadall (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_wallchop (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
 static int cmd_wallchan (struct session *sess, char *tbuf, char *word[], char *word_eol[]);
@@ -314,12 +311,6 @@ struct commands cmds[] =
 #endif
    {"GATE", cmd_gate, 0, 0, "/GATE <host> [<port>], proxies through a host, port defaults to 23\n"},
    {"HELP", cmd_help, 0, 0, 0},
-   {"IGNORE", cmd_ignore, 0, 0,
-    "/IGNORE <mask> <types..> <options..>\n"
-    "    mask - host mask to ignore, eg: *!*@*.aol.com\n"
-    "    types - types of data to ignore, one or all of:\n"
-    "            PRIV, CHAN, NOTI, CTCP, INVI, ALL\n"
-    "    options - NOSAVE, QUIET\n"},
    {"INVITE", cmd_invite, 1, 0, "/INVITE <nick> [<channel>], invites someone to a channel, by default the current channel (needs chanop)\n"},
    {"JOIN", cmd_join, 1, 0, "/JOIN <channel>, joins the channel\n"},
    {"KICK", cmd_kick, 1, 1, "/KICK <nick>, kicks the nick from the current channel (needs chanop)\n"},
@@ -363,7 +354,6 @@ struct commands cmds[] =
    {"SERVER", cmd_server, 0, 0, "/SERVER <host> [<port>] [<password>], connects to a server, the default port is 6667\n"},
    {"TOPIC", cmd_topic, 1, 1, "/TOPIC [<topic>], sets the topic is one is given, else shows the current topic\n"},
    {"UNBAN", cmd_unban, 1, 1, "/UNBAN <mask>, removes a current ban on a mask\n"},
-   {"UNIGNORE", cmd_unignore, 0, 0, "/UNIGNORE <mask> [QUIET]\n"},
 #ifdef USE_PERL
    {"UNLOADALL", cmd_unloadall, 0, 0, "/UNLOADALL, Unloads all perl scripts\n"},
 #endif
@@ -1371,71 +1361,6 @@ cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 int
-cmd_ignore (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-   int i;
-   int priv = 0;
-   int noti = 0;
-   int chan = 0;
-   int ctcp = 0;
-   int invi = 0;
-   int unignore = 0;
-   int quiet = 0;
-   int no_save = 0;
-
-   if (!*word[2])
-   {
-      ignore_showlist (sess);
-      return TRUE;
-   }
-   if (!*word[3])
-      return FALSE;
-
-   i = 3;
-   while (1)
-   {
-      if (!*word[i])
-      {
-         if (!priv && !noti && !chan && !ctcp && !invi && !unignore)
-            return FALSE;
-         i = ignore_add (word[2], priv, noti, chan, ctcp, invi, unignore, no_save);
-         if (!quiet)
-         {
-            if (i == 1)
-               EMIT_SIGNAL (XP_TE_IGNOREADD, sess, word[2], NULL, NULL, NULL, 0);
-            if (i == 2)         /* old ignore changed */
-               EMIT_SIGNAL (XP_TE_IGNORECHANGE, sess, word[2], NULL, NULL, NULL, 0);
-         }
-         return TRUE;
-      }
-      if (!strcasecmp (word[i], "UNIGNORE"))
-         unignore = 1;
-      else if (!strcasecmp (word[i], "ALL"))
-         priv = noti = chan = ctcp = invi = 1;
-      else if (!strcasecmp (word[i], "PRIV"))
-         priv = 1;
-      else if (!strcasecmp (word[i], "NOTI"))
-         noti = 1;
-      else if (!strcasecmp (word[i], "CHAN"))
-         chan = 1;
-      else if (!strcasecmp (word[i], "CTCP"))
-         ctcp = 1;
-      else if (!strcasecmp (word[i], "INVI"))
-         invi = 1;
-      else if (!strcasecmp (word[i], "QUIET"))
-         quiet = 1;
-      else if (!strcasecmp (word[i], "NOSAVE"))
-         no_save = 1;
-      else
-      {
-         sprintf (tbuf, "Unknown arg '%s' ignored.", word[i]);
-         PrintText (sess, tbuf);
-      }
-      i++;
-   }
-}
-
-int
 cmd_invite (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
    if (!*word[2])
@@ -1985,23 +1910,6 @@ cmd_unban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
    {
       sprintf (tbuf, "MODE %s -b %s\r\n", sess->channel, mask);
       tcp_send (sess->server, tbuf);
-      return TRUE;
-   }
-   return FALSE;
-}
-
-int
-cmd_unignore (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-   char *mask = find_word (pdibuf, 2);
-   char *arg = find_word (pdibuf, 3);
-   if (*mask)
-   {
-      if (ignore_del (mask, NULL))
-      {
-         if (strcasecmp (arg, "QUIET"))
-            EMIT_SIGNAL (XP_TE_IGNOREREMOVE, sess, mask, NULL, NULL, NULL, 0);
-      }
       return TRUE;
    }
    return FALSE;

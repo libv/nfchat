@@ -38,12 +38,10 @@
 #include "xchat.h"
 #include "cfgfiles.h"
 #include "util.h"
-#include "ignore.h"
 #include "fe.h"
 
 extern GSList *sess_list;
 extern GSList *serv_list;
-extern GSList *ignore_list;
 
 extern int is_session (session *sess);
 extern int tcp_send_len (struct server *serv, char *buf, int len);
@@ -114,7 +112,6 @@ XS (XS_IRC_channel_list);
 XS (XS_IRC_server_list);
 XS (XS_IRC_user_list);
 XS (XS_IRC_user_info);
-XS (XS_IRC_ignore_list);
 XS (XS_IRC_get_info);
 
 
@@ -273,7 +270,6 @@ perl_init (struct session *default_sess, int autoload)
    newXS ("IRC::server_list", XS_IRC_server_list, "IRC");
    newXS ("IRC::user_list", XS_IRC_user_list, "IRC");
    newXS ("IRC::user_info", XS_IRC_user_info, "IRC");
-   newXS ("IRC::ignore_list", XS_IRC_ignore_list, "IRC");
    newXS ("IRC::get_info", XS_IRC_get_info, "IRC");
 
    if (autoload)
@@ -781,40 +777,6 @@ XS (XS_IRC_server_list)
       list = list->next;
    }
 
-   XSRETURN (i);
-}
-
-XS (XS_IRC_ignore_list)
-{
-   struct ignore *ig;
-   GSList *list = ignore_list;
-   int i = 0;
-   dXSARGS;
-   items = 0;
-
-   while (list)
-   {
-      ig = (struct ignore *) list->data;
-
-      XST_mPV (i, ig->mask);
-      i++;
-      XST_mIV (i, ig->priv);
-      i++;
-      XST_mIV (i, ig->chan);
-      i++;
-      XST_mIV (i, ig->ctcp);
-      i++;
-      XST_mIV (i, ig->noti);
-      i++;
-      XST_mIV (i, ig->invi);
-      i++;
-      XST_mIV (i, ig->unignore);
-      i++;
-      XST_mPV (i, ":");
-      i++;
-
-      list = list->next;
-   }
    XSRETURN (i);
 }
 

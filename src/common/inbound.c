@@ -28,7 +28,6 @@
 #include <time.h>
 #include "xchat.h"
 #include "util.h"
-#include "ignore.h"
 #include "plugin.h"
 #include "fe.h"
 
@@ -334,9 +333,6 @@ you_joined (struct server *serv, char *outbuf, char *chan, char *nick, char *ip)
       if (prefs.logging)
          setup_logging (sess);
       sess->waitchannel[0] = 0;
-      sess->ignore_date = TRUE;
-      sess->ignore_mode = TRUE;
-      sess->ignore_names = TRUE;
       sess->end_of_names = FALSE;
       sprintf (outbuf, "MODE %s\r\n", chan);
       tcp_send (sess->server, outbuf);
@@ -399,8 +395,7 @@ names_list (struct server *serv, char *tbuf, char *chan, char *names)
                    NULL, 0);
       return;
    }
-   if (!sess->ignore_names)
-      EMIT_SIGNAL (XP_TE_USERSONCHAN, sess, chan, names, NULL, NULL, 0);
+   EMIT_SIGNAL (XP_TE_USERSONCHAN, sess, chan, names, NULL, NULL, 0);
 
    if (sess->end_of_names)
    {
@@ -887,7 +882,6 @@ end_of_names (struct server *serv, char *outbuf, char *chan, char *text)
          if (sess->server == serv)
          {
             sess->end_of_names = TRUE;
-            sess->ignore_names = FALSE;
          }
          list = list->next;
       }
@@ -897,7 +891,6 @@ end_of_names (struct server *serv, char *outbuf, char *chan, char *text)
    if (sess)
    {
       sess->end_of_names = TRUE;
-      sess->ignore_names = FALSE;
    }
 }
 
@@ -1147,32 +1140,21 @@ process_line (struct session *sess, struct server *serv, char *buf)
                sess = find_session_from_channel (word[4], serv);
                if (!sess)
                   sess = serv->front_session;
-               if (sess->ignore_mode)
-               {
-                  sess->ignore_mode = FALSE;
-               } else
-               {
-                  EMIT_SIGNAL (XP_TE_CHANMODES, sess, word[4], word_eol[5],
+               EMIT_SIGNAL (XP_TE_CHANMODES, sess, word[4], word_eol[5],
                                NULL, NULL, 0);
-               }
                channel_modes (serv, outbuf, word, word[3], 1);
                break;
             case 329:
                sess = find_session_from_channel (word[4], serv);
                if (sess)
-               {
-                  if (sess->ignore_date)
-                     sess->ignore_date = FALSE;
-                  else
-                     channel_date (sess, outbuf, word[4], word[5]);
-               }
+                  channel_date (sess, outbuf, word[4], word[5]);
                break;
             case 332:
                topic (serv, outbuf, text);
                break;
             case 333:
                topic_nametime (serv, outbuf, find_word (pdibuf, 4),
-                find_word (pdibuf, 5),
+               find_word (pdibuf, 5),
                find_word (pdibuf, 6));
                break;
             case 352:          /* WHO */
@@ -1362,8 +1344,6 @@ process_line (struct session *sess, struct server *serv, char *buf)
 
                if (!strcmp ("INVITE", cmd))
                {
-                  if (ignore_check (pdibuf, 0, 0, 0, 0, 1))
-                     return;
                   EMIT_SIGNAL (XP_TE_INVITED, sess, word[4] + 1, nick, NULL,
                              NULL, 0);
                   return;
@@ -1427,8 +1407,6 @@ process_line (struct session *sess, struct server *serv, char *buf)
                            EMIT_SIGNAL (XP_TE_SERVERGENMESSAGE, sess, msg, NULL, NULL, NULL, 0);
                         } else
                         {
-                           if (ignore_check (pdibuf, 0, 1, 0, 0, 0))
-                              return;
                            notice (serv, outbuf, to, nick, msg, ip);
                         }
                         return;
@@ -1458,20 +1436,14 @@ process_line (struct session *sess, struct server *serv, char *buf)
                      char *msg = find_word_to_end (buf, 4) + 1;
                      if (msg[0] == 1 && msg[strlen (msg) - 1] == 1)  /* ctcp */
                      {
-                        if (ignore_check (pdibuf, 0, 0, 0, 1, 0))
-                           return;
                         handle_ctcp (sess, outbuf, to, nick, msg + 1, word, word_eol);
                      } else
                      {
                         if (is_channel (to))
                         {
-                           if (ignore_check (pdibuf, 0, 0, 1, 0, 0))
-                              return;
                            channel_msg (serv, outbuf, to, nick, msg, FALSE);
                         } else
                         {
-                           if (ignore_check (pdibuf, 1, 0, 0, 0, 0))
-                              return;
                            private_msg (serv, outbuf, nick, ip, msg);
                         }
                      }

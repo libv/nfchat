@@ -10,7 +10,7 @@ INCLUDES = \
 	-I$(includedir)
 
 libnfchatmain_a_SOURCES = cfgfiles.c ctcp.c \
-      history.c ignore.c \
+                history.c \
 		inbound.c notify.c outbound.c \
 		$(perl_c) plugin.c server.c \
 		text.c themes-common.c userlist.c util.c xchat.c

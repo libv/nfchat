@@ -734,24 +734,6 @@ static char *pevt_ctcpsend_help[] =
    NULL
 };
 
-static char *pevt_ignorelist_help[] =
-{
-   "Hostmask",
-   "Priv Yes/No",
-   "Noti Yes/No",
-   "Chan Yes/No",
-   "Ctcp Yes/No",
-   "Invi Yes/No",
-   "Unig Yes/No",
-   NULL
-};
-
-static char *pevt_ignoreaddremove_help[] =
-{
-   "Hostmask",
-   NULL
-};
-
 static char *pevt_resolvinguser_help[] =
 {
    "Nickname",
@@ -909,13 +891,13 @@ struct text_event te[] =
 /*123*/   {"Receive Wallops", pevt_dprivmsg_help, "%C12-%C13$1/Wallops%C12-%O$t$2%O", 2, NULL},
 /*124*/   {NULL, NULL, NULL, 0, NULL},  /* XP_HIGHLIGHT */
 /*125*/   {"Ignore Header", pevt_generic_none_help, "%C08,02 Hostmask             PRIV NOTI CHAN CTCP INVI UNIG %O", 0, NULL},
-/*126*/   {"Ignore List", pevt_ignorelist_help, " $1 $2  $3  $4  $5  $6  $7", 7, NULL},
+/*126*/   {NULL, NULL, NULL, 0, NULL},
 /*127*/   {"Ignore Footer", pevt_generic_none_help, "%C08,02                                                    %O", 0, NULL},
-/*128*/   {"Ignore Add", pevt_ignoreaddremove_help, "%O%C11$1%O added to ignore list.", 1, NULL},
-/*129*/   {"Ignore Remove", pevt_ignoreaddremove_help, "%O%C11$1%O removed from ignore list.", 1, NULL},
+/*128*/   {NULL, NULL, NULL, 0, NULL},
+/*129*/   {NULL, NULL, NULL, 0, NULL},
 /*130*/   {"Resolving User", pevt_resolvinguser_help, "-%C10-%C11-%O$tLooking up IP number for%C11 $1%O..", 2, NULL},
 /*131*/   {"Ignorelist Empty", pevt_generic_none_help, "  Ignore list is empty.", 0, NULL},
-/*132*/   {"Ignore Changed", pevt_ignoreaddremove_help, "Ignore on %C11$1%O changed.", 1, NULL},
+/*132*/   {NULL, NULL, NULL, 0, NULL},
 /*133*/   {"Notify Offline", pevt_generic_nick_help, "-%C10-%C11-%O$tNotify: $1 is offline ($2).", 2, NULL},
 /*134*/   {NULL, NULL, NULL, 0, NULL}, /* XP_TE_MALFORMED_FROM */
 /*135*/   {NULL, NULL, NULL, 0, NULL}, /* XP_TE_MALFORMED_PACKET */

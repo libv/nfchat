@@ -29,7 +29,6 @@
 #include <signal.h>
 #include <time.h>
 #include "cfgfiles.h"
-#include "ignore.h"
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
@@ -45,7 +44,6 @@ GSList *sess_list = 0;
 GSList *serv_list = 0;
 GSList *url_list = 0;
 GSList *away_list = 0;
-GSList *ignore_list = 0;
 GSList *urlhandler_list = 0;
 
 int notify_tag = -1;
@@ -862,8 +860,6 @@ xchat_misc_checks (void) /* this gets called every 2 seconds */
                            "NAME Take Ops\nCMD /deop %s\n\n"\
                            "NAME ENDSUB\nCMD \n\n"\
                            "NAME SUB\nCMD Ignore\n\n"\
-                           "NAME Ignore User\nCMD /ignore %s!*@* ALL\n\n"\
-                           "NAME UnIgnore User\nCMD /unignore %s!*@*\n\n"\
                            "NAME ENDSUB\nCMD \n\n"\
                            "NAME SUB\nCMD Kick/Ban\n\n"\
                            "NAME Kick\nCMD /kick %s\n\n"\
@@ -939,7 +935,6 @@ xchat_init (void)
    signal_setup ();
    load_text_events ();
    notify_load ();
-   ignore_load ();
    list_loadconf ("popup.conf", &popup_list, defaultconf_popup);
    list_loadconf ("ctcpreply.conf", &ctcp_list, defaultconf_ctcp);
    list_loadconf ("buttons.conf", &button_list, defaultconf_buttons);
@@ -985,7 +980,6 @@ xchat_cleanup (void)
       pevent_dialog_save (NULL);
    }
    notify_save ();
-   ignore_save ();
    free_sessions ();
    fe_exit ();
 }

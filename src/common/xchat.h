@@ -197,9 +197,6 @@ struct session
    int is_server:1;		  /* for use_server_tab feature */
    int new_data:1;              /* new data avail? (red tab) */
    int nick_said:1;             /* your nick mentioned? (green tab) */
-   int ignore_date:1;
-   int ignore_mode:1;
-   int ignore_names:1;
    int end_of_names:1;
    int doing_who:1;             /* /who sent on this channel */
    int userlisthidden:1;

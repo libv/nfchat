@@ -27,7 +27,7 @@
 #include <sys/stat.h>
 #include "xchat.h"
 #include "cfgfiles.h"
-#include "popup.h"
+#include "popup.h" 
 #include "fe.h"
 
 
@@ -49,7 +49,7 @@ list_addentry (GSList ** list, char *cmd, char *name)
    else
       strncpy (pop->cmd, cmd, 255);
    *list = g_slist_append (*list, pop);
-}
+} 
 
 void
 list_loadconf (char *file, GSList ** list, char *defaultconf)
