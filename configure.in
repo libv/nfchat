@@ -130,9 +130,9 @@ if test "x$GCC" = "xyes"; then
   if test "$socks" = yes; then
     CFLAGS="$CFLAGS -w"
   fi
-  if test -z "`echo "$CFLAGS" | grep "\-g " 2> /dev/null`" ; then
-    CFLAGS="$CFLAGS -g"
-  fi
+  dnl if test -z "`echo "$CFLAGS" | grep "\-g " 2> /dev/null`" ; then
+  dnl   CFLAGS="$CFLAGS -g"
+  dnl fi
 fi
 
 dnl this is strange, but apparently necessary

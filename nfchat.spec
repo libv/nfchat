@@ -1,6 +1,6 @@
 %define name nfchat
-%define version 1.3.5
-%define release 1
+%define version 0.3.5
+%define release a
 %define prefix /usr
 
 Summary: Gtk+ IRC client for special client boxes
@@ -13,7 +13,7 @@ Copyright: GPL
 
 Url: http://www.netforce.be
 
-Source: http://www.netforce.be/files/source/1.3/nfchat-%{version}.tar.gz
+Source: http://www.netforce.be/files/source/1.3/nfchat-%{version}%{release}.tar.bz2
 Buildroot: /var/tmp/%{name}-%{version}-%{release}-root
 
 %description

@@ -443,19 +443,21 @@ handle_ctcp (char *outbuf, char *nick, char *msg, char *word_eol[])
 {
   char *po;
 
-  if (!strncasecmp (msg, "VERSION", 7))
-    sprintf (outbuf, "NOTICE %s :\001VERSION NF-Chat "VERSION" : http://www.netforce.be\001\r\n", nick);
-  else if (!strncasecmp (msg, "PING", 4))
-    sprintf (outbuf, "NOTICE %s :\001PING %s\001\r\n", nick, word_eol[5]);
-  else if (!strncasecmp (msg, "ACTION", 6))
+  if (!strncasecmp (msg, "ACTION", 6))
     {
       po = strchr (msg + 7, '\001');
       if (po)
 	po[0] = 0;
       channel_action (outbuf, nick, msg + 7, FALSE);
     }
-
-  tcp_send (outbuf);
+  else
+    {
+      if (!strncasecmp (msg, "VERSION", 7))
+	sprintf (outbuf, "NOTICE %s :\001VERSION NF-Chat "VERSION" : http://www.netforce.be\001\r\n", nick);
+      else if (!strncasecmp (msg, "PING", 4))
+	sprintf (outbuf, "NOTICE %s :\001PING %s\001\r\n", nick, word_eol[5]);
+      tcp_send (outbuf);
+    }
   return;
 }
 
